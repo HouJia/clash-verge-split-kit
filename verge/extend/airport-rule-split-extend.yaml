@@ -421,13 +421,13 @@ proxy-groups:
     include-all-proxies: true
     exclude-filter: '(?i)海外用户专用'
     proxies:
+      - 🇺🇸 美国节点
       - ♻️ 自动最优
       - 🎚️ 手动切换
       - 🇭🇰 香港节点
       - 🇯🇵 日本节点
       - 🇸🇬 新加坡节点
       - 🌺 台湾节点
-      - 🇺🇸 美国节点
       - 🇰🇷 韩国节点
       - 🌍 其它国家
       - 🔌 国内直连
