@@ -109,8 +109,23 @@ proxy-groups:
       - 🇺🇸 美国节点
       - 🔌 国内直连
 
-  # 🎬 场景 · 追剧听歌与海外社区：Netflix/Spotify/Discord/TikTok 等流媒体与社区。
+  # 🎬 场景 · 追剧听歌与海外社区：Netflix/Spotify/Discord/Reddit 等流媒体与社区。
   - name: '🎬 场景 · 追剧听歌与海外社区'
+    type: select
+    include-all-proxies: true
+    exclude-filter: '(?i)海外用户专用'
+    proxies:
+      - 🚀 自动最优
+      - 🎚️ 手动切换
+      - 🇭🇰 香港节点
+      - 🇯🇵 日本节点
+      - 🇸🇬 新加坡节点
+      - 🌺 台湾节点
+      - 🇺🇸 美国节点
+      - 🔌 国内直连
+
+  # 📱 场景 · TikTok：单独拆分，便于按需配置（部分地区需特定出口）。
+  - name: '📱 场景 · TikTok'
     type: select
     include-all-proxies: true
     exclude-filter: '(?i)海外用户专用'
@@ -543,7 +558,7 @@ rules:
   - DOMAIN-SUFFIX,emby.wtf,🎬 场景 · 追剧听歌与海外社区
   - DOMAIN-SUFFIX,emby.nz,🎬 场景 · 追剧听歌与海外社区
   # TikTok：`GEOSITE,tiktok` 与 geo 随 meta-rules-dat / v2fly `data/tiktok` **同步**更新；本条即「库内 TikTok」，**不能保证**互联网上未来新域名下一秒已入库。
-  - GEOSITE,tiktok,🎬 场景 · 追剧听歌与海外社区
+  - GEOSITE,tiktok,📱 场景 · TikTok
 
   # ========== 🐙 场景 · 开发源站（早于 GEOSITE,microsoft：便于 GHCR/npm 等与 GitHub 大块策略拆开）==========
   - GEOSITE,docker,🐙 场景 · 开发源站
