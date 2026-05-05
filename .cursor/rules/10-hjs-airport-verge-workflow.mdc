@@ -1,0 +1,55 @@
+# Airport Verge 配置修改规则
+
+**适用范围**: 仅在 `/Users/hubery/Works.localized/ClaudeAndCursor/airport` 目录生效
+
+## 文件层级（重要性从高到低）
+
+### 1. 真值源（唯一手动修改处）
+- **路径**: `verge/derive/parts/20-routing-mihomo.yaml`
+- **说明**: 这是所有 proxy-groups 和 rules 的唯一真值源
+- **操作**: 所有策略组、分流规则的修改**只能**在此文件进行
+
+### 2. 自动合并产物（禁止手动修改）
+- **路径**: `verge/extend/airport-rule-split-extend.yaml`
+- **说明**: 由 `verge/derive/compose.sh` 自动合并生成
+- **警告**: ⚠️ 手动修改会被下次执行 `render-local.sh` 时覆盖（默认先执行 compose）
+
+### 3. 本机渲染产物（禁止手动修改）
+- **路径**: `verge/generated/airport-rule-split.local.yaml`
+- **说明**: 由 `verge/scripts/render-local.sh` 生成，替换占位 IP 并注入本地规则
+- **警告**: ⚠️ 完全自动生成，每次执行都会覆盖
+
+## 正确修改流程
+
+```bash
+# 1. 修改真值源（唯一需要编辑的文件）
+vim verge/derive/parts/20-routing-mihomo.yaml
+
+# 2. 重新渲染生成配置（会自动先执行 compose）
+bash verge/scripts/render-local.sh <你的VPS_IP>
+
+# 3. 产物位于
+cat verge/generated/airport-rule-split.local.yaml
+```
+
+## 快速检查清单
+
+修改前必须确认：
+- [ ] 我在 `derive/parts/` 目录下修改
+- [ ] 我没有直接修改 `extend/` 下的任何文件
+- [ ] 我知道 `extend/` 是自动生成的
+
+## 误改后果
+
+如果错误地修改了 `extend/airport-rule-split-extend.yaml`：
+1. 执行 `render-local.sh` 时会先执行 `compose.sh`
+2. `compose.sh` 会从 `derive/parts/` 重新合并，覆盖 `extend/` 的修改
+3. 你的修改全部丢失
+
+## 例外情况
+
+只有当 `VERGE_SKIP_COMPOSE=1` 时，`render-local.sh` 才会跳过 compose 步骤，此时可以临时修改 `extend/` 文件：
+```bash
+VERGE_SKIP_COMPOSE=1 bash verge/scripts/render-local.sh <IP>
+```
+但这是应急用途，常规修改必须走 `derive/parts/`。

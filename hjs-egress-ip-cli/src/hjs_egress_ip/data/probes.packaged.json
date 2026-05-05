@@ -1,0 +1,78 @@
+{
+  "probes": [
+    {
+      "category": "domestic",
+      "name": "ipip.net",
+      "url": "https://myip.ipip.net",
+      "parser": "plain"
+    },
+    {
+      "category": "domestic",
+      "name": "cip.cc",
+      "url": "https://cip.cc",
+      "parser": "cip_cc_ip",
+      "noBrowserCors": true
+    },
+    {
+      "category": "intl_plain",
+      "name": "ipecho.net",
+      "url": "https://ipecho.net/plain",
+      "parser": "plain"
+    },
+    {
+      "category": "intl_plain",
+      "name": "ipify",
+      "url": "https://api.ipify.org",
+      "parser": "plain"
+    },
+    {
+      "category": "intl_plain",
+      "name": "ipify_v6_hint",
+      "url": "https://api64.ipify.org",
+      "parser": "plain"
+    },
+    {
+      "category": "intl_plain",
+      "name": "icanhazip",
+      "url": "https://icanhazip.com",
+      "parser": "plain"
+    },
+    {
+      "category": "intl_plain",
+      "name": "ifconfig.me",
+      "url": "https://ifconfig.me/ip",
+      "parser": "plain"
+    },
+    {
+      "category": "intl_plain",
+      "name": "ipinfo.io",
+      "url": "https://ipinfo.io/ip",
+      "parser": "plain"
+    },
+    {
+      "category": "intl_plain",
+      "name": "aws_checkip",
+      "url": "https://checkip.amazonaws.com",
+      "parser": "plain"
+    },
+    {
+      "category": "intl_plain",
+      "name": "ident.me",
+      "url": "https://ident.me",
+      "parser": "plain"
+    },
+    {
+      "category": "cdn_trace",
+      "name": "cloudflare_trace",
+      "url": "https://1.1.1.1/cdn-cgi/trace",
+      "parser": "cloudflare_trace",
+      "noBrowserCors": true
+    },
+    {
+      "category": "meta",
+      "name": "httpbin_ip",
+      "url": "https://httpbin.org/ip",
+      "parser": "httpbin_ip"
+    }
+  ]
+}

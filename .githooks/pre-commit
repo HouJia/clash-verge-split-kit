@@ -1,0 +1,39 @@
+#!/usr/bin/env sh
+# 若本次暂存 verge/extend/*-rule-split-extend.yaml，提交前刷新对应成对本机稿（不加入暂存区）。
+# 若暂存了 derive/parts 或 airport 合并稿，校验与 parts 一致。
+set -e
+
+ROOT="$(git rev-parse --show-toplevel)"
+
+SCRIPT="${ROOT}/verge/scripts/render-local.sh"
+if [ ! -f "${SCRIPT}" ]; then
+  exit 0
+fi
+
+if ! command -v bash >/dev/null 2>&1; then
+  echo "githooks: 未找到 bash，跳过 verge render-local" >&2
+  exit 0
+fi
+
+git diff --cached --name-only | while IFS= read -r f; do
+  case "${f}" in
+  verge/extend/*-rule-split-extend.yaml) ;;
+  *) continue ;;
+  esac
+  EXT_BASE="${f##*/}"
+  if VERGE_EXTEND_FILE="${EXT_BASE}" bash "${SCRIPT}" >/dev/null 2>&1; then
+    continue
+  fi
+  echo "提示: 已暂存 ${EXT_BASE}，但未生成对应的 verge/generated/*-rule-split.local.yaml（请在 verge/generated/local/override.local 的 [vps] 写入 IPv4，或 export VPS_PUBLIC_IP）。提交仍继续。" >&2
+done
+
+if git diff --cached --name-only | grep -qE '^verge/derive/parts/|^verge/extend/airport-rule-split-extend\.yaml$'; then
+  if [ -f "${ROOT}/verge/derive/verify-compose.sh" ]; then
+    if ! bash "${ROOT}/verge/derive/verify-compose.sh"; then
+      echo "githooks: 请先 bash verge/derive/compose.sh -o verge/extend/airport-rule-split-extend.yaml 并一并暂存。" >&2
+      exit 1
+    fi
+  fi
+fi
+
+exit 0

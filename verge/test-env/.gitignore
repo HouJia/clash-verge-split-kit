@@ -1,0 +1,12 @@
+# Mihomo test environment binaries and runtime files
+bin/mihomo
+*.log
+logs/*.log
+
+# Geo databases (auto-downloaded)
+*.dat
+*.mmdb
+
+# Rule set cache
+ruleset/*
+

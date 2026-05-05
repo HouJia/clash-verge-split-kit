@@ -1,0 +1,93 @@
+# =============================================================================
+# Mihomo/Clash Verge 运行时壳配置（基础运行时参数）
+# =============================================================================
+# 本文件定义：
+#   - 代理模式、日志级别、IPv6 支持
+#   - GeoIP/Geosite 数据源与自动更新
+#   - 流量嗅探器（SNI 识别）
+#   - DNS 配置（fake-ip 模式、国内外分流解析）
+# 
+# 与 20-routing-mihomo.yaml 合并后生成完整配置。
+# 详见：verge/derive/README.md
+# =============================================================================
+
+mode: rule
+log-level: info
+ipv6: true
+
+# --- Geo 数据库配置 ---
+# 使用 geodata-mode 而非 classical-mode，内存占用更低
+# 每日自动更新 geo 数据库，确保分流准确性
+geodata-mode: true
+geo-auto-update: true
+geo-update-interval: 24
+
+# GeoIP/Geosite/Mmdb 数据源（MetaCubeX 社区维护，每日自动编译）
+geox-url:
+  geoip: https://github.com/MetaCubeX/meta-rules-dat/releases/download/latest/geoip.dat
+  geosite: https://github.com/MetaCubeX/meta-rules-dat/releases/download/latest/geosite.dat
+  mmdb: https://github.com/MetaCubeX/meta-rules-dat/releases/download/latest/country.mmdb
+  asn: https://github.com/MetaCubeX/meta-rules-dat/releases/download/latest/GeoLite2-ASN.mmdb
+
+# --- 流量嗅探器（SNI 识别）---
+# 启用后可根据 TLS/QUIC 握手信息识别真实域名，绕过 fake-ip 限制
+# 用于：TLS SNI 识别、HTTP Host 头重写、QUIC 流量分流
+sniffer:
+  enable: true
+  sniff:
+    HTTP:
+      ports: [80, 8080-8880]
+      override-destination: true
+    TLS:
+      ports: [443, 8443]
+    QUIC:
+      ports: [443, 8443]
+
+# --- DNS 配置 ---
+# 采用 fake-ip 模式，域名先解析为 198.18.x.x 虚拟 IP，再由 Mihomo 进行域名分流
+# 优点：规避 DNS 污染、支持进程级分流、减少真实 DNS 查询次数
+# 缺点：部分应用需要 fake-ip-filter 才能正常工作
+# 
+# 注意：proxy-server-nameserver 用于解析代理服务器域名，必须返回真实 IP
+dns:
+  enable: true
+  use-hosts: true
+  ipv6: true
+  enhanced-mode: fake-ip
+  fake-ip-range: 198.18.0.1/16
+  # 专用于解析代理服务器（节点）域名的 DNS，返回真实 IP
+  # 解决 Verge 节点测试超时问题：节点域名用真实 IP，其他域名走 fake-ip
+  proxy-server-nameserver:
+    - 223.5.5.5
+    - 119.29.29.29
+  default-nameserver:
+    - 223.5.5.5
+    - 119.29.29.29
+  # 默认 DNS：国内 DoH（DNSPod + 阿里云），解析国内域名快速稳定
+  nameserver:
+    - https://doh.pub/dns-query
+    - https://dns.alidns.com/dns-query
+  # Fallback DNS：国外 DoH/DoT（Cloudflare + Google），当国内无法解析时启用
+  fallback:
+    - https://dns.cloudflare.com/dns-query
+    - tls://8.8.8.8:853
+  # Fallback 触发条件：
+  # - 当解析结果 IP 为 CN 且 geoip-code 匹配时，优先使用国内 DNS
+  # - 保留 240.0.0.0/4（保留地址段）和 0.0.0.0/32 走 fallback
+  fallback-filter:
+    geoip: true
+    geoip-code: CN
+    ipcidr:
+      - 240.0.0.0/4
+      - 0.0.0.0/32
+  fake-ip-filter:
+    - '*.lan'
+    - '*.local'
+    - '+.msftconnecttest.com'
+    - '+.msftncsi.com'
+    - 'localhost.ptlogin2.qq.com'
+    # fake-ip-filter：指定域名不使用 fake-ip，返回真实 IP
+  # GitHub 相关域：跳过 fake-ip 避免 TLS 握手异常，但出站仍由规则走代理
+    - '+.github.com'
+    - '+.githubusercontent.com'
+    - '+.githubassets.com'

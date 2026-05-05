@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>出口 IP 一键检测</title>
+  <style>
+    :root {
+      --bg: #0f1419;
+      --panel: #1a2332;
+      --text: #e7ecf3;
+      --muted: #8b9cb3;
+      --accent: #3d8bfd;
+      --ok: #3ecf8e;
+      --warn: #f0c14b;
+      --err: #ff6b6b;
+      --border: #2a3545;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      min-height: 100vh;
+    }
+    header {
+      padding: 1.25rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+      background: var(--panel);
+    }
+    h1 { margin: 0; font-size: 1.2rem; font-weight: 600; }
+    .sub { margin: 0.4rem 0 0; font-size: 0.85rem; color: var(--muted); max-width: 52rem; }
+    main { padding: 1.25rem 1.5rem 3rem; max-width: 960px; margin: 0 auto; }
+    .toolbar { display: flex; flex-wrap: wrap; gap: 0.75rem 1rem; align-items: center; margin-bottom: 1.25rem; }
+    button {
+      font-family: inherit;
+      cursor: pointer;
+      border: none;
+      border-radius: 8px;
+      padding: 0.6rem 1.25rem;
+      font-size: 0.95rem;
+      font-weight: 600;
+      background: var(--accent);
+      color: #fff;
+    }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+    button.secondary { background: #334155; color: var(--text); }
+    .status { font-size: 0.88rem; color: var(--muted); margin-bottom: 1rem; }
+    .pill { display: inline-block; padding: 0.15rem 0.55rem; border-radius: 999px; font-size: 0.75rem; margin-left: 0.35rem; }
+    .pill.run { background: #1e3a5f; color: #93c5fd; }
+    .pill.ok { background: #134e4a; color: #6ee7b7; }
+    .pill.err { background: #4c1d1d; color: #fca5a5; }
+
+    .cards { display: flex; flex-direction: column; gap: 1rem; }
+    .card {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: var(--panel);
+      padding: 1rem 1.15rem;
+    }
+    .card h2 { margin: 0 0 0.65rem; font-size: 1rem; color: #93c5fd; font-weight: 600; }
+    .rowline { font-size: 0.82rem; margin: 0.35rem 0; padding: 0.35rem 0; border-bottom: 1px solid var(--border); }
+    .rowline:last-child { border-bottom: none; }
+    .rowline strong { color: #e2e8f0; }
+    .code { color: var(--ok); font-weight: 600; }
+    .code.bad { color: var(--err); }
+    .snippet { color: #94a3b8; word-break: break-all; margin-top: 0.2rem; font-size: 0.78rem; }
+
+    /* 同一 IP 全局同色（与 audit-core IP_CHIP_VARIANTS 种循环） */
+    .ip-chip {
+      display: inline-block;
+      padding: 0.1rem 0.45rem;
+      margin: 0 0.12rem;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: inherit;
+      font-variant-numeric: tabular-nums;
+      border: 1px solid rgba(255,255,255,0.14);
+      line-height: 1.35;
+    }
+    .ip-chip.ip-c0 { background: #3d2766; color: #efe5ff; }
+    .ip-chip.ip-c1 { background: #1a4f6f; color: #d9f4ff; }
+    .ip-chip.ip-c2 { background: #1e5738; color: #d9ffe8; }
+    .ip-chip.ip-c3 { background: #5c4218; color: #fff4d9; }
+    .ip-chip.ip-c4 { background: #4a2842; color: #ffe8fb; }
+    .ip-chip.ip-c5 { background: #0f4f4f; color: #d9ffff; }
+    .ip-chip.ip-c6 { background: #4a3620; color: #fff0dc; }
+    .ip-chip.ip-c7 { background: #1e3654; color: #e0efff; }
+    .ip-chip.ip-c8 { background: #3d2020; color: #ffd7d7; }
+    .ip-chip.ip-c9 { background: #2d3d20; color: #efffd9; }
+
+    .ip-legend-wrap {
+      display: none;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 0.5rem;
+      padding: 0.65rem 0.85rem;
+      margin-bottom: 1rem;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: #141c28;
+      font-size: 0.82rem;
+      color: var(--muted);
+    }
+    .ip-legend-wrap.show { display: flex; }
+    .ip-legend-label { flex-shrink: 0; font-weight: 600; color: #cbd5e1; }
+    .ip-legend-lines { display: flex; flex-direction: column; gap: 0.45rem; }
+    .ip-legend-line {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      gap: 0.35rem 0.65rem;
+      line-height: 1.45;
+    }
+    .ip-legend-tail { color: var(--text); font-size: 0.8rem; flex: 1; min-width: 12rem; }
+
+    .wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: 10px; background: var(--panel); margin-top: 1rem; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.78rem; }
+    th, td { padding: 0.45rem 0.55rem; text-align: left; border-bottom: 1px solid var(--border); vertical-align: top; }
+    th { color: var(--muted); font-weight: 600; white-space: nowrap; background: #141c28; }
+    tr:last-child td { border-bottom: none; }
+    td.snippet { word-break: break-all; max-width: 20rem; color: #cbd5e1; }
+    td.url-cell { word-break: break-all; max-width: 18rem; font-size: 0.7rem; }
+    td.url-cell a.url-probe {
+      color: #7eb8ff;
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+    td.url-cell a.url-probe:visited { color: #b8a8ff; }
+    td.url-cell a.url-probe:hover { color: #a8d4ff; }
+    .snippet a.url-probe {
+      color: #7eb8ff;
+      text-decoration: underline;
+      text-underline-offset: 2px;
+      font-size: 0.78rem;
+      word-break: break-all;
+    }
+    .snippet a.url-probe:hover { color: #a8d4ff; }
+    .scenario { color: #a5b4fc; white-space: nowrap; }
+
+    details.tech { margin-top: 1.5rem; border: 1px solid var(--border); border-radius: 10px; padding: 0.75rem 1rem; background: #141c28; }
+    details.tech summary { cursor: pointer; font-weight: 600; color: #cbd5e1; }
+    details.tech .inner { margin-top: 0.75rem; font-size: 0.82rem; color: var(--muted); }
+    .cli-hint {
+      margin-top: 1rem;
+      padding: 0.75rem 1rem;
+      border-radius: 10px;
+      border: 1px dashed var(--border);
+      background: #141c28;
+      font-size: 0.82rem;
+      color: var(--muted);
+    }
+    .cli-hint code { color: #93c5fd; font-size: 0.8rem; }
+    pre.raw {
+      margin-top: 0.75rem;
+      padding: 0.75rem;
+      background: #0b0f14;
+      border-radius: 8px;
+      overflow: auto;
+      font-size: 0.72rem;
+      color: #94a3b8;
+      max-height: 220px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>出口 IP 一键检测</h1>
+    <p class="sub">本页纯静态：<code>audit-core.js</code> 与 CLI 共用同一探测表数据源（见包内同步流程）。浏览器内对工作流允许的站点使用 <code>fetch</code>。<strong>与 ipip 出口不一致的 IP，仅在同源 <code>hjs-egress-ip serve</code> + <code>/__geo</code> 时用中文行政区划补全归属；<code>file://</code> 不提供英文数据源、也不代为补全地名。</strong><strong>cip.cc、Cloudflare trace（<code>1.1.1.1/cdn-cgi/trace</code>）在「仅 file://」时脚本往往读不到正文；需 <code>serve</code> 同源 <code>/__probe</code> 代取或在标签栏单独打开探测 URL。</strong>仍可能受浏览器/系统代理与跨域响应头限制，结果与 CLI 中 <code>curl</code> 不必完全一致。</p>
+  </header>
+  <main>
+    <div class="toolbar">
+      <button type="button" id="btn-run">一键检测 / 复测</button>
+      <button type="button" id="btn-copy" class="secondary">复制页面链接</button>
+      <button type="button" id="btn-table" class="secondary">切换卡片视图</button>
+    </div>
+    <div class="status"><span id="status-msg">就绪。</span><span class="pill run" id="pill">待机</span></div>
+
+    <div id="ip-legend-wrap" class="ip-legend-wrap" aria-label="本次识别到的出口 IP"><div class="ip-legend-label">出口 IP</div><div id="ip-legend-chips" class="ip-legend-lines"></div></div>
+
+    <div id="simple-view" class="cards" style="display:none;"></div>
+
+    <div id="full-wrap" class="wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>场景</th><th>类别</th><th>探测</th><th>URL</th><th>状态码</th><th>摘要</th>
+          </tr>
+        </thead>
+        <tbody id="tbody-full"><tr id="tbody-placeholder"><td colspan="6" style="color:var(--muted)">就绪。点击「一键检测 / 复测」开始。</td></tr></tbody>
+      </table>
+    </div>
+
+    <div class="cli-hint">
+      需要 <strong>S0 代理环境 / S1 noproxy / IPv4·IPv6 / 指定网卡</strong> 等完整技术矩阵时，请在终端运行：
+      <code>hjs-egress-ip --full --ipv6-skip</code>（依赖本机安装的 <code>egress-ip-audit.sh</code>）。
+    </div>
+
+    <details class="tech">
+      <summary>技术说明与 TSV（原始行）</summary>
+      <div class="inner">
+        <p>
+          本页不向远端 POST；脚本直链 <code>audit-core.js</code>，与下方 TSV 同源。
+          地址栏<strong>顶层打开</strong>探测站点（整页跳转）不适用跨域脚本限制；本页用 <code>fetch</code> 读正文时，若站点<strong>未返回</strong>允许跨源的响应头（示例：<strong>cip.cc</strong>），状态码常为 <code>000</code>，摘要中会显示类似「请求失败（网络异常、跨域限制或浏览器拦截）」，
+          <strong>与你在地址栏单独打开是否正常无关</strong>。
+          通过 <code>hjs-egress-ip serve</code> 同源打开时，可对<strong>仅限内置探测 URL</strong>调用 <code>/__probe</code>，由本机代取正文，以便读出无跨域响应头的站点；
+          <code>file://</code> 打开的页面不能使用该代取。各探测单次约有 <strong>20s</strong> 前端超时，避免站点挂起导致按钮长期停在「检测中」。
+        </p>
+        <p>终端一键路径对每次 curl 使用 <code>--noproxy '*'</code>，与浏览器的代理策略不同，属预期差异。</p>
+        <pre class="raw" id="raw-tsv"></pre>
+      </div>
+    </details>
+  </main>
+  <script src="./audit-core.js"></script>
+  <script>
+    const {
+      buildEgressLegendLines,
+      buildIpChipClassMap,
+      buildGroups,
+      escapeHtmlForSnippet,
+      formatSnippetHtmlWithIpChips,
+      formatUiCategory,
+      runBrowserProbes,
+    } = globalThis.HjsEgressAuditCore;
+
+    const $ = (id) => document.getElementById(id);
+
+    function escapeHtml(s) {
+      return String(s)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+
+    function codeClass(code) {
+      const n = parseInt(code, 10);
+      if (n >= 200 && n < 300) return "code";
+      return "code bad";
+    }
+
+    function setPill(text, kind) {
+      const pill = $("pill");
+      pill.textContent = text;
+      pill.className = "pill " + (kind || "run");
+    }
+
+    function rowsToTsv(rows) {
+      const head = ["scenario", "category", "probe_name", "url", "http_code", "snippet"].join("\t");
+      const lines = rows.map((r) =>
+        [r.scenario, r.category, r.probe_name, r.url, r.http_code, r.snippet].join("\t")
+      );
+      return [head, ...lines].join("\n");
+    }
+
+    function probeUrlLinkHtml(urlRaw) {
+      const u = String(urlRaw || "").trim();
+      if (!u) return "";
+      const esc = escapeHtml(u);
+      return (
+        '<a class="url-probe" href="' + esc + '" target="_blank" rel="noopener noreferrer">' + esc + "</a>"
+      );
+    }
+
+    /** @param {Map<string,string>} chipMap @param {unknown[]} rows */
+    function renderIpLegend(chipMap, rows) {
+      const wrap = $("ip-legend-wrap");
+      const host = $("ip-legend-chips");
+      if (!chipMap.size) {
+        wrap.classList.remove("show");
+        host.innerHTML = "";
+        return;
+      }
+      wrap.classList.add("show");
+      const lines = buildEgressLegendLines(rows, chipMap);
+      host.innerHTML = lines
+        .map(function (L) {
+          const ipInner = escapeHtmlForSnippet(L.displayIp);
+          const tail = L.tailZh ? escapeHtmlForSnippet(L.tailZh) : "";
+          return (
+            '<div class="ip-legend-line">' +
+            '<span class="ip-chip ' +
+            L.chipClass +
+            '" title="' +
+            ipInner +
+            '">' +
+            ipInner +
+            "</span>" +
+            (tail ? '<span class="ip-legend-tail">' + tail + "</span>" : "") +
+            "</div>"
+          );
+        })
+        .join("");
+    }
+
+    function renderSimple(groups, chipMap) {
+      const el = $("simple-view");
+      if (!groups || !groups.length) {
+        el.innerHTML = "<p style=\"color:var(--muted)\">无分组数据</p>";
+        return;
+      }
+      el.innerHTML = groups.map((g) => {
+        const rows = (g.rows || []).map((r) => {
+          const hc = escapeHtml(r.http_code || "");
+          const snippetHtml = formatSnippetHtmlWithIpChips(r.snippet || "", chipMap);
+          return (
+            "<div class=\"rowline\">" +
+            "<strong>" + escapeHtml(r.probe_name) + "</strong> " +
+            "<span class=\"" + codeClass(hc) + "\">状态 " + hc + "</span>" +
+            '<div class="snippet">' + snippetHtml + "</div>" +
+            '<div class="snippet" style="opacity:0.75">' + probeUrlLinkHtml(r.url) + "</div>" +
+            "</div>"
+          );
+        }).join("");
+        return "<section class=\"card\"><h2>" + escapeHtml(g.title) + "</h2>" + rows + "</section>";
+      }).join("");
+    }
+
+    function renderFull(rows, chipMap) {
+      const tb = $("tbody-full");
+      if (!rows || !rows.length) {
+        tb.innerHTML = "<tr><td colspan=\"6\" style=\"color:var(--muted)\">无数据</td></tr>";
+        return;
+      }
+      tb.innerHTML = rows.map((r) => {
+        const http = escapeHtml(r.http_code || "");
+        const snippetHtml = formatSnippetHtmlWithIpChips(r.snippet || "", chipMap);
+        return (
+          "<tr>" +
+          "<td class=\"scenario\">" + escapeHtml(r.scenario) + "</td>" +
+          "<td>" + escapeHtml(formatUiCategory(r.category)) + "</td>" +
+          "<td>" + escapeHtml(r.probe_name) + "</td>" +
+          '<td class="url-cell">' + probeUrlLinkHtml(r.url) + "</td>" +
+          "<td class=\"" + codeClass(http) + "\">" + http + "</td>" +
+          '<td class="snippet">' + snippetHtml + "</td>" +
+          "</tr>"
+        );
+      }).join("");
+    }
+
+    let tableVisible = true;
+
+    async function runAudit() {
+      const btn = $("btn-run");
+      btn.disabled = true;
+      setPill("检测中", "run");
+      $("status-msg").textContent = "检测中，请稍候…";
+      const t0 = performance.now();
+      try {
+        const { rows } = await runBrowserProbes();
+        const dt = ((performance.now() - t0) / 1000).toFixed(1);
+        $("raw-tsv").textContent = rowsToTsv(rows);
+        const chipMap = buildIpChipClassMap(rows);
+        renderIpLegend(chipMap, rows);
+        const groups = buildGroups(rows);
+        renderSimple(groups && groups.length ? groups : null, chipMap);
+        renderFull(rows, chipMap);
+        $("full-wrap").style.display = tableVisible ? "block" : "none";
+        $("simple-view").style.display = tableVisible ? "none" : "";
+        $("status-msg").textContent = "完成，耗时 " + dt + " 秒。";
+        setPill("完成 " + dt + " 秒", "ok");
+        requestAnimationFrame(function () {
+          var el = tableVisible ? $("full-wrap") : $("simple-view");
+          if (el) el.scrollIntoView({ block: "nearest", behavior: "smooth" });
+        });
+      } catch (e) {
+        $("simple-view").innerHTML = "<p style=\"color:var(--err)\">" + escapeHtml(String(e)) + "</p>";
+        $("ip-legend-wrap").classList.remove("show");
+        $("ip-legend-chips").innerHTML = "";
+        setPill("失败", "err");
+        $("status-msg").textContent = "失败。";
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    $("btn-run").addEventListener("click", runAudit);
+    $("btn-copy").addEventListener("click", () => {
+      const u = window.location.href;
+      navigator.clipboard.writeText(u).then(() => {
+        $("btn-copy").textContent = "已复制";
+        setTimeout(() => { $("btn-copy").textContent = "复制页面链接"; }, 1500);
+      }).catch(() => prompt("复制", u));
+    });
+    $("btn-table").addEventListener("click", () => {
+      tableVisible = !tableVisible;
+      $("btn-table").textContent = tableVisible ? "切换卡片视图" : "切换表格视图";
+      $("full-wrap").style.display = tableVisible ? "block" : "none";
+      $("simple-view").style.display = tableVisible ? "none" : "";
+    });
+  </script>
+</body>
+</html>

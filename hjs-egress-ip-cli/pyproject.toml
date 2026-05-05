@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools>=61", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "hjs-egress-ip"
+version = "0.1.0"
+description = "Egress IP audit CLI aligned with hjs-egress-ip-audit skill."
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.9"
+dependencies = []
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=7",
+  "build>=1",
+]
+
+[project.scripts]
+hjs-egress-ip = "hjs_egress_ip.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+"hjs_egress_ip.data" = ["*.json"]
+"hjs_egress_ip.web" = ["static/*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]

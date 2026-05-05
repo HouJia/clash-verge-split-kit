@@ -1,0 +1,224 @@
+# Mihomo 测试环境配置
+# 位置: verge/test-env/config/config.yaml
+# 说明: 用于本地测试分流规则，不走真实代理（DIRECT 模式）
+
+# ========== 基础设置 ==========
+mode: rule
+log-level: debug
+ipv6: true
+
+# 允许局域网连接（可选）
+allow-lan: true
+bind-address: '*'
+
+# 混合端口：HTTP/SOCKS 代理端口
+mixed-port: 7890
+
+# 外部控制器（REST API）
+external-controller: 127.0.0.1:9090
+secret: "test-env"
+
+# ========== 地理数据库 ==========
+geodata-mode: true
+geo-auto-update: true
+geo-update-interval: 24
+
+geox-url:
+  geoip: https://github.com/MetaCubeX/meta-rules-dat/releases/download/latest/geoip.dat
+  geosite: https://github.com/MetaCubeX/meta-rules-dat/releases/download/latest/geosite.dat
+  mmdb: https://github.com/MetaCubeX/meta-rules-dat/releases/download/latest/country.mmdb
+  asn: https://github.com/MetaCubeX/meta-rules-dat/releases/download/latest/GeoLite2-ASN.mmdb
+
+# ========== 流量嗅探 ==========
+sniffer:
+  enable: true
+  sniff:
+    HTTP:
+      ports: [80, 8080-8880]
+      override-destination: true
+    TLS:
+      ports: [443, 8443]
+    QUIC:
+      ports: [443, 8443]
+
+# ========== DNS 设置 ==========
+dns:
+  enable: true
+  use-hosts: true
+  ipv6: true
+  enhanced-mode: fake-ip
+  fake-ip-range: 198.18.0.1/16
+  default-nameserver:
+    - 223.5.5.5
+    - 114.114.114.114
+  nameserver:
+    - https://doh.pub/dns-query
+    - https://dns.alidns.com/dns-query
+  fallback:
+    - https://dns.cloudflare.com/dns-query
+    - tls://8.8.8.8:853
+  fallback-filter:
+    geoip: true
+    geoip-code: CN
+    ipcidr:
+      - 240.0.0.0/4
+      - 0.0.0.0/32
+  fake-ip-filter:
+    - '*.lan'
+    - '*.local'
+    - '+.msftconnecttest.com'
+    - '+.msftncsi.com'
+    - 'localhost.ptlogin2.qq.com'
+    - '+.github.com'
+    - '+.githubusercontent.com'
+    - '+.githubassets.com'
+
+# ========== 代理组 ==========
+# 注意: DIRECT 是 mihomo 内置代理，无需在 proxies 中定义
+proxy-groups:
+  - name: '🌍 节点选择'
+    type: select
+    proxies:
+      - DIRECT
+
+  - name: '🏠 全球直连'
+    type: select
+    proxies:
+      - DIRECT
+
+  - name: '🔜 工具 · Cursor'
+    type: select
+    proxies:
+      - DIRECT
+
+  - name: '🧠 场景 · 境外 AI'
+    type: select
+    proxies:
+      - DIRECT
+
+  - name: '💬 场景 · 即时通讯'
+    type: select
+    proxies:
+      - DIRECT
+
+  - name: '📢 场景 · 谷歌推送'
+    type: select
+    proxies:
+      - DIRECT
+
+  - name: '🎬 场景 · 追剧听歌与海外社区'
+    type: select
+    proxies:
+      - DIRECT
+
+  - name: '🐙 场景 · 开发源站'
+    type: select
+    proxies:
+      - DIRECT
+
+  - name: '📚 场景 · 学术与数据'
+    type: select
+    proxies:
+      - DIRECT
+
+# ========== 分流规则 ==========
+rules:
+  # === 局域网直连 ===
+  - IP-CIDR,127.0.0.0/8,DIRECT
+  - IP-CIDR,172.16.0.0/12,DIRECT
+  - IP-CIDR,192.168.0.0/16,DIRECT
+  - IP-CIDR,10.0.0.0/8,DIRECT
+  - IP-CIDR,100.64.0.0/10,DIRECT
+  - IP-CIDR,224.0.0.0/4,DIRECT
+  - IP-CIDR,fe80::/10,DIRECT
+  - IP-CIDR,fc00::/7,DIRECT
+
+  # === 特殊直连 ===
+  - DOMAIN-SUFFIX,local,DIRECT
+  - DOMAIN-SUFFIX,localhost,DIRECT
+  - DOMAIN-SUFFIX,lan,DIRECT
+  - DOMAIN-SUFFIX,internal,DIRECT
+
+  # === 国内直连 ===
+  - GEOSITE,cn,🏠 全球直连
+  - GEOIP,CN,🏠 全球直连
+
+  # === 境外 AI ===
+  - DOMAIN-SUFFIX,openai.com,🧠 场景 · 境外 AI
+  - DOMAIN-SUFFIX,chatgpt.com,🧠 场景 · 境外 AI
+  - DOMAIN-SUFFIX,anthropic.com,🧠 场景 · 境外 AI
+  - DOMAIN-SUFFIX,claude.ai,🧠 场景 · 境外 AI
+  - DOMAIN-SUFFIX,gemini.google.com,🧠 场景 · 境外 AI
+  - DOMAIN-SUFFIX,bard.google.com,🧠 场景 · 境外 AI
+  - DOMAIN-SUFFIX,copilot.microsoft.com,🧠 场景 · 境外 AI
+  - DOMAIN-SUFFIX,cursor.sh,🧠 场景 · 境外 AI
+  - DOMAIN-SUFFIX,cursor.com,🧠 场景 · 境外 AI
+  - DOMAIN-KEYWORD,openai,🧠 场景 · 境外 AI
+  - DOMAIN-KEYWORD,anthropic,🧠 场景 · 境外 AI
+  - DOMAIN-KEYWORD,claude,🧠 场景 · 境外 AI
+
+  # === 开发源站 ===
+  - DOMAIN-SUFFIX,github.com,🐙 场景 · 开发源站
+  - DOMAIN-SUFFIX,githubusercontent.com,🐙 场景 · 开发源站
+  - DOMAIN-SUFFIX,githubassets.com,🐙 场景 · 开发源站
+  - DOMAIN-SUFFIX,github.io,🐙 场景 · 开发源站
+  - DOMAIN-SUFFIX,docker.io,🐙 场景 · 开发源站
+  - DOMAIN-SUFFIX,docker.com,🐙 场景 · 开发源站
+  - DOMAIN-SUFFIX,npmjs.com,🐙 场景 · 开发源站
+  - DOMAIN-SUFFIX,nodejs.org,🐙 场景 · 开发源站
+  - DOMAIN-SUFFIX,python.org,🐙 场景 · 开发源站
+  - DOMAIN-SUFFIX,pypi.org,🐙 场景 · 开发源站
+  - DOMAIN-SUFFIX,golang.org,🐙 场景 · 开发源站
+  - DOMAIN-SUFFIX,go.dev,🐙 场景 · 开发源站
+  - DOMAIN-SUFFIX,rust-lang.org,🐙 场景 · 开发源站
+  - DOMAIN-SUFFIX,crates.io,🐙 场景 · 开发源站
+  - DOMAIN-SUFFIX,stackoverflow.com,🐙 场景 · 开发源站
+
+  # === 即时通讯 ===
+  - DOMAIN-SUFFIX,telegram.org,💬 场景 · 即时通讯
+  - DOMAIN-SUFFIX,telegram.com,💬 场景 · 即时通讯
+  - DOMAIN-SUFFIX,tdesktop.com,💬 场景 · 即时通讯
+  - DOMAIN-KEYWORD,telegram,💬 场景 · 即时通讯
+  - DOMAIN-SUFFIX,whatsapp.com,💬 场景 · 即时通讯
+  - DOMAIN-SUFFIX,whatsapp.net,💬 场景 · 即时通讯
+  - DOMAIN-KEYWORD,whatsapp,💬 场景 · 即时通讯
+
+  # === 流媒体与海外社区 ===
+  - DOMAIN-SUFFIX,youtube.com,🎬 场景 · 追剧听歌与海外社区
+  - DOMAIN-SUFFIX,googlevideo.com,🎬 场景 · 追剧听歌与海外社区
+  - DOMAIN-SUFFIX,ytimg.com,🎬 场景 · 追剧听歌与海外社区
+  - DOMAIN-SUFFIX,netflix.com,🎬 场景 · 追剧听歌与海外社区
+  - DOMAIN-SUFFIX,nflxvideo.net,🎬 场景 · 追剧听歌与海外社区
+  - DOMAIN-SUFFIX,spotify.com,🎬 场景 · 追剧听歌与海外社区
+  - DOMAIN-SUFFIX,spotifycdn.com,🎬 场景 · 追剧听歌与海外社区
+  - DOMAIN-SUFFIX,twitter.com,🎬 场景 · 追剧听歌与海外社区
+  - DOMAIN-SUFFIX,x.com,🎬 场景 · 追剧听歌与海外社区
+  - DOMAIN-SUFFIX,twimg.com,🎬 场景 · 追剧听歌与海外社区
+  - DOMAIN-SUFFIX,instagram.com,🎬 场景 · 追剧听歌与海外社区
+  - DOMAIN-SUFFIX,cdninstagram.com,🎬 场景 · 追剧听歌与海外社区
+  - DOMAIN-SUFFIX,facebook.com,🎬 场景 · 追剧听歌与海外社区
+  - DOMAIN-SUFFIX,fbcdn.net,🎬 场景 · 追剧听歌与海外社区
+
+  # === 学术与数据 ===
+  - DOMAIN-SUFFIX,scholar.google.com,📚 场景 · 学术与数据
+  - DOMAIN-SUFFIX,ieee.org,📚 场景 · 学术与数据
+  - DOMAIN-SUFFIX,acm.org,📚 场景 · 学术与数据
+  - DOMAIN-SUFFIX,arxiv.org,📚 场景 · 学术与数据
+  - DOMAIN-SUFFIX,jstor.org,📚 场景 · 学术与数据
+  - DOMAIN-SUFFIX,nature.com,📚 场景 · 学术与数据
+  - DOMAIN-SUFFIX,science.org,📚 场景 · 学术与数据
+  - DOMAIN-SUFFIX,cell.com,📚 场景 · 学术与数据
+
+  # === 兜底规则 ===
+  - GEOIP,CN,🏠 全球直连,no-resolve
+  - MATCH,🏠 全球直连
+
+# ========== 规则集（可选） ==========
+# 如需使用规则集，可在此配置
+# rule-providers:
+#   reject-loyal:
+#     type: http
+#     behavior: domain
+#     url: "https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release/reject.txt"
+#     path: ./ruleset/reject-loyal.txt
+#     interval: 86400

@@ -1,0 +1,34 @@
+# =============================================================================
+# ⚠️ 警告：本文件为自动生成产物，禁止直接修改！
+# =============================================================================
+# 真值源：`verge/derive/parts/` — `10-runtime-verge-mihomo.yaml` + `20-routing-mihomo.yaml`
+# 正确工作流：
+#   1. 修改 `parts/*.yaml` 源文件（如 proxy-groups/rules 改 `20-routing-mihomo.yaml`）
+#   2. 运行 `bash verge/derive/compose.sh -o verge/extend/airport-rule-split-extend.yaml`
+#   3. 同时提交 `parts/*.yaml` + `extend/airport-rule-split-extend.yaml`
+# 详见：`verge/derive/README.md`
+# =============================================================================
+#
+# Clash Verge — **扩展分流规则与策略（机场 / 订阅反哺主线）**
+# **文件：** `airport-rule-split-extend.yaml`（Verge 扩展合并稿）
+# **真值源（派生）：** `verge/derive/parts/` — `10-runtime-verge-mihomo.yaml`（Mihomo/Verge 运行时壳），`20-routing-mihomo.yaml`（`proxy-groups`/`rule-providers`/`rules`）。合并：`bash verge/derive/compose.sh`。`render-local.sh` 渲染前**默认**先合并（应急可 `VERGE_SKIP_COMPOSE=1`）。
+# **关联：** MECE 与「广告 vs 应用遥测」见 `verge/analysis/反哺摘录.md`；个人/专用稿为 **`extend/*-rule-split-extend.yaml`**（不经 `parts/`）。
+# **模板：** 默认 `IP-CIDR,192.0.2.1/32` 为 RFC 5737 占位；真实 VPS 由 `render-local.sh` 替换。**勿**提交可识别个人的全文。
+# **粘贴即用：** **proxy-groups + rules** 与订阅节点（`include-all-proxies`）分离。`reject-loyal` 见文档。`# >>> rulebase:*` 分段可由 `verge/analysis` 反哺（改 `parts` 内路由稿）。
+# **默认渲染：** `bash verge/scripts/render-local.sh` → **`verge/generated/airport-rule-split.local.yaml`**；其他稿用 **`VERGE_EXTEND_FILE=`**（见 `verge/README.md`）。
+# **可选：** `verge/generated/local/override.local` 的 `[rules-before-cn]`。见 `override.local.example` 与 `render-local.sh`。
+#
+# 将生成文件全文复制到 Verge **全局扩展配置**。
+# 文档：https://www.clashverge.dev/guide/extend.html
+#
+# --- MECE：先定分组，再挂规则（命中顺序自上而下；同一流量只入一个业务组）---
+# 1) 底座「🎚️ 手动切换」：滑动调节器图标，像扳道岔一样手动选择出口。`include-all-proxies` 汇入订阅节点，末项 `🔌 国内直连` 供排障；`select` 未写 `default` 时首项为默认，故默认走订阅节点而非直连。
+# 2) 自动底座「🚀 自动最优」：url-test 测速，自动选择延迟最低的节点。
+# 3) 默认入口「🔌 国内直连」：插头图标，DIRECT + 🚀 自动最优。国内域名/IP（GEOSITE,cn / GEOIP,cn）固定走此组。
+# 4) 业务组（规则显式命中）：「🔜 工具 · Cursor」「🧠 场景 · 境外 AI」「👥 大厂 · 脸书系」「🎬 场景 · 追剧听歌与海外社区」「🐙 场景 · 开发源站」「📚 场景 · 学术与数据」「🔍 大厂 · 谷歌」「🍎 大厂 · 苹果」「💳 PayPal · 国内线路」「💳 PayPal · 国际线路」「💠 大厂 · 微软跨境」「🪟 大厂 · 微软」「🎮 场景 · 游戏平台」— 所有业务组均可切换至 🔌 国内直连。
+# 5) 系统组：**「🚫 系统 · 广告拦截」**拦截展示类广告/联盟等大集合；**「🍃 系统 · 应用遥测净化」**承接统计／上报／tracker 等与「纯广告清单」分列，便于面板灰度放行；「🐟 系统 · 漏网之鱼」承接 MATCH。
+#
+# rules 顺序：私有/局域网 → 广告大集合与应用遥测（含远端 RULE-SET）→ 🔜 工具 · Cursor → … → 💠 大厂 · 微软跨境 carve-out（先于 GEOSITE,microsoft）→ 谷歌 / 苹果 / 🪟 大厂 · 微软 → …
+# 稳妥分流思路：关键业务用 DOMAIN/DOMAIN-SUFFIX 写死；CDN **以域名为准**。数据源为 meta-rules-dat / v2fly domain-list-community 编译产物时，`GEOSITE,microsoft` 等大类内含大量微软系子列表（如 Azure、OneDrive、Skype、Xbox）；与 GitHub 的标签在源数据里可能交叉，但 **`GEOSITE,github`**（网页/Git/API）、**`ghcr.io`、`npm.pkg.github.com`** 已由「🐙 场景 · 开发源站」**先于** `GEOSITE,microsoft` 命中；未被子域规则摘走的流量才依 geosite 归入「🪟 大厂 · 微软」桶。另：`dns.fake-ip-filter` 收录常规 GitHub 域，降低浏览器/`git` 在 fake-ip 下解析出 `198.18.*` 后的握手异常。
+# PROCESS-NAME：仅本机 Mihomo + TUN/ebpf 能关联进程时生效；旁路由常无进程名。Windows：`Cursor.exe`；macOS 常见 Helper 进程名如下（不匹配则仍可依赖 DOMAIN 规则）。
+
