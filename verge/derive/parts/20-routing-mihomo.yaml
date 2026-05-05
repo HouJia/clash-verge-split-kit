@@ -125,18 +125,19 @@ proxy-groups:
       - 🔌 国内直连
 
   # 📱 场景 · TikTok：单独拆分，便于按需配置（部分地区需特定出口）。
+  # 默认 🇺🇸 美国节点，TikTok 美区内容最丰富
   - name: '📱 场景 · TikTok'
     type: select
     include-all-proxies: true
     exclude-filter: '(?i)海外用户专用'
     proxies:
+      - 🇺🇸 美国节点
       - 🚀 自动最优
       - 🎚️ 手动切换
       - 🇭🇰 香港节点
       - 🇯🇵 日本节点
       - 🇸🇬 新加坡节点
       - 🌺 台湾节点
-      - 🇺🇸 美国节点
       - 🔌 国内直连
 
   # 🐙 场景 · 开发源站：GitHub/Docker/npm/PyPI 等，早于 GEOSITE,microsoft 命中。
