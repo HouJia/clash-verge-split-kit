@@ -6,7 +6,7 @@
 
 | 路径 | 内容 |
 |------|------|
-| [`verge/`](verge/) | Clash Verge：**`derive/parts/`**（主线分层）→ **`derive/compose.sh`** → **`extend/airport-rule-split-extend.yaml`** → **`scripts/render-local.sh`** → `generated/*-rule-split.local.yaml`。分析见 [`verge/analysis/`](verge/analysis/)，原则见 [`verge/analysis/RULEBASE-PROGRAM.md`](verge/analysis/RULEBASE-PROGRAM.md)。 |
+| [`verge/`](verge/) | Clash Verge：**`derive/parts/`**（主线分层）→ **`derive/compose.sh`** → **`extend/airport-rule-split-extend.yaml`** → **`scripts/render-local.sh`** → `generated/*-rule-split.local.yaml`。设计原则见 [`docs/clash-verge/RULEBASE-PROGRAM.md`](docs/clash-verge/RULEBASE-PROGRAM.md)。 |
 | [`docs/clash-verge/`](docs/clash-verge/) | 自用说明与里程碑白话 FAQ。 |
 | [`.planning/`](.planning/) | 路线图、需求、阶段上下文（GSD）。 |
 
@@ -23,7 +23,7 @@
 | [`docs/clash-verge/verification-playbook.md`](docs/clash-verge/verification-playbook.md) | 可重复验证与审计联动 |
 | [`hjs-egress-ip-cli/README.md`](hjs-egress-ip-cli/README.md) | CLI 与审计 UI；**pipx** 与可复制的安装命令**仅在此文** |
 | [`verge/README.md`](verge/README.md) | 扩展分流：`extend/*-rule-split-extend.yaml` ⇄ `generated/*-rule-split.local.yaml`、`render-local.sh`、Hooks |
-| [`verge/analysis/RULEBASE-PROGRAM.md`](verge/analysis/RULEBASE-PROGRAM.md) | 自用规则库：背景、阶段顺序（Verge → 其它端）、`verge/extend/` 与 `verge/analysis/` 分工、脱敏红线、模块化切块口径 |
+| [`docs/clash-verge/RULEBASE-PROGRAM.md`](docs/clash-verge/RULEBASE-PROGRAM.md) | 自用规则库：背景、阶段顺序（Verge → 其它端）、`verge/extend/` 与配置分层、脱敏红线、模块化切块口径 |
 
 ### 安装与使用路径
 

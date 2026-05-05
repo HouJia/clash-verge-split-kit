@@ -1,6 +1,6 @@
 # Clash Verge 扩展分流（模板 + 本机稿）
 
-长期目标、多端路线与脱敏红线见 **[`analysis/RULEBASE-PROGRAM.md`](analysis/RULEBASE-PROGRAM.md)**；订阅配置的拆解与审计材料放在 **`analysis/`**（**勿提交**含密钥的 snapshot，已加入 `.gitignore`）。  
+长期目标、多端路线与脱敏红线见 **[`docs/clash-verge/RULEBASE-PROGRAM.md`](../docs/clash-verge/RULEBASE-PROGRAM.md)**；订阅配置的拆解与审计材料已脱敏移至 **`docs/clash-verge/`**。  
 **主线机场稿**的真值源为 **`derive/parts/`**（分层见 **[`derive/README.md`](derive/README.md)**），合并为 **`extend/airport-rule-split-extend.yaml`** 后再走 `render-local.sh`；个人/专用稿仍只维护 **`extend/`** 下其它文件名。
 
 本目录 **`verge/extend/*-rule-split-extend.yaml`**：代理分组、`rules`、`dns` 等，**不包含**节点。`render-local.sh` **默认**读合并后的 `airport-rule-split-extend.yaml`（渲染前会先 **`derive/compose.sh`**，除非 `VERGE_SKIP_COMPOSE=1`）。命名：**Extend** 须以 **`-extend.yaml`** 结尾；产物去掉 **`-extend`** 加 **`.local.yaml`**。
