@@ -12,4 +12,6 @@
 /verge/generated/local/*
 !/verge/generated/local/*.example
 
-/verge/analysis/
+/verge/analysis/modules/00-core.yaml
+/verge/analysis/modules/10-proxies.yaml
+/verge/analysis/modules/25-rules-special.yaml

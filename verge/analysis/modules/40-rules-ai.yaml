@@ -1,0 +1,19 @@
+# 规则 - AI服务
+# 包含: ChatGPT, Claude等AI平台
+# 数量: 15条
+rules:
+ - DOMAIN,chatgpt.com,🤖 AI
+ - DOMAIN,chat.com,🤖 AI
+ - DOMAIN,oaistatic.com,🤖 AI
+ - DOMAIN,oaiusercontent.com,🤖 AI
+ - DOMAIN,openai.com.cdn.cloudflare.net,🤖 AI
+ - DOMAIN,openaiapi-site.azureedge.net,🤖 AI
+ - DOMAIN,production-openaicom-storage.azureedge.net,🤖 AI
+ - DOMAIN,o33249.ingest.sentry.io,🤖 AI
+ - DOMAIN,openaicom.imgix.net,🤖 AI
+ - DOMAIN-SUFFIX,ai.com,🤖 AI
+ - DOMAIN-SUFFIX,openai.com,🤖 AI
+ - DOMAIN,anthropic.com,🤖 AI
+ - DOMAIN,claude.ai,🤖 AI
+ - DOMAIN,claudeusercontent.com,🤖 AI
+ - DOMAIN,servd-anthropic-website.b-cdn.net,🤖 AI
