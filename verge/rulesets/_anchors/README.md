@@ -2,11 +2,56 @@
 
 本目录包含规则片段文件，由 `compose.sh` 组装到 `extend/airport-rule-split-extend.yaml`。
 
+## 快速开始
+
+### 修改规则后必须执行
+
+```bash
+# 1. 修改片段文件（如 verge/rulesets/_anchors/20-cursor.yaml）
+
+# 2. 生成标准规则文件并测试
+bash verge/derive/compose.sh -o verge/extend/airport-rule-split-extend.yaml
+bash verge/scripts/test-rules.sh          # ← 回归测试（必须！）
+
+# 3. 生成本机产物并测试
+bash verge/scripts/render-local.sh
+bash verge/scripts/test-rules.sh local    # ← 测试 local 文件
+
+# 4. 复制到 Verge
+cat verge/generated/airport-rule-split.local.yaml | pbcopy
+```
+
+---
+
+## 回归测试说明
+
+**每次修改片段后必须运行回归测试**，确保：
+- YAML 语法正确
+- 所有规则引用的策略组存在
+- 13 项关键规则（广告、Cursor、AI、TikTok 等）存在
+- 策略组 emoji 正确（🚫/🍃/🔜 等）
+- 规则顺序正确（私有→广告→Cursor→AI→...）
+
+### 测试命令
+
+```bash
+# 测试 extend 文件（标准规则）
+bash verge/scripts/test-rules.sh extend
+
+# 测试 local 文件（本机产物）
+bash verge/scripts/test-rules.sh local
+
+# 测试全部
+bash verge/scripts/test-rules.sh all
+```
+
+---
+
 ## 命名规范
 
-文件名格式：`NN-name.yaml`，其中：
+文件名格式：`NN-name.yaml`
 - `NN`：两位数字前缀，控制组装顺序（与 rules 命中顺序一致）
-- `name`：策略组语义缩写（小写，连字符分隔）
+- `name`：策略组语义缩写
 
 ## 片段列表
 
@@ -31,34 +76,42 @@
 片段文件**仅包含规则列表**：
 
 ```yaml
-# 文件头部注释（策略组、说明）
-- DOMAIN-SUFFIX,example.com,🔜 策略组名
-- IP-CIDR,1.2.3.0/24,🔜 策略组名,no-resolve
+# 🧠 场景 · 境外 AI
+# OpenAI / ChatGPT / Codex / Anthropic / Claude / Claude Code
+
+- DOMAIN-SUFFIX,openai.com,🧠 场景 · 境外 AI
+- DOMAIN,api.anthropic.com,🧠 场景 · 境外 AI
 ```
+
+**注意**：
+- 标题必须使用 emoji 策略组名（如 `🧠 场景 · 境外 AI`）
+- 规则中的策略组名必须与 `proxy-groups` 中定义的一致
+- emoji 字符必须正确（如 🚫 U+1F6AB，不是 🛑 U+1F6D1）
+
+---
 
 ## 修改流程
 
 ### 第一步：修改规则片段
 
-编辑本目录下的片段文件（如修改 Cursor 规则）：
 ```bash
 vim verge/rulesets/_anchors/20-cursor.yaml
 ```
 
-### 第二步：生成标准规则文件
+### 第二步：生成并测试
 
-运行 `compose.sh` 组装片段到 extend 文件：
 ```bash
 bash verge/derive/compose.sh -o verge/extend/airport-rule-split-extend.yaml
+bash verge/scripts/test-rules.sh    # ← 必须运行！
 ```
 
-产物 `extend/airport-rule-split-extend.yaml` 包含完整的标准规则（199条），**纳入 git 管理**。
+产物 `extend/airport-rule-split-extend.yaml` 包含完整的标准规则，**纳入 git 管理**。
 
-### 第三步：生成本机产物
+### 第三步：生成本机产物并测试
 
-运行 `render-local.sh` 替换 IP 并注入本地私有规则：
 ```bash
 bash verge/scripts/render-local.sh
+bash verge/scripts/test-rules.sh local    # ← 测试 local 文件
 ```
 
 产物 `generated/airport-rule-split.local.yaml` 在标准规则基础上：
@@ -74,8 +127,11 @@ cat verge/generated/airport-rule-split.local.yaml | pbcopy
 # 粘贴到 Verge 全局扩展配置
 ```
 
+---
+
 ## 注意事项
 
-- **不要**修改片段文件中的策略组名称，必须与 `proxy-groups` 中定义的一致
-- 保持编号前缀连续性，便于顺序控制
-- 每个策略组片段之间会自动插入空行，便于阅读
+1. **必须运行回归测试**：每次修改后执行 `bash verge/scripts/test-rules.sh`
+2. **emoji 必须正确**：策略组名中的 emoji 必须与 `proxy-groups` 定义完全一致
+3. **策略组名一致性**：片段标题、规则中的策略组名、`proxy-groups` 定义必须一致
+4. **编号前缀连续性**：保持 00, 10, 20... 顺序，控制规则注入优先级
