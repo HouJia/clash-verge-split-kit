@@ -589,16 +589,12 @@ rules:
   # __VERGE_INJECT_RULES_START__
   # === 规则片段注入（由 compose.sh 自动组装）===
   # 片段源：rulesets/_anchors/*.yaml
-  # === 00-private ===
-  # 私有/局域网规则（基础直连）
-  # 策略组: DIRECT
+  # ========== 私有/局域网规则（基础直连） ==========
   # 说明: 私有地址段与局域网流量固定直连
   - GEOSITE,private,DIRECT
   - GEOIP,private,DIRECT,no-resolve
 
-  # === 10-ads ===
-  # 广告拦截与遥测净化规则
-  # 策略组: 🚫 系统 · 广告拦截 / 🍃 系统 · 应用遥测净化
+  # ========== 广告拦截与遥测净化规则 ==========
   # 说明: 前置拦截广告与追踪域
   # 与 GEOSITE,category-ads-all 互补；remote 由 Mihomo 缓存至 path
   - GEOSITE,category-ads-all,🛑 系统 · 广告拦截
@@ -606,9 +602,7 @@ rules:
   - GEOSITE,tracker,🍃 系统 · 应用遥测净化
   - RULE-SET,reject-loyal,🛑 系统 · 广告拦截
 
-  # === 20-cursor ===
-  # 🔜 工具 · Cursor
-  # Cursor IDE 专用规则
+  # ========== 🔜 工具 · Cursor（Cursor IDE 专用规则）==========
   # 进程名优先（Windows/macOS 多进程名覆盖），域名兜底
   - PROCESS-NAME,Cursor,🔜 工具 · Cursor
   - PROCESS-NAME,Cursor Helper,🔜 工具 · Cursor
@@ -623,9 +617,7 @@ rules:
   - DOMAIN-SUFFIX,cursor-cdn.com,🔜 工具 · Cursor
   - DOMAIN-SUFFIX,cursorapi.com,🔜 工具 · Cursor
 
-  # === 30-ai ===
-  # 🧠 场景 · 境外 AI
-  # OpenAI / ChatGPT / Codex / Anthropic / Claude / Claude Code
+  # ========== 🧠 场景 · 境外 AI（OpenAI / ChatGPT / Codex / Anthropic / Claude / Claude Code）==========
   # OpenAI 域名对齐官方 Network recommendations
   - DOMAIN-SUFFIX,openai.com,🧠 场景 · 境外 AI
   - DOMAIN-SUFFIX,chatgpt.com,🧠 场景 · 境外 AI
@@ -670,9 +662,7 @@ rules:
   - GEOSITE,openai,🧠 场景 · 境外 AI
   - GEOSITE,anthropic,🧠 场景 · 境外 AI
 
-  # === 35-messaging ===
-  # 即时通讯规则
-  # 策略组: 💬 场景 · 即时通讯
+  # ========== 即时通讯规则 ==========
   # 说明: Telegram / WhatsApp / Line 等即时通讯应用
   # ========== 脸书系兜底（WhatsApp 前置 carve-out）==========
   # WhatsApp 已在即时通讯前置 carve-out；本段兜底 Facebook / Instagram / Threads
@@ -693,9 +683,7 @@ rules:
   - DOMAIN-SUFFIX,whatsapp.net,💬 场景 · 即时通讯
   - GEOSITE,whatsapp,💬 场景 · 即时通讯
 
-  # === 40-fcm ===
-  # 谷歌推送服务规则
-  # 策略组: 📢 场景 · 谷歌推送
+  # ========== 谷歌推送服务规则 ==========
   # 说明: FCM / Firebase Cloud Messaging，放在 GEOSITE,google 前面避免被截胡
   # Android 设备推送服务；mtalk.google.com 为主地址，alt 为备用节点
   - DOMAIN,mtalk.google.com,📢 场景 · 谷歌推送
@@ -735,9 +723,7 @@ rules:
   - IP-CIDR,173.194.218.188/32,📢 场景 · 谷歌推送,no-resolve
   - IP-CIDR,209.85.233.188/32,📢 场景 · 谷歌推送,no-resolve
 
-  # === 45-streaming ===
-  # 流媒体与海外社区规则
-  # 策略组: 🎬 场景 · 海外音影社 / 📱 场景 · TikTok
+  # ========== 流媒体与海外社区规则 ==========
   # 说明: Netflix/Spotify/Discord/Reddit/巴哈姆特/EMBY/TikTok 等
   # ========== 主流流媒体与社区平台 ==========
   - GEOSITE,netflix,🎬 场景 · 海外音影社
@@ -760,9 +746,7 @@ rules:
   # TikTok（GEOSITE,tiktok 与 geo 同步更新）
   - GEOSITE,tiktok,📱 场景 · TikTok
 
-  # === 50-dev ===
-  # 开发源站规则
-  # 策略组: 🐙 场景 · 开发源站
+  # ========== 开发源站规则 ==========
   # 说明: GitHub/Docker/npm/PyPI/crates.io 等，早于 GEOSITE,microsoft 命中
   # Docker/npm/PyPI/crates.io/GitHub 包管理
   - GEOSITE,docker,🐙 场景 · 开发源站
@@ -778,9 +762,7 @@ rules:
   # GitHub 主站 / API / raw（减少浏览器/git 在 DNS+fake-ip 下的异常）
   - GEOSITE,github,🐙 场景 · 开发源站
 
-  # === 55-scholar ===
-  # 学术与数据规则
-  # 策略组: 📚 场景 · 学术与数据
+  # ========== 学术与数据规则 ==========
   # 说明: category-scholar-!cn 学术集合，必须排在 GEOSITE,google 前
   # GEOSITE,category-scholar-!cn 运行时整体匹配，上游源文件：
   # https://github.com/v2fly/domain-list-community/blob/master/data/category-scholar-!cn
@@ -788,9 +770,7 @@ rules:
   #       ieee, mit, proquest, sci-hub, sciencedirect, springer, taylorfrancis, z-library 等
   - GEOSITE,category-scholar-!cn,📚 场景 · 学术与数据
 
-  # === 60-tech-giants ===
-  # 大厂服务规则（Google/Apple/Microsoft 及跨境服务）
-  # 策略组: 🔍 大厂 · 谷歌 / 🍎 大厂 · 苹果 / 💠 大厂 · 微软跨境 / 🪟 大厂 · 微软
+  # ========== 大厂服务规则（Google/Apple/Microsoft 及跨境服务） ==========
   # 说明: 大厂服务分组，微软跨境早于 GEOSITE,microsoft carve-out
   # ========== 🔍 大厂 · 谷歌（GEOSITE + Gmail 补丁）==========
   - GEOSITE,google,🔍 大厂 · 谷歌
@@ -825,9 +805,7 @@ rules:
   - DOMAIN-SUFFIX,office.com,🪟 大厂 · 微软
   - DOMAIN-SUFFIX,microsoft365.com,🪟 大厂 · 微软
 
-  # === 65-gaming ===
-  # 游戏平台规则
-  # 策略组: 🎮 场景 · 游戏平台
+  # ========== 游戏平台规则 ==========
   # 说明: Steam/Epic/PlayStation/Xbox/Nintendo/EA/Ubisoft 等
   # Steam 平台
   - DOMAIN-SUFFIX,steampowered.com,🎮 场景 · 游戏平台
@@ -868,9 +846,7 @@ rules:
   - GEOSITE,xbox,🎮 场景 · 游戏平台
   - GEOSITE,nintendo,🎮 场景 · 游戏平台
 
-  # === 70-domestic ===
-  # 国内流量规则
-  # 策略组: 🔌 国内直连 / DIRECT
+  # ========== 国内流量规则 ==========
   # 说明: 国内站点与服务，充分利用国内 CDN
   # 国内长视频站点（显式写死，避免误走代理）
   - GEOSITE,bilibili,🔌 国内直连
@@ -886,9 +862,7 @@ rules:
   # openwrt.ai 文档/镜像站（避免被误判国内直连）
   - DOMAIN-SUFFIX,openwrt.ai,🎚️ 手动切换
 
-  # === 80-geo ===
-  # 地理分流与兜底规则
-  # 策略组: 🔌 国内直连 / 🎚️ 手动切换 / 🐟 系统 · 漏网之鱼
+  # ========== 地理分流与兜底规则 ==========
   # 说明: GEOSITE/GEOIP 地理分流 + MATCH 兜底
   # 国内流量（GEOSITE/GEOIP 识别为 CN）
   - GEOSITE,cn,🔌 国内直连

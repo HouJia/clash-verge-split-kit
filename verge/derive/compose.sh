@@ -59,9 +59,36 @@ emit_anchor_rules() {
   for fragment in "${fragments[@]}"; do
     file="${ANCHORS_DIR}/${fragment}"
     if [[ -f "${file}" ]]; then
-      # 添加片段分隔注释
-      echo "  # === ${fragment%.yaml} ==="
+      # 读取标题和详细说明（前两行注释）
+      local title="" desc=""
+      local line_num=0
+      while IFS= read -r line && [[ ${line_num} -lt 2 ]]; do
+        # 去掉开头的 # 和空格
+        local clean_line="${line#\# }"
+        clean_line="${clean_line#\#}"
+        clean_line="${clean_line# }"
+        if [[ ${line_num} -eq 0 ]]; then
+          title="${clean_line}"
+        else
+          desc="${clean_line}"
+        fi
+        ((line_num++))
+      done < "${file}"
+
+      # 生成 ========== 格式的详细标题
+      if [[ -n "${title}" ]]; then
+        if [[ -n "${desc}" && "${desc}" != "策略组:"* ]]; then
+          echo "  # ========== ${title}（${desc}）=========="
+        else
+          echo "  # ========== ${title} =========="
+        fi
+      fi
+
+      # 输出剩余内容（跳过前两行标题注释）
+      local skip=0
       while IFS= read -r line || [[ -n "${line}" ]]; do
+        ((skip++))
+        [[ ${skip} -le 2 ]] && continue
         # 跳过空行，但保留注释作为规则间的说明
         [[ -z "${line}" ]] && continue
         # 输出带缩进的规则（2个空格缩进，保持 YAML 列表格式）
