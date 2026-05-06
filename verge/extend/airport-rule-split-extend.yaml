@@ -587,4 +587,231 @@ rule-providers:
 
 rules:
   # __VERGE_INJECT_RULES_START__
+  # === 规则片段注入（由 compose.sh 自动组装）===
+  # 片段源：rulesets/_anchors/*.yaml
+  # === 00-private ===
+  # 私有/局域网规则（基础直连）
+  # 策略组: DIRECT
+  # 说明: 私有地址段与局域网流量固定直连
+  - GEOSITE,private,DIRECT
+  - GEOIP,private,DIRECT,no-resolve
+  # === 35-messaging ===
+  # 即时通讯规则
+  # 策略组: 💬 场景 · 即时通讯
+  # 说明: Telegram / WhatsApp / Line 等即时通讯应用
+  # ========== 脸书系兜底（WhatsApp 前置 carve-out）==========
+  # WhatsApp 已在即时通讯前置 carve-out；本段兜底 Facebook / Instagram / Threads
+  - GEOSITE,meta,👥 大厂 · 脸书系
+  # ========== Telegram 域名与 IP 段 ==========
+  # https://core.telegram.org/resources/cidr.txt
+  - DOMAIN-SUFFIX,t.me,💬 场景 · 即时通讯
+  - DOMAIN-SUFFIX,tdesktop.com,💬 场景 · 即时通讯
+  - DOMAIN-SUFFIX,telegra.ph,💬 场景 · 即时通讯
+  - DOMAIN-SUFFIX,telegram.me,💬 场景 · 即时通讯
+  - DOMAIN-SUFFIX,telegram.org,💬 场景 · 即时通讯
+  - DOMAIN-SUFFIX,telesco.pe,💬 场景 · 即时通讯
+  - IP-CIDR,91.108.0.0/16,💬 场景 · 即时通讯,no-resolve
+  - IP-CIDR,109.239.140.0/24,💬 场景 · 即时通讯,no-resolve
+  - IP-CIDR,149.154.160.0/20,💬 场景 · 即时通讯,no-resolve
+  # ========== WhatsApp（Meta 旗下；voice/video call 优化）=========
+  - DOMAIN-SUFFIX,whatsapp.com,💬 场景 · 即时通讯
+  - DOMAIN-SUFFIX,whatsapp.net,💬 场景 · 即时通讯
+  - GEOSITE,whatsapp,💬 场景 · 即时通讯
+  # === 40-fcm ===
+  # 谷歌推送服务规则
+  # 策略组: 📢 场景 · 谷歌推送
+  # 说明: FCM / Firebase Cloud Messaging，放在 GEOSITE,google 前面避免被截胡
+  # Android 设备推送服务；mtalk.google.com 为主地址，alt 为备用节点
+  - DOMAIN,mtalk.google.com,📢 场景 · 谷歌推送
+  - DOMAIN,alt1-mtalk.google.com,📢 场景 · 谷歌推送
+  - DOMAIN,alt2-mtalk.google.com,📢 场景 · 谷歌推送
+  - DOMAIN,alt3-mtalk.google.com,📢 场景 · 谷歌推送
+  - DOMAIN,alt4-mtalk.google.com,📢 场景 · 谷歌推送
+  - DOMAIN,alt5-mtalk.google.com,📢 场景 · 谷歌推送
+  - DOMAIN,alt6-mtalk.google.com,📢 场景 · 谷歌推送
+  - DOMAIN,alt7-mtalk.google.com,📢 场景 · 谷歌推送
+  - DOMAIN,alt8-mtalk.google.com,📢 场景 · 谷歌推送
+  # IP 段覆盖 Google 推送服务出口
+  - IP-CIDR,64.233.177.188/32,📢 场景 · 谷歌推送,no-resolve
+  - IP-CIDR,64.233.186.188/32,📢 场景 · 谷歌推送,no-resolve
+  - IP-CIDR,64.233.187.188/32,📢 场景 · 谷歌推送,no-resolve
+  - IP-CIDR,64.233.188.188/32,📢 场景 · 谷歌推送,no-resolve
+  - IP-CIDR,64.233.189.188/32,📢 场景 · 谷歌推送,no-resolve
+  - IP-CIDR,74.125.23.188/32,📢 场景 · 谷歌推送,no-resolve
+  - IP-CIDR,74.125.24.188/32,📢 场景 · 谷歌推送,no-resolve
+  - IP-CIDR,74.125.28.188/32,📢 场景 · 谷歌推送,no-resolve
+  - IP-CIDR,74.125.127.188/32,📢 场景 · 谷歌推送,no-resolve
+  - IP-CIDR,74.125.137.188/32,📢 场景 · 谷歌推送,no-resolve
+  - IP-CIDR,74.125.203.188/32,📢 场景 · 谷歌推送,no-resolve
+  - IP-CIDR,74.125.204.188/32,📢 场景 · 谷歌推送,no-resolve
+  - IP-CIDR,74.125.206.188/32,📢 场景 · 谷歌推送,no-resolve
+  - IP-CIDR,108.177.125.188/32,📢 场景 · 谷歌推送,no-resolve
+  - IP-CIDR,142.250.4.188/32,📢 场景 · 谷歌推送,no-resolve
+  - IP-CIDR,142.250.10.188/32,📢 场景 · 谷歌推送,no-resolve
+  - IP-CIDR,142.250.31.188/32,📢 场景 · 谷歌推送,no-resolve
+  - IP-CIDR,142.250.96.188/32,📢 场景 · 谷歌推送,no-resolve
+  - IP-CIDR,172.217.194.188/32,📢 场景 · 谷歌推送,no-resolve
+  - IP-CIDR,172.217.218.188/32,📢 场景 · 谷歌推送,no-resolve
+  - IP-CIDR,172.217.219.188/32,📢 场景 · 谷歌推送,no-resolve
+  - IP-CIDR,172.253.63.188/32,📢 场景 · 谷歌推送,no-resolve
+  - IP-CIDR,172.253.122.188/32,📢 场景 · 谷歌推送,no-resolve
+  - IP-CIDR,173.194.175.188/32,📢 场景 · 谷歌推送,no-resolve
+  - IP-CIDR,173.194.218.188/32,📢 场景 · 谷歌推送,no-resolve
+  - IP-CIDR,209.85.233.188/32,📢 场景 · 谷歌推送,no-resolve
+  # === 45-streaming ===
+  # 流媒体与海外社区规则
+  # 策略组: 🎬 场景 · 海外音影社 / 📱 场景 · TikTok
+  # 说明: Netflix/Spotify/Discord/Reddit/巴哈姆特/EMBY/TikTok 等
+  # ========== 主流流媒体与社区平台 ==========
+  - GEOSITE,netflix,🎬 场景 · 海外音影社
+  - GEOSITE,disney,🎬 场景 · 海外音影社
+  - GEOSITE,hulu,🎬 场景 · 海外音影社
+  - GEOSITE,primevideo,🎬 场景 · 海外音影社
+  - GEOSITE,hbo,🎬 场景 · 海外音影社
+  - GEOSITE,spotify,🎬 场景 · 海外音影社
+  - GEOSITE,twitch,🎬 场景 · 海外音影社
+  - GEOSITE,pixiv,🎬 场景 · 海外音影社
+  - GEOSITE,reddit,🎬 场景 · 海外音影社
+  - GEOSITE,discord,🎬 场景 · 海外音影社
+  - GEOSITE,twitter,🎬 场景 · 海外音影社
+  # 巴哈姆特（台湾动画平台）
+  - DOMAIN-SUFFIX,gamer.com.tw,🎬 场景 · 海外音影社
+  - DOMAIN-SUFFIX,bahamut.com.tw,🎬 场景 · 海外音影社
+  # EMBY 影视服务器
+  - DOMAIN-SUFFIX,emby.wtf,🎬 场景 · 海外音影社
+  - DOMAIN-SUFFIX,emby.nz,🎬 场景 · 海外音影社
+  # TikTok（GEOSITE,tiktok 与 geo 同步更新）
+  - GEOSITE,tiktok,📱 场景 · TikTok
+  # === 50-dev ===
+  # 开发源站规则
+  # 策略组: 🐙 场景 · 开发源站
+  # 说明: GitHub/Docker/npm/PyPI/crates.io 等，早于 GEOSITE,microsoft 命中
+  # Docker/npm/PyPI/crates.io/GitHub 包管理
+  - GEOSITE,docker,🐙 场景 · 开发源站
+  - GEOSITE,npmjs,🐙 场景 · 开发源站
+  - DOMAIN-SUFFIX,registry.npmjs.org,🐙 场景 · 开发源站
+  - DOMAIN-SUFFIX,npmjs.org,🐙 场景 · 开发源站
+  - DOMAIN-SUFFIX,pypi.org,🐙 场景 · 开发源站
+  - DOMAIN-SUFFIX,pythonhosted.org,🐙 场景 · 开发源站
+  - DOMAIN-SUFFIX,files.pythonhosted.org,🐙 场景 · 开发源站
+  - DOMAIN-SUFFIX,crates.io,🐙 场景 · 开发源站
+  - DOMAIN-SUFFIX,ghcr.io,🐙 场景 · 开发源站
+  - DOMAIN-SUFFIX,npm.pkg.github.com,🐙 场景 · 开发源站
+  # GitHub 主站 / API / raw（减少浏览器/git 在 DNS+fake-ip 下的异常）
+  - GEOSITE,github,🐙 场景 · 开发源站
+  # === 55-scholar ===
+  # 学术与数据规则
+  # 策略组: 📚 场景 · 学术与数据
+  # 说明: category-scholar-!cn 学术集合，必须排在 GEOSITE,google 前
+  # GEOSITE,category-scholar-!cn 运行时整体匹配，上游源文件：
+  # https://github.com/v2fly/domain-list-community/blob/master/data/category-scholar-!cn
+  # 包含：category-scholar-ir/uk, apa, clarivate, doi, elsevier, google-scholar,
+  #       ieee, mit, proquest, sci-hub, sciencedirect, springer, taylorfrancis, z-library 等
+  - GEOSITE,category-scholar-!cn,📚 场景 · 学术与数据
+  # === 60-tech-giants ===
+  # 大厂服务规则（Google/Apple/Microsoft 及跨境服务）
+  # 策略组: 🔍 大厂 · 谷歌 / 🍎 大厂 · 苹果 / 💠 大厂 · 微软跨境 / 🪟 大厂 · 微软
+  # 说明: 大厂服务分组，微软跨境早于 GEOSITE,microsoft carve-out
+  # ========== 🔍 大厂 · 谷歌（GEOSITE + Gmail 补丁）==========
+  - GEOSITE,google,🔍 大厂 · 谷歌
+  - GEOSITE,youtube,🔍 大厂 · 谷歌
+  # Gmail 主域与邮箱客户端（POP3/SMTP/IMAP）
+  - DOMAIN-SUFFIX,gmail.com,🔍 大厂 · 谷歌
+  - DOMAIN-SUFFIX,googlemail.com,🔍 大厂 · 谷歌
+  - DOMAIN,pop.gmail.com,🔍 大厂 · 谷歌
+  - DOMAIN,smtp.gmail.com,🔍 大厂 · 谷歌
+  - DOMAIN,imap.gmail.com,🔍 大厂 · 谷歌
+  # ========== 🍎 大厂 · 苹果（GEOSITE 合集）==========
+  - GEOSITE,apple,🍎 大厂 · 苹果
+  - GEOSITE,icloud,🍎 大厂 · 苹果
+  - GEOSITE,apple-dev,🍎 大厂 · 苹果
+  - GEOSITE,itunes,🍎 大厂 · 苹果
+  - GEOSITE,apple-update,🍎 大厂 · 苹果
+  # ========== 💠 大厂 · 微软跨境（早于 GEOSITE,microsoft carve-out）==========
+  - DOMAIN-SUFFIX,copilot.microsoft.com,💠 大厂 · 微软跨境
+  - DOMAIN-SUFFIX,copilotstudio.microsoft.com,💠 大厂 · 微软跨境
+  - DOMAIN,edgeservices.bing.com,💠 大厂 · 微软跨境
+  - DOMAIN-SUFFIX,sydney.bing.com,💠 大厂 · 微软跨境
+  - DOMAIN-SUFFIX,bingapis.com,💠 大厂 · 微软跨境
+  # ========== 🪟 大厂 · 微软（GEOSITE 合集 + 邮箱补丁）==========
+  # GitHub 相关已由「🐙 场景 · 开发源站」命中；剩余子域落在此组
+  - GEOSITE,microsoft,🪟 大厂 · 微软
+  - GEOSITE,onedrive,🪟 大厂 · 微软
+  - GEOSITE,linkedin,🪟 大厂 · 微软
+  # Outlook/Hotmail/Live/Office 邮箱补丁
+  - DOMAIN-SUFFIX,outlook.com,🪟 大厂 · 微软
+  - DOMAIN-SUFFIX,hotmail.com,🪟 大厂 · 微软
+  - DOMAIN-SUFFIX,live.com,🪟 大厂 · 微软
+  - DOMAIN-SUFFIX,office.com,🪟 大厂 · 微软
+  - DOMAIN-SUFFIX,microsoft365.com,🪟 大厂 · 微软
+  # === 65-gaming ===
+  # 游戏平台规则
+  # 策略组: 🎮 场景 · 游戏平台
+  # 说明: Steam/Epic/PlayStation/Xbox/Nintendo/EA/Ubisoft 等
+  # Steam 平台
+  - DOMAIN-SUFFIX,steampowered.com,🎮 场景 · 游戏平台
+  - DOMAIN-SUFFIX,steamcommunity.com,🎮 场景 · 游戏平台
+  - DOMAIN-SUFFIX,steamgames.com,🎮 场景 · 游戏平台
+  - DOMAIN-SUFFIX,steamusercontent.com,🎮 场景 · 游戏平台
+  - DOMAIN-SUFFIX,steamcontent.com,🎮 场景 · 游戏平台
+  - DOMAIN-SUFFIX,steamstatic.com,🎮 场景 · 游戏平台
+  - DOMAIN-SUFFIX,steambroadcast.akamaized.net,🎮 场景 · 游戏平台
+  # Epic 平台
+  - DOMAIN-SUFFIX,epicgames.com,🎮 场景 · 游戏平台
+  - DOMAIN-SUFFIX,helpshift.com,🎮 场景 · 游戏平台
+  - DOMAIN-SUFFIX,paragon.com,🎮 场景 · 游戏平台
+  - DOMAIN-SUFFIX,unrealengine.com,🎮 场景 · 游戏平台
+  # PlayStation 平台
+  - DOMAIN-SUFFIX,playstation.com,🎮 场景 · 游戏平台
+  - DOMAIN-SUFFIX,playstation.net,🎮 场景 · 游戏平台
+  - DOMAIN-SUFFIX,playstationnetwork.com,🎮 场景 · 游戏平台
+  - DOMAIN-SUFFIX,sony.com,🎮 场景 · 游戏平台
+  - DOMAIN-SUFFIX,sonyentertainmentnetwork.com,🎮 场景 · 游戏平台
+  # Xbox 平台
+  - DOMAIN-SUFFIX,xbox.com,🎮 场景 · 游戏平台
+  - DOMAIN-SUFFIX,xboxlive.com,🎮 场景 · 游戏平台
+  - DOMAIN-SUFFIX,xboxlive.com.cn,🎮 场景 · 游戏平台
+  # Nintendo 平台
+  - DOMAIN-SUFFIX,nintendo.com,🎮 场景 · 游戏平台
+  - DOMAIN-SUFFIX,nintendo.net,🎮 场景 · 游戏平台
+  - DOMAIN-SUFFIX,nintendo.co.jp,🎮 场景 · 游戏平台
+  # EA/Origin 平台
+  - DOMAIN-SUFFIX,ea.com,🎮 场景 · 游戏平台
+  - DOMAIN-SUFFIX,origin.com,🎮 场景 · 游戏平台
+  # Ubisoft 平台
+  - DOMAIN-SUFFIX,ubisoft.com,🎮 场景 · 游戏平台
+  - DOMAIN-SUFFIX,uplay.com,🎮 场景 · 游戏平台
+  # GEOSITE 兜底
+  - GEOSITE,steam,🎮 场景 · 游戏平台
+  - GEOSITE,epicgames,🎮 场景 · 游戏平台
+  - GEOSITE,xbox,🎮 场景 · 游戏平台
+  - GEOSITE,nintendo,🎮 场景 · 游戏平台
+  # === 70-domestic ===
+  # 国内流量规则
+  # 策略组: 🔌 国内直连 / DIRECT
+  # 说明: 国内站点与服务，充分利用国内 CDN
+  # 国内长视频站点（显式写死，避免误走代理）
+  - GEOSITE,bilibili,🔌 国内直连
+  - GEOSITE,youku,🔌 国内直连
+  - GEOSITE,iqiyi,🔌 国内直连
+  # 腾讯系（微信/支付/视频/云等）
+  - GEOSITE,tencent,DIRECT
+  # PayPal 国内门户（先于 GEOSITE,paypal 命中）
+  - DOMAIN-SUFFIX,paypal.cn,💳 PayPal · 国内线路
+  - DOMAIN-SUFFIX,gopay.com.cn,💳 PayPal · 国内线路
+  # PayPal 国际线路
+  - GEOSITE,paypal,💳 PayPal · 国际线路
+  # openwrt.ai 文档/镜像站（避免被误判国内直连）
+  - DOMAIN-SUFFIX,openwrt.ai,🎚️ 手动切换
+  # === 80-geo ===
+  # 地理分流与兜底规则
+  # 策略组: 🔌 国内直连 / 🎚️ 手动切换 / 🐟 系统 · 漏网之鱼
+  # 说明: GEOSITE/GEOIP 地理分流 + MATCH 兜底
+  # 国内流量（GEOSITE/GEOIP 识别为 CN）
+  - GEOSITE,cn,🔌 国内直连
+  - GEOIP,cn,🔌 国内直连,no-resolve
+  # 国外流量（非中国大陆地理定位）
+  - GEOSITE,geolocation-!cn,🎚️ 手动切换
+  # 兜底规则：所有未命中的流量
+  - MATCH,🐟 系统 · 漏网之鱼
   # __VERGE_INJECT_RULES_END__
