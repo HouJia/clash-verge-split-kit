@@ -67,6 +67,8 @@ emit_anchor_rules() {
         # 输出带缩进的规则（2个空格缩进，保持 YAML 列表格式）
         echo "  ${line}"
       done < "${file}"
+      # 每个策略组之间用空行隔开，便于阅读
+      echo
     fi
   done
 }
