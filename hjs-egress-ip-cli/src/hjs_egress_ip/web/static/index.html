@@ -372,12 +372,59 @@
       }
     }
 
+    // 显示 toast 提示
+    function showToast(message, type = 'info') {
+      const existing = document.querySelector('.toast-notification');
+      if (existing) existing.remove();
+
+      const toast = document.createElement('div');
+      toast.className = 'toast-notification';
+      const bgColor = type === 'error' ? '#ff6b6b' : (type === 'success' ? '#3ecf8e' : '#3d8bfd');
+      toast.style.cssText = `
+        position: fixed;
+        top: 1rem;
+        right: 1rem;
+        padding: 0.75rem 1.25rem;
+        background: ${bgColor};
+        color: #fff;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        font-weight: 500;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        z-index: 10000;
+        animation: slideIn 0.3s ease-out;
+      `;
+      toast.textContent = message;
+
+      const style = document.createElement('style');
+      style.textContent = `
+        @keyframes slideIn {
+          from { transform: translateX(100%); opacity: 0; }
+          to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes slideOut {
+          from { transform: translateX(0); opacity: 1; }
+          to { transform: translateX(100%); opacity: 0; }
+        }
+      `;
+      if (!document.querySelector('#toast-style')) {
+        style.id = 'toast-style';
+        document.head.appendChild(style);
+      }
+
+      document.body.appendChild(toast);
+      setTimeout(() => {
+        toast.style.animation = 'slideOut 0.3s ease-out';
+        setTimeout(() => toast.remove(), 300);
+      }, 4000);
+    }
+
     // 复制启动命令到剪贴板
     function copyServeCommand() {
-      navigator.clipboard.writeText('hjs-egress-ip serve').then(() => {
-        alert('命令已复制到剪贴板');
+      navigator.clipboard.writeText('./start-egress.sh').then(() => {
+        showToast('命令已复制到剪贴板', 'success');
       }).catch(() => {
-        prompt('请手动复制:', 'hjs-egress-ip serve');
+        prompt('请手动复制:', './start-egress.sh');
       });
     }
 
@@ -393,7 +440,7 @@
       if (isRunning) {
         window.location.href = 'http://127.0.0.1:18765/';
       } else {
-        alert('本地服务未运行。请在终端执行: hjs-egress-ip serve');
+        showToast('本地服务未运行，请先启动服务', 'error');
         if (btn) {
           btn.disabled = false;
           btn.textContent = '尝试跳转';
@@ -418,7 +465,7 @@
       // 服务未启动，显示提示
       btn.disabled = false;
       setPill("需手动启动", "err");
-      $("status-msg").innerHTML = '本地服务未运行。<span style="color:var(--muted);">请先在终端执行 <code style="background:#1a2332;padding:0.15rem 0.35rem;border-radius:4px;color:#93c5fd;">hjs-egress-ip serve</code> 启动服务</span> <button onclick="tryRedirectToServer()" style="margin-left:0.5rem;padding:0.2rem 0.6rem;font-size:0.85rem;background:var(--accent);color:#fff;border:none;border-radius:6px;cursor:pointer;">尝试跳转</button> <button onclick="copyServeCommand()" style="margin-left:0.3rem;padding:0.2rem 0.6rem;font-size:0.85rem;background:#334155;color:var(--text);border:none;border-radius:6px;cursor:pointer;">复制命令</button>';
+      $("status-msg").innerHTML = '本地服务未运行。<span style="color:var(--muted);">请先在终端执行 <code style="background:#1a2332;padding:0.15rem 0.35rem;border-radius:4px;color:#93c5fd;">./start-egress.sh</code> 启动服务</span> <button onclick="tryRedirectToServer()" style="margin-left:0.5rem;padding:0.2rem 0.6rem;font-size:0.85rem;background:var(--accent);color:#fff;border:none;border-radius:6px;cursor:pointer;">尝试跳转</button> <button onclick="copyServeCommand()" style="margin-left:0.3rem;padding:0.2rem 0.6rem;font-size:0.85rem;background:#334155;color:var(--text);border:none;border-radius:6px;cursor:pointer;">复制命令</button>';
       return false;
     }
 
