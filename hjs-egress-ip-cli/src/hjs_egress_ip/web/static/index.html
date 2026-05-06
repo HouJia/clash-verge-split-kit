@@ -372,6 +372,35 @@
       }
     }
 
+    // 复制启动命令到剪贴板
+    function copyServeCommand() {
+      navigator.clipboard.writeText('hjs-egress-ip serve').then(() => {
+        alert('命令已复制到剪贴板');
+      }).catch(() => {
+        prompt('请手动复制:', 'hjs-egress-ip serve');
+      });
+    }
+
+    // 尝试跳转到本地服务
+    async function tryRedirectToServer() {
+      const btn = event.target;
+      if (btn) {
+        btn.disabled = true;
+        btn.textContent = '检测中...';
+      }
+
+      const isRunning = await checkLocalServer();
+      if (isRunning) {
+        window.location.href = 'http://127.0.0.1:18765/';
+      } else {
+        alert('本地服务未运行。请在终端执行: hjs-egress-ip serve');
+        if (btn) {
+          btn.disabled = false;
+          btn.textContent = '尝试跳转';
+        }
+      }
+    }
+
     // 尝试启动本地服务并跳转
     async function autoStartAndRedirect() {
       const btn = $("btn-run");
@@ -389,7 +418,7 @@
       // 服务未启动，显示提示
       btn.disabled = false;
       setPill("需手动启动", "err");
-      $("status-msg").innerHTML = '本地服务未运行。请在终端执行：<code>hjs-egress-ip serve</code> 后点击<button onclick="tryRedirectToServer()">尝试跳转</button>';
+      $("status-msg").innerHTML = '本地服务未运行。<span style="color:var(--muted);">请先在终端执行 <code style="background:#1a2332;padding:0.15rem 0.35rem;border-radius:4px;color:#93c5fd;">hjs-egress-ip serve</code> 启动服务</span> <button onclick="tryRedirectToServer()" style="margin-left:0.5rem;padding:0.2rem 0.6rem;font-size:0.85rem;background:var(--accent);color:#fff;border:none;border-radius:6px;cursor:pointer;">尝试跳转</button> <button onclick="copyServeCommand()" style="margin-left:0.3rem;padding:0.2rem 0.6rem;font-size:0.85rem;background:#334155;color:var(--text);border:none;border-radius:6px;cursor:pointer;">复制命令</button>';
       return false;
     }
 
