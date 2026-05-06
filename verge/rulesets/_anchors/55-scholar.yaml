@@ -1,0 +1,9 @@
+# 学术与数据规则
+# 策略组: 📚 场景 · 学术与数据
+# 说明: category-scholar-!cn 学术集合，必须排在 GEOSITE,google 前
+
+# GEOSITE,category-scholar-!cn 运行时整体匹配，上游源文件：
+# https://github.com/v2fly/domain-list-community/blob/master/data/category-scholar-!cn
+# 包含：category-scholar-ir/uk, apa, clarivate, doi, elsevier, google-scholar,
+#       ieee, mit, proquest, sci-hub, sciencedirect, springer, taylorfrancis, z-library 等
+- GEOSITE,category-scholar-!cn,📚 场景 · 学术与数据

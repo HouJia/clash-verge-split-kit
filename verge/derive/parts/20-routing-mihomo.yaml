@@ -1,10 +1,10 @@
 # =============================================================================
-# Mihomo/Clash Verge 分流策略与规则配置
+# Mihomo/Clash Verge 分流策略与规则配置（骨架版）
 # =============================================================================
 # 本文件定义：
 #   - proxy-groups：策略组（底座组、业务组、系统组、地区节点组）
 #   - rule-providers：外部规则集（如 reject-loyal）
-#   - rules：流量分流规则（域名、IP、进程、GEOSITE/GEOIP）
+#   - rules：流量分流规则骨架（具体规则由 render-local.sh 注入）
 #
 # 设计原则：
 #   - 底座组（🎚️ 手动切换、♻️ 自动最优）提供出口选择
@@ -13,7 +13,8 @@
 #   - 系统组（广告拦截、遥测净化、漏网之鱼）处理特殊流量
 #   - 避免 ProxyGroup 循环引用（🎚️ 手动切换 → 🔌 国内直连，单向依赖）
 #
-# 与 10-runtime-verge-mihomo.yaml 合并后生成完整配置。
+# 规则片段位于 verge/rulesets/_anchors/*.yaml
+# 由 render-local.sh 组装为最终产物
 # =============================================================================
 
 proxy-groups:
@@ -451,295 +452,12 @@ rule-providers:
 # --- 流量分流规则（rules）---
 # 命中顺序自上而下；同一流量只入一个策略组（MECE 原则）
 # 先处理私有/局域网 → 广告/遥测 → 业务组 → 国内 → 国外 → 兜底
+#
+# 规则片段按优先级排列（由 render-local.sh 从 rulesets/_anchors/*.yaml 注入）
+# 片段列表：00-private → 10-ads → 20-cursor → 30-ai → 35-messaging → 40-fcm
+#            → 45-streaming → 50-dev → 55-scholar → 60-tech-giants → 65-gaming
+#            → 70-domestic → 80-geo
 
 rules:
-  # 私有/局域网：直连
-  - GEOSITE,private,DIRECT
-  - GEOIP,private,DIRECT,no-resolve
-
-  # === 本地私有规则注入点（最高优先级，由 render-local.sh 处理）===
-  # 原则：手动维护的本地规则必然准确，放在最前面确保优先命中
-  # __VERGE_INJECT_LOCAL_RULES__
-
-  # 广告与遥测：前置拦截
-
-  - GEOSITE,category-ads-all,🚫 系统 · 广告拦截
-  # tracker（统计／上报域）：归入「应用遥测净化」，与展示类广告列表分列，可按需放行排障。
-  - GEOSITE,tracker,🍃 系统 · 应用遥测净化
-  - RULE-SET,reject-loyal,🚫 系统 · 广告拦截
-
-# >>> rulebase:rules
-
-# <<< rulebase:rules
-
-  # ========== 🔜 工具 · Cursor（PROCESS-NAME 优先于 Azure/CDN；与境外 AI / Microsoft 拆分）==========
-  - PROCESS-NAME,Cursor,🔜 工具 · Cursor
-  - PROCESS-NAME,Cursor Helper,🔜 工具 · Cursor
-  - PROCESS-NAME,Cursor Helper (GPU),🔜 工具 · Cursor
-  - PROCESS-NAME,Cursor Helper (Plugin),🔜 工具 · Cursor
-  - PROCESS-NAME,Cursor Helper (Renderer),🔜 工具 · Cursor
-  - PROCESS-NAME,Cursor.exe,🔜 工具 · Cursor
-  - PROCESS-NAME,cursor,🔜 工具 · Cursor
-  # 域名兜底（无进程上下文或旁路由仅用 DOMAIN）
-  - DOMAIN-SUFFIX,cursor.com,🔜 工具 · Cursor
-  - DOMAIN-SUFFIX,cursor.sh,🔜 工具 · Cursor
-  - DOMAIN-SUFFIX,cursor-cdn.com,🔜 工具 · Cursor
-  - DOMAIN-SUFFIX,cursorapi.com,🔜 工具 · Cursor
-
-  # ========== 🧠 场景 · 境外 AI — OpenAI / ChatGPT / Codex ==========
-  # 域名对齐 OpenAI Help Center「Network recommendations」：https://help.openai.com/en/articles/9247338-network-recommendations-for-chatgpt-errors-on-web-and-apps
-  # Codex CLI 默认 API：`api.openai.com`（见 openai/codex init_firewall.sh）；WebSocket 等走 chatgpt.com 路径。
-  # IP：无官方全量静态 IPv4；语音 UDP 见 https://openai.com/chatgpt-voice.json 。
-  - DOMAIN-SUFFIX,openai.com,🧠 场景 · 境外 AI
-  - DOMAIN-SUFFIX,chatgpt.com,🧠 场景 · 境外 AI
-  - DOMAIN-SUFFIX,chat.openai.com,🧠 场景 · 境外 AI
-  - DOMAIN-SUFFIX,oaistatic.com,🧠 场景 · 境外 AI
-  - DOMAIN-SUFFIX,oaiusercontent.com,🧠 场景 · 境外 AI
-  - DOMAIN-SUFFIX,auth.openai.com,🧠 场景 · 境外 AI
-  - DOMAIN,auth0.openai.com,🧠 场景 · 境外 AI
-  - DOMAIN,setup.auth.openai.com,🧠 场景 · 境外 AI
-  - DOMAIN-SUFFIX,openaimerge.com,🧠 场景 · 境外 AI
-  - DOMAIN-SUFFIX,cdn.openaimerge.com,🧠 场景 · 境外 AI
-  - DOMAIN-SUFFIX,statsig.com,🧠 场景 · 境外 AI
-  - DOMAIN-SUFFIX,statsigapi.net,🧠 场景 · 境外 AI
-  - DOMAIN-SUFFIX,featuregates.org,🧠 场景 · 境外 AI
-  - DOMAIN-SUFFIX,featureassets.org,🧠 场景 · 境外 AI
-  - DOMAIN-SUFFIX,prodregistryv2.org,🧠 场景 · 境外 AI
-  - DOMAIN-SUFFIX,intercom.io,🧠 场景 · 境外 AI
-  - DOMAIN-SUFFIX,intercomcdn.com,🧠 场景 · 境外 AI
-  - DOMAIN-SUFFIX,js.intercomcdn.com,🧠 场景 · 境外 AI
-  - DOMAIN-SUFFIX,ct.sendgrid.net,🧠 场景 · 境外 AI
-  - DOMAIN-SUFFIX,workos.com,🧠 场景 · 境外 AI
-  - DOMAIN-SUFFIX,cdn.workos.com,🧠 场景 · 境外 AI
-  - DOMAIN-SUFFIX,workoscdn.com,🧠 场景 · 境外 AI
-  - DOMAIN-SUFFIX,images.workoscdn.com,🧠 场景 · 境外 AI
-  - DOMAIN,workos.imgix.net,🧠 场景 · 境外 AI
-  - DOMAIN,forwarder.workos.com,🧠 场景 · 境外 AI
-  - DOMAIN,setup.workos.com,🧠 场景 · 境外 AI
-  - DOMAIN,js.stripe.com,🧠 场景 · 境外 AI
-  - DOMAIN,challenges.cloudflare.com,🧠 场景 · 境外 AI
-  - DOMAIN-SUFFIX,ingest.sentry.io,🧠 场景 · 境外 AI
-  - DOMAIN,rum.browser-intake-datadoghq.com,🧠 场景 · 境外 AI
-
-  # ========== 🧠 场景 · 境外 AI — Anthropic / Claude / Claude Code ==========
-  # Claude Code 企业网络要求：https://docs.anthropic.com/en/docs/claude-code/corporate-proxy
-  # （api.anthropic.com / claude.ai / platform.claude.com / downloads.claude.ai / bridge.claudeusercontent.com）
-  # 旧版原生安装另需 storage.googleapis.com（与全网 Google 存储共用，**不可**整域绑定境外 AI）；请依赖 GEOSITE,google→🔍 大厂 · 谷歌 或在本地临时补 DOMAIN。
-  - DOMAIN-SUFFIX,anthropic.com,🧠 场景 · 境外 AI
-  - DOMAIN,api.anthropic.com,🧠 场景 · 境外 AI
-  - DOMAIN-SUFFIX,claude.ai,🧠 场景 · 境外 AI
-  - DOMAIN-SUFFIX,claude.com,🧠 场景 · 境外 AI
-  - DOMAIN-SUFFIX,platform.claude.com,🧠 场景 · 境外 AI
-  - DOMAIN-SUFFIX,downloads.claude.ai,🧠 场景 · 境外 AI
-  - DOMAIN-SUFFIX,claudeusercontent.com,🧠 场景 · 境外 AI
-  - DOMAIN-SUFFIX,bridge.claudeusercontent.com,🧠 场景 · 境外 AI
-
-  # GEOSITE 兜底（新子域）
-  - GEOSITE,openai,🧠 场景 · 境外 AI
-  - GEOSITE,anthropic,🧠 场景 · 境外 AI
-
-  # ========== 👥 大厂 · 脸书系（v2fly `data/meta`：`facebook` / `instagram` / `whatsapp` / `threads` 等）==========
-  # WhatsApp 已在 💬 场景 · 即时通讯前置 carve-out；本段兜底 Facebook / Instagram / Threads。
-  - GEOSITE,meta,👥 大厂 · 脸书系
-
-  # ========== 💬 场景 · 即时通讯（Telegram / WhatsApp / Line 等）==========
-  # Telegram 域名与 IP 段（来自忍者云拆解）：https://core.telegram.org/resources/cidr.txt
-  - DOMAIN-SUFFIX,t.me,💬 场景 · 即时通讯
-  - DOMAIN-SUFFIX,tdesktop.com,💬 场景 · 即时通讯
-  - DOMAIN-SUFFIX,telegra.ph,💬 场景 · 即时通讯
-  - DOMAIN-SUFFIX,telegram.me,💬 场景 · 即时通讯
-  - DOMAIN-SUFFIX,telegram.org,💬 场景 · 即时通讯
-  - DOMAIN-SUFFIX,telesco.pe,💬 场景 · 即时通讯
-  - IP-CIDR,91.108.0.0/16,💬 场景 · 即时通讯,no-resolve
-  - IP-CIDR,109.239.140.0/24,💬 场景 · 即时通讯,no-resolve
-  - IP-CIDR,149.154.160.0/20,💬 场景 · 即时通讯,no-resolve
-  # WhatsApp（Meta 旗下；但常需单独 carve-out）： voice/video call 优化
-  - DOMAIN-SUFFIX,whatsapp.com,💬 场景 · 即时通讯
-  - DOMAIN-SUFFIX,whatsapp.net,💬 场景 · 即时通讯
-  - GEOSITE,whatsapp,💬 场景 · 即时通讯
-
-  # ========== 📢 场景 · 谷歌推送（FCM / Firebase Cloud Messaging）==========
-  # Android 设备推送服务；mtalk.google.com 为主地址，alt 为备用节点。
-  # IP 段覆盖 Google 推送服务出口（来自忍者云拆解）。
-  # 放在 GEOSITE,google 前面，避免 mtalk.google.com 被截胡到 🔍 大厂 · 谷歌 组。
-  - DOMAIN,mtalk.google.com,📢 场景 · 谷歌推送
-  - DOMAIN,alt1-mtalk.google.com,📢 场景 · 谷歌推送
-  - DOMAIN,alt2-mtalk.google.com,📢 场景 · 谷歌推送
-  - DOMAIN,alt3-mtalk.google.com,📢 场景 · 谷歌推送
-  - DOMAIN,alt4-mtalk.google.com,📢 场景 · 谷歌推送
-  - DOMAIN,alt5-mtalk.google.com,📢 场景 · 谷歌推送
-  - DOMAIN,alt6-mtalk.google.com,📢 场景 · 谷歌推送
-  - DOMAIN,alt7-mtalk.google.com,📢 场景 · 谷歌推送
-  - DOMAIN,alt8-mtalk.google.com,📢 场景 · 谷歌推送
-  - IP-CIDR,64.233.177.188/32,📢 场景 · 谷歌推送,no-resolve
-  - IP-CIDR,64.233.186.188/32,📢 场景 · 谷歌推送,no-resolve
-  - IP-CIDR,64.233.187.188/32,📢 场景 · 谷歌推送,no-resolve
-  - IP-CIDR,64.233.188.188/32,📢 场景 · 谷歌推送,no-resolve
-  - IP-CIDR,64.233.189.188/32,📢 场景 · 谷歌推送,no-resolve
-  - IP-CIDR,74.125.23.188/32,📢 场景 · 谷歌推送,no-resolve
-  - IP-CIDR,74.125.24.188/32,📢 场景 · 谷歌推送,no-resolve
-  - IP-CIDR,74.125.28.188/32,📢 场景 · 谷歌推送,no-resolve
-  - IP-CIDR,74.125.127.188/32,📢 场景 · 谷歌推送,no-resolve
-  - IP-CIDR,74.125.137.188/32,📢 场景 · 谷歌推送,no-resolve
-  - IP-CIDR,74.125.203.188/32,📢 场景 · 谷歌推送,no-resolve
-  - IP-CIDR,74.125.204.188/32,📢 场景 · 谷歌推送,no-resolve
-  - IP-CIDR,74.125.206.188/32,📢 场景 · 谷歌推送,no-resolve
-  - IP-CIDR,108.177.125.188/32,📢 场景 · 谷歌推送,no-resolve
-  - IP-CIDR,142.250.4.188/32,📢 场景 · 谷歌推送,no-resolve
-  - IP-CIDR,142.250.10.188/32,📢 场景 · 谷歌推送,no-resolve
-  - IP-CIDR,142.250.31.188/32,📢 场景 · 谷歌推送,no-resolve
-  - IP-CIDR,142.250.96.188/32,📢 场景 · 谷歌推送,no-resolve
-  - IP-CIDR,172.217.194.188/32,📢 场景 · 谷歌推送,no-resolve
-  - IP-CIDR,172.217.218.188/32,📢 场景 · 谷歌推送,no-resolve
-  - IP-CIDR,172.217.219.188/32,📢 场景 · 谷歌推送,no-resolve
-  - IP-CIDR,172.253.63.188/32,📢 场景 · 谷歌推送,no-resolve
-  - IP-CIDR,172.253.122.188/32,📢 场景 · 谷歌推送,no-resolve
-  - IP-CIDR,173.194.175.188/32,📢 场景 · 谷歌推送,no-resolve
-  - IP-CIDR,173.194.218.188/32,📢 场景 · 谷歌推送,no-resolve
-  - IP-CIDR,209.85.233.188/32,📢 场景 · 谷歌推送,no-resolve
-
-  # ========== 🎬 场景 · 海外音影社（Netflix / Spotify / Reddit / Discord / 巴哈姆特 / EMBY 等）==========
-  - GEOSITE,netflix,🎬 场景 · 海外音影社
-  - GEOSITE,disney,🎬 场景 · 海外音影社
-  - GEOSITE,hulu,🎬 场景 · 海外音影社
-  - GEOSITE,primevideo,🎬 场景 · 海外音影社
-  - GEOSITE,hbo,🎬 场景 · 海外音影社
-  - GEOSITE,spotify,🎬 场景 · 海外音影社
-  - GEOSITE,twitch,🎬 场景 · 海外音影社
-  - GEOSITE,pixiv,🎬 场景 · 海外音影社
-  - GEOSITE,reddit,🎬 场景 · 海外音影社
-  - GEOSITE,discord,🎬 场景 · 海外音影社
-  - GEOSITE,twitter,🎬 场景 · 海外音影社
-  # 巴哈姆特（台湾动画平台）：并入追剧组
-  - DOMAIN-SUFFIX,gamer.com.tw,🎬 场景 · 海外音影社
-  - DOMAIN-SUFFIX,bahamut.com.tw,🎬 场景 · 海外音影社
-  # EMBY 影视服务器
-  - DOMAIN-SUFFIX,emby.wtf,🎬 场景 · 海外音影社
-  - DOMAIN-SUFFIX,emby.nz,🎬 场景 · 海外音影社
-  # TikTok：`GEOSITE,tiktok` 与 geo 随 meta-rules-dat / v2fly `data/tiktok` **同步**更新；本条即「库内 TikTok」，**不能保证**互联网上未来新域名下一秒已入库。
-  - GEOSITE,tiktok,📱 场景 · TikTok
-
-  # ========== 🐙 场景 · 开发源站（早于 GEOSITE,microsoft：便于 GHCR/npm 等与 GitHub 大块策略拆开）==========
-  - GEOSITE,docker,🐙 场景 · 开发源站
-  - GEOSITE,npmjs,🐙 场景 · 开发源站
-  - DOMAIN-SUFFIX,registry.npmjs.org,🐙 场景 · 开发源站
-  - DOMAIN-SUFFIX,npmjs.org,🐙 场景 · 开发源站
-  - DOMAIN-SUFFIX,pypi.org,🐙 场景 · 开发源站
-  - DOMAIN-SUFFIX,pythonhosted.org,🐙 场景 · 开发源站
-  - DOMAIN-SUFFIX,files.pythonhosted.org,🐙 场景 · 开发源站
-  - DOMAIN-SUFFIX,crates.io,🐙 场景 · 开发源站
-  - DOMAIN-SUFFIX,ghcr.io,🐙 场景 · 开发源站
-  - DOMAIN-SUFFIX,npm.pkg.github.com,🐙 场景 · 开发源站
-  # 主站 / API / raw（区别于仅凭 geolocation-!cn 兜底，减少浏览器与 git 在 DNS+fake-ip 下的异常）
-  - GEOSITE,github,🐙 场景 · 开发源站
-
-  # ========== 📚 场景 · 学术与数据（`GEOSITE,category-scholar-!cn`）==========
-  # 运行时不展开为「逐条 DOMAIN」：由 geosite.dat 按标签整体匹配。上游源文件见：
-  #   https://github.com/v2fly/domain-list-community/blob/master/data/category-scholar-!cn
-  # 该文件先 `include:` 多块子列表（再在编译期合并进同一标签），子列表包括但不限于：
-  #   category-scholar-ir, category-scholar-uk, apa, clarivate, doi, elsevier,
-  #   google-scholar, ieee, mit, proquest, sci-hub, sciencedirect, springer,
-  #   taylorfrancis, z-library …（各 include 自己又含大量域名/全文规则）
-  # 源文件本体还列有数百学术/高校/期刊平台域（节选举例：arxiv.org, nature.com, science.org,
-  # ieee.org→见 ieee 子列表, ebscohost.com, jstor.org, semanticscholar.org …）；**全貌以官方仓库递归展开为准**。
-  # **必须**排在 GEOSITE,google 前，否则 scholar.google.* 会先落「🔍 大厂 · 谷歌」组。
-  - GEOSITE,category-scholar-!cn,📚 场景 · 学术与数据
-
-  # ========== 🔍 大厂 · 谷歌（GEOSITE + geosite 无独立列表时的邮箱补丁）==========
-  - GEOSITE,google,🔍 大厂 · 谷歌
-  - GEOSITE,youtube,🔍 大厂 · 谷歌
-  # Gmail 主域与邮箱客户端（POP3/SMTP/IMAP）；来自忍者云拆解：显式写以免被误判。
-  - DOMAIN-SUFFIX,gmail.com,🔍 大厂 · 谷歌
-  - DOMAIN-SUFFIX,googlemail.com,🔍 大厂 · 谷歌
-  - DOMAIN,pop.gmail.com,🔍 大厂 · 谷歌
-  - DOMAIN,smtp.gmail.com,🔍 大厂 · 谷歌
-  - DOMAIN,imap.gmail.com,🔍 大厂 · 谷歌
-
-  # ========== 🍎 大厂 · 苹果（GEOSITE；apple 大类在数据源中含 icloud/itunes 等子集，下列条目共建以防标签缺失）==========
-  - GEOSITE,apple,🍎 大厂 · 苹果
-  - GEOSITE,icloud,🍎 大厂 · 苹果
-  - GEOSITE,apple-dev,🍎 大厂 · 苹果
-  - GEOSITE,itunes,🍎 大厂 · 苹果
-  - GEOSITE,apple-update,🍎 大厂 · 苹果
-
-  # ========== 🪟 大厂 · 微软（GEOSITE；microsoft 大类在 meta-rules-dat 中常含 Azure/Bing/OneDrive/Skype/Xbox 等；LinkedIn 常为独立标签）==========
-  # GitHub：`GEOSITE,github`、`ghcr.io`、`npm.pkg.github.com` 已由更靠前的「🐙 场景 · 开发源站」命中；若仍有子域落在 `GEOSITE,microsoft` 桶内才进本组。
-  - GEOSITE,microsoft,🪟 大厂 · 微软
-  - GEOSITE,onedrive,🪟 大厂 · 微软
-  - GEOSITE,linkedin,🪟 大厂 · 微软
-  # meta-rules-dat 的 geosite 常无 outlook/gmail 独立大类，邮箱域名与 GEOSITE 同条目不冲突，仅补丁：
-  - DOMAIN-SUFFIX,outlook.com,🪟 大厂 · 微软
-  - DOMAIN-SUFFIX,hotmail.com,🪟 大厂 · 微软
-  - DOMAIN-SUFFIX,live.com,🪟 大厂 · 微软
-  - DOMAIN-SUFFIX,office.com,🪟 大厂 · 微软
-  - DOMAIN-SUFFIX,microsoft365.com,🪟 大厂 · 微软
-
-  # ========== 💠 大厂 · 微软跨境（早于 GEOSITE,microsoft：Copilot / Bing API 链路等 carve-out）==========
-  - DOMAIN-SUFFIX,copilot.microsoft.com,💠 大厂 · 微软跨境
-  - DOMAIN-SUFFIX,copilotstudio.microsoft.com,💠 大厂 · 微软跨境
-  - DOMAIN,edgeservices.bing.com,💠 大厂 · 微软跨境
-  - DOMAIN-SUFFIX,sydney.bing.com,💠 大厂 · 微软跨境
-  - DOMAIN-SUFFIX,bingapis.com,💠 大厂 · 微软跨境
-
-  # 国内长视频站点：对部分 **独立 geosite 标签** 固定 DIRECT。
-  # - 原因：常混用海外 CDN/Anycast，仅依赖 `GEOSITE,cn` + `geolocation-!cn` 时，部分解析可能被判「非 CN」而误走代理；三家长视频站标签与 CDN 生态常一起被讨论，故 **显式写死**（非「只有它们会坏」）。
-  # - **腾讯视频**：主体在 `qq.com` / 腾讯 CDN 树下，已含于下方 **`GEOSITE,tencent`**，**不需要**再写 `GEOSITE,tencent-video`（v2fly 无此独立文件）；`v.qq.com` 等随 `tencent` 直连。
-  # - **芒果 TV、咪咕等**：多数落在 `GEOSITE,cn` 或国内运营商侧；若某域仍误走代理，再在「本段」按 geosite 名称补一条 DIRECT 即可。
-  - GEOSITE,bilibili,🔌 国内直连
-  - GEOSITE,youku,🔌 国内直连
-  - GEOSITE,iqiyi,🔌 国内直连
-
-
-  # 腾讯系（`data/tencent`：qq.com、微信、支付、**腾讯视频**、腾讯云等同一标签）：与 `GEOSITE,cn` 大量重叠；显式一条减少子域被误送入 `geolocation-!cn`→代理。若你依赖腾讯海外站且需走代理，可删本行或改选策略组。
-  - GEOSITE,tencent,DIRECT
-
-  # PayPal：**国内门户**（`paypal.cn`、国付宝系常见域）先于 GEOSITE 命中 →「💳 PayPal · 国内线路」；**`GEOSITE,paypal` 其余**（多为 `paypal.com` 国际）→「💳 PayPal · 国际线路」。两组均为 select，可在 Verge 内切换直连或节点；**不是**支付宝 Alipay。
-  - DOMAIN-SUFFIX,paypal.cn,💳 PayPal · 国内线路
-  - DOMAIN-SUFFIX,gopay.com.cn,💳 PayPal · 国内线路
-  - GEOSITE,paypal,💳 PayPal · 国际线路
-
-  # openwrt.ai：文档/镜像站；若落在 GEOSITE,cn 或国内解析会被误直连，显式走节点。
-  - DOMAIN-SUFFIX,openwrt.ai,🎚️ 手动切换
-
-  # ========== 🎮 场景 · 游戏平台（Steam / Epic / PlayStation / Xbox / Nintendo 等）==========
-  # 来自某订阅配置拆解：主机/PC 游戏平台域名；IPv6 段已合并为域名规则以简化维护。
-  - DOMAIN-SUFFIX,steampowered.com,🎮 场景 · 游戏平台
-  - DOMAIN-SUFFIX,steamcommunity.com,🎮 场景 · 游戏平台
-  - DOMAIN-SUFFIX,steamgames.com,🎮 场景 · 游戏平台
-  - DOMAIN-SUFFIX,steamusercontent.com,🎮 场景 · 游戏平台
-  - DOMAIN-SUFFIX,steamcontent.com,🎮 场景 · 游戏平台
-  - DOMAIN-SUFFIX,steamstatic.com,🎮 场景 · 游戏平台
-  - DOMAIN-SUFFIX,steambroadcast.akamaized.net,🎮 场景 · 游戏平台
-  - DOMAIN-SUFFIX,epicgames.com,🎮 场景 · 游戏平台
-  - DOMAIN-SUFFIX,helpshift.com,🎮 场景 · 游戏平台
-  - DOMAIN-SUFFIX,paragon.com,🎮 场景 · 游戏平台
-  - DOMAIN-SUFFIX,unrealengine.com,🎮 场景 · 游戏平台
-  - DOMAIN-SUFFIX,playstation.com,🎮 场景 · 游戏平台
-  - DOMAIN-SUFFIX,playstation.net,🎮 场景 · 游戏平台
-  - DOMAIN-SUFFIX,playstationnetwork.com,🎮 场景 · 游戏平台
-  - DOMAIN-SUFFIX,sony.com,🎮 场景 · 游戏平台
-  - DOMAIN-SUFFIX,sonyentertainmentnetwork.com,🎮 场景 · 游戏平台
-  - DOMAIN-SUFFIX,xbox.com,🎮 场景 · 游戏平台
-  - DOMAIN-SUFFIX,xboxlive.com,🎮 场景 · 游戏平台
-  - DOMAIN-SUFFIX,xboxlive.com.cn,🎮 场景 · 游戏平台
-  - DOMAIN-SUFFIX,nintendo.com,🎮 场景 · 游戏平台
-  - DOMAIN-SUFFIX,nintendo.net,🎮 场景 · 游戏平台
-  - DOMAIN-SUFFIX,nintendo.co.jp,🎮 场景 · 游戏平台
-  - DOMAIN-SUFFIX,ea.com,🎮 场景 · 游戏平台
-  - DOMAIN-SUFFIX,origin.com,🎮 场景 · 游戏平台
-  - DOMAIN-SUFFIX,ubisoft.com,🎮 场景 · 游戏平台
-  - DOMAIN-SUFFIX,uplay.com,🎮 场景 · 游戏平台
-  - GEOSITE,steam,🎮 场景 · 游戏平台
-  - GEOSITE,epicgames,🎮 场景 · 游戏平台
-  - GEOSITE,xbox,🎮 场景 · 游戏平台
-  - GEOSITE,nintendo,🎮 场景 · 游戏平台
-
-  # 国内流量：GEOSITE/GEOIP 识别为中国大陆的流量统一走 🔌 国内直连
-  - GEOSITE,cn,🔌 国内直连
-  - GEOIP,cn,🔌 国内直连,no-resolve
-
-  # 国外流量：非中国大陆地理定位的流量，手动切换决定出口
-  - GEOSITE,geolocation-!cn,🎚️ 手动切换
-
-  # 兜底规则：所有未命中的流量进入 🐟 系统 · 漏网之鱼
-  - MATCH,🐟 系统 · 漏网之鱼
+  # __VERGE_INJECT_RULES_START__
+  # __VERGE_INJECT_RULES_END__

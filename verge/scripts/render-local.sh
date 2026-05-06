@@ -1,11 +1,13 @@
 #!/usr/bin/env bash
-# 将 extend/*.yaml Extend 模板中占位公网 IP（YOUR_VPS_IP 或 192.0.2.1）替换为真实公网 IP。
+# 将 extend/*.yaml Extend 模板中占位公网 IP（YOUR_VPS_IP 或 192.0.2.1）替换为真实公网 IP，
+# 并注入规则片段（rulesets/_anchors/*.yaml）生成最终产物。
+#
 # 原因：模板里的 RFC 5737 测试地址 / 占位符仅便于入库；写入本机产物时必须改为真实 IPv4，
-#       IP-CIDR … DIRECT 才会指向你的 VPS，而非无效地址。
+#       IP-CIDR … DIRECT 才指向你的 VPS，而非无效地址。
 #
 # 本机覆写：`verge/generated/local/override.local`（分节见同目录 override.local.example）。
-# [rules-before-cn] 可选；除注释外若为空则不在锚点插入任何内容。
-# 锚点：模板中 # __VERGE_INJECT_LOCAL_RULES_BEFORE_GEOSITE_CN__
+# [rules] 节包含所有本地私有规则，将被放在最高优先级位置。
+# 锚点：模板中 # __VERGE_INJECT_RULES_START__ / # __VERGE_INJECT_RULES_END__
 #
 # 产物：generated/ 下与模板成对：去掉「-extend」再接「.local.yaml」。无大模型：仅 sed 与按行解析。
 #
@@ -17,6 +19,8 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 EXT_REL="${VERGE_EXTEND_FILE:-airport-rule-split-extend.yaml}"
 SRC="${ROOT}/extend/${EXT_REL}"
 DST_DIR="${ROOT}/generated"
+ANCHORS_DIR="${ROOT}/rulesets/_anchors"
+
 if [[ "${EXT_REL}" != *-extend.yaml ]]; then
   echo "error: VERGE_EXTEND_FILE 须以 -extend.yaml 结尾（例：airport-rule-split-extend.yaml），以便生成 airport-rule-split.local.yaml" >&2
   exit 2
@@ -33,8 +37,6 @@ if [[ "${EXT_REL}" == "airport-rule-split-extend.yaml" ]] && [[ -z "${VERGE_SKIP
     bash "${COMPOSE}" -o "${SRC}" || exit 2
   fi
 fi
-
-INJECT_ANCHOR='  # __VERGE_INJECT_LOCAL_RULES__'
 
 # 自 override.local 的 [vps] 段读取第一个非注释非空行作为 IPv4
 read_ip_from_merged() {
@@ -60,7 +62,6 @@ read_ip_from_merged() {
 }
 
 # 将 [rules] 段写入临时文件（可无此段 → 空文件）
-# [rules] 节包含所有本地私有规则，将被放在最高优先级位置（广告拦截之前）
 extract_rules_to_file() {
   local f="$1" out="$2"
   : >"${out}"
@@ -78,6 +79,39 @@ extract_rules_to_file() {
       printf '%s\n' "${line}" >>"${out}"
     fi
   done <"${f}"
+}
+
+# 读取片段文件并输出规则列表（带缩进）
+emit_anchor_rules() {
+  local fragment file
+  # 片段文件列表（按优先级顺序）
+  local fragments=(
+    "00-private.yaml"
+    "10-ads.yaml"
+    "20-cursor.yaml"
+    "30-ai.yaml"
+    "35-messaging.yaml"
+    "40-fcm.yaml"
+    "45-streaming.yaml"
+    "50-dev.yaml"
+    "55-scholar.yaml"
+    "60-tech-giants.yaml"
+    "65-gaming.yaml"
+    "70-domestic.yaml"
+    "80-geo.yaml"
+  )
+
+  for fragment in "${fragments[@]}"; do
+    file="${ANCHORS_DIR}/${fragment}"
+    if [[ -f "${file}" ]]; then
+      while IFS= read -r line || [[ -n "${line}" ]]; do
+        # 跳过空行
+        [[ -z "${line}" ]] && continue
+        # 输出带缩进的规则（4个空格）
+        echo "  ${line}"
+      done < "${file}"
+    fi
+  done
 }
 
 snippet_non_comment_nonempty() {
@@ -152,23 +186,40 @@ else
   : >"${RULES_TMP}"
 fi
 
-tmp="$(mktemp)"
-sed -e "s|YOUR_VPS_IP|${ip}|g" -e "s|192.0.2.1|${ip}|g" "${SRC}" >"${tmp}"
+# 第一步：替换 IP 占位符
+tmp_ip="$(mktemp)"
+sed -e "s|YOUR_VPS_IP|${ip}|g" -e "s|192.0.2.1|${ip}|g" "${SRC}" >"${tmp_ip}"
 
+# 第二步：注入规则片段
 tmp_out="$(mktemp)"
 while IFS= read -r line || [[ -n "${line}" ]]; do
-  # 处理本地规则锚点（在广告拦截之前，最高优先级）
-  if [[ "${line}" == "${INJECT_ANCHOR}" ]]; then
+  # 检测规则注入开始标记
+  if [[ "${line}" == "  # __VERGE_INJECT_RULES_START__" ]]; then
+    echo "${line}"
+    # 注入本地私有规则（如果有）
     if snippet_non_comment_nonempty "${RULES_TMP}"; then
+      echo "  # === 本地私有规则（最高优先级）==="
       emit_normalized_snippet "${RULES_TMP}"
+      echo
     fi
+    # 注入片段规则
+    echo "  # === 规则片段注入（由 render-local.sh 自动组装）==="
+    echo "  # 片段源：rulesets/_anchors/*.yaml"
+    emit_anchor_rules
     continue
   fi
+  # 跳过原有的结束标记到文件末尾之间的内容（旧的规则）
+  if [[ "${line}" == "  # __VERGE_INJECT_RULES_END__" ]]; then
+    echo "${line}"
+    # 跳过所有后续内容直到文件结束（这些是被替换的旧规则）
+    break
+  fi
   printf '%s\n' "${line}"
-done <"${tmp}" >"${tmp_out}"
+done <"${tmp_ip}" >"${tmp_out}"
 
-rm -f "${tmp}"
+rm -f "${tmp_ip}"
 
+# 第三步：添加元信息头
 preface="$(mktemp)"
 GEN_TS="$(date '+%Y-%m-%d %H:%M:%S %z')"
 {
@@ -176,6 +227,7 @@ GEN_TS="$(date '+%Y-%m-%d %H:%M:%S %z')"
   printf '# 生成时间：%s\n' "${GEN_TS}"
   printf '# 生成工具：bash verge/scripts/render-local.sh\n'
   printf '# 源模板（extend）：%s\n' "${EXT_REL}"
+  printf '# 规则片段源：rulesets/_anchors/*.yaml\n'
   printf '# 本机产物（generated）：%s\n' "$(basename "${DST}")"
   printf '# 作者：我\n'
   printf '# ---\n'

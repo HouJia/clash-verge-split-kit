@@ -1,0 +1,21 @@
+# 国内流量规则
+# 策略组: 🔌 国内直连 / DIRECT
+# 说明: 国内站点与服务，充分利用国内 CDN
+
+# 国内长视频站点（显式写死，避免误走代理）
+- GEOSITE,bilibili,🔌 国内直连
+- GEOSITE,youku,🔌 国内直连
+- GEOSITE,iqiyi,🔌 国内直连
+
+# 腾讯系（微信/支付/视频/云等）
+- GEOSITE,tencent,DIRECT
+
+# PayPal 国内门户（先于 GEOSITE,paypal 命中）
+- DOMAIN-SUFFIX,paypal.cn,💳 PayPal · 国内线路
+- DOMAIN-SUFFIX,gopay.com.cn,💳 PayPal · 国内线路
+
+# PayPal 国际线路
+- GEOSITE,paypal,💳 PayPal · 国际线路
+
+# openwrt.ai 文档/镜像站（避免被误判国内直连）
+- DOMAIN-SUFFIX,openwrt.ai,🎚️ 手动切换
