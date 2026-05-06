@@ -1,0 +1,30 @@
+#!/usr/bin/env sh
+# post-commit 钩子：提交后二次检查（本地验证用）
+set -e
+
+ROOT="$(git rev-parse --show-toplevel)"
+PRIVACY_SCRIPT="${ROOT}/verge/scripts/privacy-guard.sh"
+
+# 获取刚创建的 commit message
+COMMIT_MSG=$(git log -1 --pretty=%B)
+
+if [ -f "${PRIVACY_SCRIPT}" ] && command -v bash >/dev/null 2>&1; then
+  # 创建临时文件存储 commit message
+  TEMP_MSG=$(mktemp)
+  echo "$COMMIT_MSG" > "$TEMP_MSG"
+  
+  if ! bash "${PRIVACY_SCRIPT}" message "$TEMP_MSG"; then
+    rm -f "$TEMP_MSG"
+    echo "" >&2
+    echo "⚠️  Privacy Guard: 刚创建的提交可能包含隐私信息" >&2
+    echo "建议操作：" >&2
+    echo "  1. git reset --soft HEAD~1  # 撤销提交" >&2
+    echo "  2. 修改后重新提交" >&2
+    echo "  3. 如需强制推送（不推荐），使用 git push --no-verify" >&2
+    exit 1
+  fi
+  
+  rm -f "$TEMP_MSG"
+fi
+
+exit 0

@@ -1,0 +1,116 @@
+name: Privacy Guard
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  privacy-scan:
+    runs-on: ubuntu-latest
+    name: 隐私信息泄漏扫描
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # 需要完整历史来扫描 commit messages
+
+      - name: Setup Bash
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y git
+
+      - name: Scan commit messages
+        run: |
+          # 扫描本次推送的所有 commit message
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            # PR 场景：扫描 PR 中的所有提交
+            commits=$(git log --format=%H ${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }})
+          else
+            # Push 场景：扫描最近 10 个提交
+            commits=$(git log --format=%H -n 10)
+          fi
+          
+          EXIT_CODE=0
+          for commit in $commits; do
+            msg=$(git log -1 --pretty=%B "$commit")
+            echo "Scanning commit: ${commit:0:7}"
+            
+            # 检查 IP
+            if echo "$msg" | grep -qE '([0-9]{1,3}\.){3}[0-9]{1,3}'; then
+              ip=$(echo "$msg" | grep -oE '([0-9]{1,3}\.){3}[0-9]{1,3}' | head -1)
+              # 排除 RFC 5737 测试地址
+              if ! echo "$ip" | grep -qE '^(192\.0\.2\.|198\.51\.100\.|203\.0\.113\.|240\.0\.0\.)'; then
+                echo "❌ Privacy violation in commit ${commit:0:7}: contains IP address '$ip'"
+                EXIT_CODE=1
+              fi
+            fi
+            
+            # 检查域名（排除常见示例）
+            if echo "$msg" | grep -qE '[a-zA-Z0-9.-]+\.(org|com|net|io|dev|app|cn)\b'; then
+              domain=$(echo "$msg" | grep -oE '[a-zA-Z0-9.-]+\.(org|com|net|io|dev|app|cn)\b' | head -1)
+              if [[ -n "$domain" && ! "$domain" =~ (example|localhost|test|demo|sample|github|git) ]]; then
+                echo "⚠️  Warning in commit ${commit:0:7}: contains domain '$domain' (please verify if this is intentional)"
+              fi
+            fi
+          done
+          
+          if [ $EXIT_CODE -eq 0 ]; then
+            echo "✅ Privacy Guard: No obvious privacy leaks detected in commit messages"
+          else
+            echo ""
+            echo "🚫 Privacy Guard: Potential privacy leak detected!"
+            echo "Please amend your commits to remove sensitive information:"
+            echo "  git rebase -i HEAD~N  # N = number of commits to edit"
+            echo "  git commit --amend     # Edit commit message"
+            exit 1
+          fi
+
+      - name: Scan file contents
+        run: |
+          # 扫描仓库中的敏感文件
+          EXIT_CODE=0
+          
+          # 检查是否有 override.local 被意外提交
+          if git ls-files | grep -q "override.local$"; then
+            echo "❌ Privacy violation: override.local found in git index (should be .gitignore'd)"
+            git ls-files | grep "override.local$"
+            EXIT_CODE=1
+          fi
+          
+          # 检查是否有其他 .local 文件
+          if git ls-files | grep -q "\.local$"; then
+            echo "⚠️  Warning: .local files found in git index:"
+            git ls-files | grep "\.local$"
+          fi
+          
+          # 扫描已跟踪文件中的常见私有 IP 模式
+          # 这个检查比较宽松，只阻止明显的私有 IP 泄漏
+          PRIVATE_IP_PATTERNS="10\.|172\.1[6-9]\.|172\.2[0-9]\.|172\.3[0-1]\.|192\.168\.|127\.|169\.254\."
+          
+          for pattern in $(echo "$PRIVATE_IP_PATTERNS" | tr '|' ' '); do
+            matches=$(git grep -l "$pattern" -- '*.yaml' '*.yml' '*.md' '*.txt' '*.sh' 2>/dev/null || true)
+            if [ -n "$matches" ]; then
+              # 过滤掉示例文件和测试文件
+              real_matches=""
+              for file in $matches; do
+                if ! echo "$file" | grep -qE "(example|test|spec|sample|demo|mock)"; then
+                  real_matches="$real_matches $file"
+                fi
+              done
+              
+              if [ -n "$real_matches" ]; then
+                echo "⚠️  Potential private IP pattern '$pattern' found in:"
+                echo "$real_matches" | tr ' ' '\n' | sed 's/^/  - /'
+              fi
+            fi
+          done
+          
+          if [ $EXIT_CODE -eq 0 ]; then
+            echo "✅ Privacy Guard: File content scan passed"
+          else
+            echo ""
+            echo "🚫 Privacy Guard: Sensitive files detected!"
+            exit 1
+          fi

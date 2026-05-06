@@ -1,9 +1,18 @@
 #!/usr/bin/env sh
 # 若本次暂存 verge/extend/*-rule-split-extend.yaml，提交前刷新对应成对本机稿（不加入暂存区）。
 # 若暂存了 derive/parts 或 airport 合并稿，校验与 parts 一致。
+# 提交前扫描隐私信息泄漏。
 set -e
 
 ROOT="$(git rev-parse --show-toplevel)"
+
+# ===== Privacy Guard: 隐私信息扫描 =====
+PRIVACY_SCRIPT="${ROOT}/verge/scripts/privacy-guard.sh"
+if [ -f "${PRIVACY_SCRIPT}" ] && command -v bash >/dev/null 2>&1; then
+  if ! bash "${PRIVACY_SCRIPT}" files; then
+    exit 1
+  fi
+fi
 
 SCRIPT="${ROOT}/verge/scripts/render-local.sh"
 if [ ! -f "${SCRIPT}" ]; then

@@ -1,0 +1,14 @@
+#!/usr/bin/env sh
+# commit-msg 钩子：扫描提交信息中的隐私信息
+set -e
+
+ROOT="$(git rev-parse --show-toplevel)"
+PRIVACY_SCRIPT="${ROOT}/verge/scripts/privacy-guard.sh"
+
+if [ -f "${PRIVACY_SCRIPT}" ] && command -v bash >/dev/null 2>&1; then
+  if ! bash "${PRIVACY_SCRIPT}" message "$1"; then
+    exit 1
+  fi
+fi
+
+exit 0
