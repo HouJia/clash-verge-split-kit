@@ -686,6 +686,9 @@ rules:
   - GEOSITE,youku,🔌 国内直连
   - GEOSITE,iqiyi,🔌 国内直连
 
+  # 机场管理面板：国内运营，固定直连避免登录异常
+  - DOMAIN-SUFFIX,example-airport.org,🔌 国内直连
+
   # 腾讯系（`data/tencent`：qq.com、微信、支付、**腾讯视频**、腾讯云等同一标签）：与 `GEOSITE,cn` 大量重叠；显式一条减少子域被误送入 `geolocation-!cn`→代理。若你依赖腾讯海外站且需走代理，可删本行或改选策略组。
   - GEOSITE,tencent,DIRECT
 
