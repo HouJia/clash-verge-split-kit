@@ -171,6 +171,14 @@
     <p class="sub">本页纯静态：<code>audit-core.js</code> 与 CLI 共用同一探测表数据源（见包内同步流程）。浏览器内对工作流允许的站点使用 <code>fetch</code>。<strong>与 ipip 出口不一致的 IP，仅在同源 <code>hjs-egress-ip serve</code> + <code>/__geo</code> 时用中文行政区划补全归属；<code>file://</code> 不提供英文数据源、也不代为补全地名。</strong><strong>cip.cc、Cloudflare trace（<code>1.1.1.1/cdn-cgi/trace</code>）在「仅 file://」时脚本往往读不到正文；需 <code>serve</code> 同源 <code>/__probe</code> 代取或在标签栏单独打开探测 URL。</strong>仍可能受浏览器/系统代理与跨域响应头限制，结果与 CLI 中 <code>curl</code> 不必完全一致。</p>
   </header>
   <main>
+    <div id="file-protocol-warning" style="display:none; margin-bottom:1rem; padding:0.75rem 1rem; border:1px dashed var(--warn); border-radius:10px; background:#2d2a1e; color:#f0c14b; font-size:0.9rem;">
+      <strong>⚠️ 当前以 file:// 协议打开</strong><br>
+      部分探测站点（如 cip.cc）会因跨域限制无法读取。建议启动本地服务获得完整功能：<br>
+      <code style="background:#1a2332; padding:0.2rem 0.4rem; border-radius:4px; color:#93c5fd;">hjs-egress-ip serve</code>
+      <button onclick="copyServeCommand()" style="margin-left:0.5rem; padding:0.2rem 0.5rem; font-size:0.8rem; background:#334155; color:#fff; border:none; border-radius:4px; cursor:pointer;">复制命令</button>
+      <button onclick="tryRedirectToServer()" style="margin-left:0.5rem; padding:0.2rem 0.5rem; font-size:0.8rem; background:var(--accent); color:#fff; border:none; border-radius:4px; cursor:pointer;">尝试跳转</button>
+    </div>
+
     <div class="toolbar">
       <button type="button" id="btn-run">一键检测 / 复测</button>
       <button type="button" id="btn-copy" class="secondary">复制页面链接</button>
@@ -342,8 +350,58 @@
 
     let tableVisible = true;
 
+    // 检测是否在 file:// 协议下运行
+    function isFileProtocol() {
+      return window.location.protocol === 'file:';
+    }
+
+    // 检测本地服务是否可用
+    async function checkLocalServer() {
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 2000);
+        await fetch('http://127.0.0.1:18765/health', {
+          method: 'GET',
+          signal: controller.signal,
+          mode: 'no-cors'
+        });
+        clearTimeout(timeoutId);
+        return true;
+      } catch (e) {
+        return false;
+      }
+    }
+
+    // 尝试启动本地服务并跳转
+    async function autoStartAndRedirect() {
+      const btn = $("btn-run");
+      btn.disabled = true;
+      setPill("启动中", "run");
+      $("status-msg").textContent = "正在检测本地服务…";
+
+      // 首先检查服务是否已在运行
+      const isRunning = await checkLocalServer();
+      if (isRunning) {
+        window.location.href = 'http://127.0.0.1:18765/';
+        return true;
+      }
+
+      // 服务未启动，显示提示
+      btn.disabled = false;
+      setPill("需手动启动", "err");
+      $("status-msg").innerHTML = '本地服务未运行。请在终端执行：<code>hjs-egress-ip serve</code> 后点击<button onclick="tryRedirectToServer()">尝试跳转</button>';
+      return false;
+    }
+
     async function runAudit() {
       const btn = $("btn-run");
+
+      // 如果是 file:// 协议，先尝试跳转
+      if (isFileProtocol()) {
+        const started = await autoStartAndRedirect();
+        if (!started) return;
+      }
+
       btn.disabled = true;
       setPill("检测中", "run");
       $("status-msg").textContent = "检测中，请稍候…";
