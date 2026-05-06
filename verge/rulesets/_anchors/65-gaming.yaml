@@ -1,6 +1,5 @@
-# 游戏平台规则
-# 策略组: 🎮 场景 · 游戏平台
-# 说明: Steam/Epic/PlayStation/Xbox/Nintendo/EA/Ubisoft 等
+# 🎮 场景 · 游戏平台
+# Steam / Epic / PlayStation / Xbox / Nintendo 等
 
 # Steam 平台
 - DOMAIN-SUFFIX,steampowered.com,🎮 场景 · 游戏平台

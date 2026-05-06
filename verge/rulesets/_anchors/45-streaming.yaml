@@ -1,6 +1,5 @@
-# 流媒体与海外社区规则
-# 策略组: 🎬 场景 · 海外音影社 / 📱 场景 · TikTok
-# 说明: Netflix/Spotify/Discord/Reddit/巴哈姆特/EMBY/TikTok 等
+# 🎬 场景 · 海外音影社
+# Netflix / Spotify / Reddit / Discord / 巴哈姆特 / EMBY / TikTok 等
 
 # ========== 主流流媒体与社区平台 ==========
 - GEOSITE,netflix,🎬 场景 · 海外音影社
@@ -23,5 +22,5 @@
 - DOMAIN-SUFFIX,emby.wtf,🎬 场景 · 海外音影社
 - DOMAIN-SUFFIX,emby.nz,🎬 场景 · 海外音影社
 
-# TikTok（GEOSITE,tiktok 与 geo 同步更新）
+# TikTok
 - GEOSITE,tiktok,📱 场景 · TikTok

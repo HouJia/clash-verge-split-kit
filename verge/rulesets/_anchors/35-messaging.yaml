@@ -1,6 +1,5 @@
-# 即时通讯规则
-# 策略组: 💬 场景 · 即时通讯
-# 说明: Telegram / WhatsApp / Line 等即时通讯应用
+# 💬 场景 · 即时通讯
+# Telegram / WhatsApp / Line 等即时通讯应用
 
 # ========== 脸书系兜底（WhatsApp 前置 carve-out）==========
 # WhatsApp 已在即时通讯前置 carve-out；本段兜底 Facebook / Instagram / Threads

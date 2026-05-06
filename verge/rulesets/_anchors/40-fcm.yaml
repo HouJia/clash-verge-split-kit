@@ -1,6 +1,6 @@
-# 谷歌推送服务规则
-# 策略组: 📢 场景 · 谷歌推送
-# 说明: FCM / Firebase Cloud Messaging，放在 GEOSITE,google 前面避免被截胡
+# 📢 场景 · 谷歌推送
+# FCM / Firebase Cloud Messaging
+# 放在 GEOSITE,google 前面避免被截胡
 
 # Android 设备推送服务；mtalk.google.com 为主地址，alt 为备用节点
 - DOMAIN,mtalk.google.com,📢 场景 · 谷歌推送

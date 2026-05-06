@@ -1,8 +1,8 @@
-# 开发源站规则
-# 策略组: 🐙 场景 · 开发源站
-# 说明: GitHub/Docker/npm/PyPI/crates.io 等，早于 GEOSITE,microsoft 命中
+# 🐙 场景 · 开发源站
+# GitHub / Docker / npm / PyPI / crates.io 等
+# 早于 GEOSITE,microsoft 命中，便于 GHCR/npm 等与 GitHub 大块策略拆开
 
-# Docker/npm/PyPI/crates.io/GitHub 包管理
+# Docker / npm / PyPI / crates.io / GitHub 包管理
 - GEOSITE,docker,🐙 场景 · 开发源站
 - GEOSITE,npmjs,🐙 场景 · 开发源站
 - DOMAIN-SUFFIX,registry.npmjs.org,🐙 场景 · 开发源站
@@ -14,5 +14,5 @@
 - DOMAIN-SUFFIX,ghcr.io,🐙 场景 · 开发源站
 - DOMAIN-SUFFIX,npm.pkg.github.com,🐙 场景 · 开发源站
 
-# GitHub 主站 / API / raw（减少浏览器/git 在 DNS+fake-ip 下的异常）
+# GitHub 主站 / API / raw
 - GEOSITE,github,🐙 场景 · 开发源站

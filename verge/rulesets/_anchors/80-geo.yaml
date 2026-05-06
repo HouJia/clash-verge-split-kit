@@ -1,6 +1,6 @@
-# 地理分流与兜底规则
-# 策略组: 🔌 国内直连 / 🎚️ 手动切换 / 🐟 系统 · 漏网之鱼
-# 说明: GEOSITE/GEOIP 地理分流 + MATCH 兜底
+# 🔌 国内直连 / 🎚️ 手动切换 / 🐟 系统 · 漏网之鱼
+# 地理分流与兜底
+# GEOSITE/GEOIP 地理分流 + MATCH 兜底
 
 # 国内流量（GEOSITE/GEOIP 识别为 CN）
 - GEOSITE,cn,🔌 国内直连

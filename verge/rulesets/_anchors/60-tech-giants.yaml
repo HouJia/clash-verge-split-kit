@@ -1,6 +1,6 @@
-# 大厂服务规则（Google/Apple/Microsoft 及跨境服务）
-# 策略组: 🔍 大厂 · 谷歌 / 🍎 大厂 · 苹果 / 💠 大厂 · 微软跨境 / 🪟 大厂 · 微软
-# 说明: 大厂服务分组，微软跨境早于 GEOSITE,microsoft carve-out
+# 🔍 大厂 · 谷歌 / 🍎 大厂 · 苹果 / 💠 大厂 · 微软跨境 / 🪟 大厂 · 微软
+# Google / Apple / Microsoft 及跨境服务
+# 微软跨境早于 GEOSITE,microsoft carve-out
 
 # ========== 🔍 大厂 · 谷歌（GEOSITE + Gmail 补丁）==========
 - GEOSITE,google,🔍 大厂 · 谷歌
@@ -28,7 +28,6 @@
 - DOMAIN-SUFFIX,bingapis.com,💠 大厂 · 微软跨境
 
 # ========== 🪟 大厂 · 微软（GEOSITE 合集 + 邮箱补丁）==========
-# GitHub 相关已由「🐙 场景 · 开发源站」命中；剩余子域落在此组
 - GEOSITE,microsoft,🪟 大厂 · 微软
 - GEOSITE,onedrive,🪟 大厂 · 微软
 - GEOSITE,linkedin,🪟 大厂 · 微软

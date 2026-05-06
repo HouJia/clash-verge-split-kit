@@ -76,12 +76,11 @@ emit_anchor_rules() {
       done < "${file}"
 
       # 生成 ================== 格式的详细标题（带编号前缀）
-      local fragment_id="${fragment%.yaml}"
+      # 提取编号（如 30）从文件名（30-ai.yaml）
+      local fragment_num="${fragment%%-*}"
       if [[ -n "${title}" ]]; then
-        # 提取策略组名（从标题中提取emoji+名称部分）
-        local strategy_name="${title}"
         # 生成格式：================== 30-🧠 场景 · 境外 AI ==================
-        echo "  # ================== ${fragment_id}-${strategy_name} =================="
+        echo "  # ================== ${fragment_num}-${title} =================="
       fi
 
       # 输出剩余内容（跳过前两行标题注释）
