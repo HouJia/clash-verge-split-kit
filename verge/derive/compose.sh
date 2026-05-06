@@ -75,13 +75,13 @@ emit_anchor_rules() {
         ((line_num++))
       done < "${file}"
 
-      # 生成 ========== 格式的详细标题
+      # 生成 ================== 格式的详细标题（带编号前缀）
+      local fragment_id="${fragment%.yaml}"
       if [[ -n "${title}" ]]; then
-        if [[ -n "${desc}" && "${desc}" != "策略组:"* ]]; then
-          echo "  # ========== ${title}（${desc}）=========="
-        else
-          echo "  # ========== ${title} =========="
-        fi
+        # 提取策略组名（从标题中提取emoji+名称部分）
+        local strategy_name="${title}"
+        # 生成格式：================== 30-🧠 场景 · 境外 AI ==================
+        echo "  # ================== ${fragment_id}-${strategy_name} =================="
       fi
 
       # 输出剩余内容（跳过前两行标题注释）
