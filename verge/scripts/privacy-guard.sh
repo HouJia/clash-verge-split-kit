@@ -84,6 +84,8 @@ scan_files() {
     [[ "$file" =~ \.(png|jpg|jpeg|gif|ico|woff|woff2|ttf|eot)$ ]] && continue
     [[ "$file" == "verge/generated/local/override.local" ]] && continue
     [[ "$file" == ".gitignore" ]] && continue
+    # 跳过扫描脚本自身（避免正则表达式被误认为隐私信息）
+    [[ "$file" == "verge/scripts/privacy-guard.sh" ]] && continue
     
     # 获取暂存区文件内容
     if git show ":$file" 2>/dev/null > "$temp_scan" 2>/dev/null; then
@@ -132,10 +134,13 @@ validate_commit_message() {
     issues+=("commit message 包含具体 IP 地址，请泛化为 <YOUR_IP> 或 '我的 IP'")
   fi
   
-  # 检查是否包含具体域名（常见示例除外）
-  if echo "$msg_content" | grep -qE '[a-zA-Z0-9.-]+\.(org|com|net|io|dev|app)\b'; then
-    local domain=$(echo "$msg_content" | grep -oE '[a-zA-Z0-9.-]+\.(org|com|net|io|dev|app)\b' | head -1)
-    if [[ -n "$domain" && ! "$domain" =~ (example|localhost|test|demo|sample) ]]; then
+  # 检查是否包含具体域名（排除 Co-authored-by 行和公共域名）
+  local filtered_content=$(echo "$msg_content" | grep -vE '^Co-authored-by:')
+  if echo "$filtered_content" | grep -qE '[a-zA-Z0-9.-]+\.(org|com|net|io|dev|app|cn)\b'; then
+    local domain=$(echo "$filtered_content" | grep -oE '[a-zA-Z0-9.-]+\.(org|com|net|io|dev|app|cn)\b' | head -1)
+    # 白名单：公共域名、常见服务商
+    local whitelist="(example|localhost|test|demo|sample|github|git|cursor|microsoft|google|apple|amazon|facebook|twitter|x\.com|wechat|qq|baidu|aliyun|tencent)"
+    if [[ -n "$domain" && ! "$domain" =~ $whitelist ]]; then
       issues+=("commit message 可能包含具体域名 '${domain}'，请泛化处理")
     fi
   fi
@@ -147,10 +152,10 @@ validate_commit_message() {
     done
     echo "" >&2
     echo "建议修改方式：" >&2
-    echo "  ❌ '添加 161.35.234.175 直连规则'" >&2
-    echo "  ✅ '添加我的 VPS IP 直连规则'" >&2
-    echo "  ❌ '支持 ikuuu.org 直连'" >&2
-    echo "  ✅ '支持机场面板域名直连'" >&2
+    echo "  ❌ '添加 203.0.113.10 直连规则'  ← 包含具体 IP" >&2
+    echo "  ✅ '添加我的 VPS IP 直连规则'     ← 泛化描述" >&2
+    echo "  ❌ '支持 example-airport.org 直连' ← 包含具体域名" >&2
+    echo "  ✅ '支持机场面板域名直连'         ← 泛化描述" >&2
     return 1
   fi
   
