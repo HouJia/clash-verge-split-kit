@@ -1,13 +1,32 @@
 # 复制为同目录下 override.local（本机私稿；整目录规则见仓库根 .gitignore）。
 # verge/scripts/render-local.sh 读取：纯文本分节，无大模型参与。
 #
-# [vps]        公网 IPv4，取段内第一个非注释非空行（也可只靠命令行参数 / VPS_PUBLIC_IP）。
+# [vps]              公网 IPv4，取段内第一个非注释非空行（也可只靠命令行参数 / VPS_PUBLIC_IP）。
+# [rules-first]      可选；在模板锚点 __VERGE_INJECT_LOCAL_RULES_FIRST__ 处插入，
+#                      位于广告拦截之前，用于最高优先级纠正配置错误。
 # [rules-before-cn]  可选；在模板锚点 __VERGE_INJECT_LOCAL_RULES_BEFORE_GEOSITE_CN__ 处插入，
-#                      与 Mihomo rules 列表项一致。段内若仅有注释/空行则等价于「不插入」。
+#                      位于 GEOSITE,cn 之前，用于补充国内站点直连。
 [vps]
-# 示例（改为你的公网 IPv4）：
-# 203.0.113.10
+# 填写你的公网 IPv4（用于替换模板中的 192.0.2.1 占位符）
+# 例如：203.0.113.10
+
+[rules-first]
+# ============================================
+# 最高优先级本地规则 - 在广告拦截之前命中
+# 用途：纠正配置文件中的错误，确保特定流量直连
+# ============================================
+
+# 你的 VPS 服务器：必须直连，避免回环
+# - IP-CIDR,203.0.113.10/32,DIRECT,no-resolve
+
+# 云服务控制台：本地直连，不经机场隧道
+# - GEOSITE,
 
 [rules-before-cn]
-# 示例（取消注释并修改；勿把含隐私的 local 稿提交进 Git）：
-#   - GEOSITE,
+# ============================================
+# 次级本地规则 - 在 GEOSITE,cn 之前命中
+# 用途：补充国内站点直连，避免被 geolocation-!cn 误判
+# ============================================
+
+# 机场管理面板：国内运营，固定直连避免登录异常
+# - DOMAIN-SUFFIX,example-airport.org,DIRECT

@@ -34,6 +34,7 @@ if [[ "${EXT_REL}" == "airport-rule-split-extend.yaml" ]] && [[ -z "${VERGE_SKIP
   fi
 fi
 
+INJECT_ANCHOR_FIRST='  # __VERGE_INJECT_LOCAL_RULES_FIRST__'
 INJECT_ANCHOR='  # __VERGE_INJECT_LOCAL_RULES_BEFORE_GEOSITE_CN__'
 
 # 自 override.local 的 [vps] 段读取第一个非注释非空行作为 IPv4
@@ -57,6 +58,26 @@ read_ip_from_merged() {
     fi
   done <"${f}"
   return 1
+}
+
+# 将 [rules-first] 段写入临时文件（可无此段 → 空文件）
+extract_rules_first_to_file() {
+  local f="$1" out="$2"
+  : >"${out}"
+  [[ -f "$f" ]] || return 0
+  local line in_rules=0
+  while IFS= read -r line || [[ -n "${line}" ]]; do
+    if [[ "${line}" =~ ^[[:space:]]*\[rules-first\][[:space:]]*$ ]]; then
+      in_rules=1
+      continue
+    fi
+    if [[ "${in_rules}" -eq 1 ]]; then
+      if [[ "${line}" =~ ^[[:space:]]*\[[^]]+\][[:space:]]*$ ]]; then
+        break
+      fi
+      printf '%s\n' "${line}" >>"${out}"
+    fi
+  done <"${f}"
 }
 
 # 将 [rules-before-cn] 段写入临时文件（可无此段 → 空文件）
@@ -138,15 +159,20 @@ fi
 
 mkdir -p "${DST_DIR}" "${LOCAL_DIR}"
 
+# 准备两个临时文件：最高优先级规则 和 GEOSITE,cn 前规则
+RULES_FIRST_TMP="$(mktemp)"
 RULES_TMP="$(mktemp)"
 cleanup_rules_tmp() {
+  [[ -n "${RULES_FIRST_TMP}" && -f "${RULES_FIRST_TMP}" ]] && rm -f "${RULES_FIRST_TMP}"
   [[ -n "${RULES_TMP}" && -f "${RULES_TMP}" ]] && rm -f "${RULES_TMP}"
 }
 trap cleanup_rules_tmp EXIT
 
 if [[ -f "${MERGED_FILE}" ]]; then
+  extract_rules_first_to_file "${MERGED_FILE}" "${RULES_FIRST_TMP}"
   extract_rules_before_cn_to_file "${MERGED_FILE}" "${RULES_TMP}"
 else
+  : >"${RULES_FIRST_TMP}"
   : >"${RULES_TMP}"
 fi
 
@@ -155,6 +181,14 @@ sed -e "s|YOUR_VPS_IP|${ip}|g" -e "s|192.0.2.1|${ip}|g" "${SRC}" >"${tmp}"
 
 tmp_out="$(mktemp)"
 while IFS= read -r line || [[ -n "${line}" ]]; do
+  # 处理最高优先级锚点（在广告拦截之前）
+  if [[ "${line}" == "${INJECT_ANCHOR_FIRST}" ]]; then
+    if snippet_non_comment_nonempty "${RULES_FIRST_TMP}"; then
+      emit_normalized_snippet "${RULES_FIRST_TMP}"
+    fi
+    continue
+  fi
+  # 处理 GEOSITE,cn 前锚点
   if [[ "${line}" == "${INJECT_ANCHOR}" ]]; then
     if snippet_non_comment_nonempty "${RULES_TMP}"; then
       emit_normalized_snippet "${RULES_TMP}"

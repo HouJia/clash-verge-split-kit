@@ -456,7 +456,9 @@ rules:
   # 私有/局域网：直连
   - GEOSITE,private,DIRECT
   - GEOIP,private,DIRECT,no-resolve
-  - IP-CIDR,192.0.2.1/32,DIRECT,no-resolve
+
+  # === 本地私有规则注入点（最高优先级，由 render-local.sh 处理）===
+  # __VERGE_INJECT_LOCAL_RULES_FIRST__
 
   # 广告与遥测：前置拦截
 
