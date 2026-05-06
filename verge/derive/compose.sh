@@ -117,6 +117,10 @@ emit() {
       # 检测开始标记
       if [[ "${line}" == "  # __VERGE_INJECT_RULES_START__" ]]; then
         echo "${line}"
+        # 本地私有规则锚点说明（由 render-local.sh 从此处注入 override.local 内容）
+        echo "  # >>> 本地私有规则注入锚点（由 render-local.sh 从 override.local 注入）"
+        echo "  # 作用：放置私有 IP 规则（本机需直连的 IP、机场面板、NAS 等），在标准规则之前最高优先级命中"
+        echo "  # 说明：见 verge/generated/local/override.local.example，复制为 override.local 后编辑"
         # 注入片段规则
         echo "  # === 规则片段注入（由 compose.sh 自动组装）==="
         echo "  # 片段源：rulesets/_anchors/*.yaml"
@@ -158,6 +162,10 @@ emit() {
       # 检测开始标记
       if [[ "${line}" == "  # __VERGE_INJECT_RULES_START__" ]]; then
         echo "${line}"
+        # 本地私有规则锚点说明（由 render-local.sh 从此处注入 override.local 内容）
+        echo "  # >>> 本地私有规则注入锚点（由 render-local.sh 从 override.local 注入）"
+        echo "  # 作用：放置私有 IP 规则（本机需直连的 IP、机场面板、NAS 等），在标准规则之前最高优先级命中"
+        echo "  # 说明：见 verge/generated/local/override.local.example，复制为 override.local 后编辑"
         # 注入片段规则
         echo "  # === 规则片段注入（由 compose.sh 自动组装）==="
         echo "  # 片段源：rulesets/_anchors/*.yaml"

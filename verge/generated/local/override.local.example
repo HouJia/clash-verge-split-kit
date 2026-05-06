@@ -1,10 +1,21 @@
-# 复制为同目录下 override.local（本机私稿；整目录规则见仓库根 .gitignore）。
-# verge/scripts/render-local.sh 读取：纯文本分节，无大模型参与。
+# =============================================================================
+# 本机私有规则配置文件示例
+# 目标文件：override.local（由本文件复制后修改，.gitignore 排除）
+# =============================================================================
 #
-# 结构说明：
-# [vps]    公网 IPv4，取段内第一个非注释非空行（也可只靠命令行参数 / VPS_PUBLIC_IP）。
-# [rules]  所有本地私有规则（最高优先级，在广告拦截之前命中）。
-#          按「直连 / 手动代理 / 自动选择 / 分国家」分组，便于维护。
+# 【使用说明】
+# 1. 复制本文件为 override.local：cp override.local.example override.local
+# 2. 编辑 override.local（非本示例文件），在 [vps] 段填写你的公网 IP，在 [rules] 段添加私有规则
+# 3. 重新生成配置：bash verge/scripts/render-local.sh <你的公网IP>
+# 4. 将生成的 verge/generated/airport-rule-split.local.yaml 复制到 Verge 使用
+# 5. 如需修改规则，重复步骤 2-4
+#
+# 【注意事项】
+# - override.local 文件（非本示例）被 .gitignore 排除，不会提交到仓库，适合存放敏感信息
+# - 非私有规则（通用规则）请修改 verge/rulesets/_anchors/*.yaml
+# - 此处的规则用于纠正系统性配置错误，最高优先级在标准规则之前命中
+#
+# =============================================================================
 
 [vps]
 # 填写你的公网 IPv4（用于替换模板中的 192.0.2.1 占位符）
@@ -12,76 +23,61 @@
 
 [rules]
 # ============================================
-# 一、直连规则（DIRECT）
+# 1. 私有直连规则（示例）
 # ============================================
-# 原则：手动维护的规则必然准确，放在最前面确保优先命中
 
-# 1.1 本机 VPS：必须直连，避免回环
-# - IP-CIDR,203.0.113.10/32,DIRECT,no-resolve
+# 1.1 本机需要直连的 IP：必须直连，避免回环
+#   - IP-CIDR,203.0.113.10/32,🔌 国内直连,no-resolve
 
-# 1.2 云服务商控制台/API：本地直连，不经机场隧道
-# - GEOSITE,aws,DIRECT
-# - GEOSITE,azure,DIRECT
-# - GEOSITE,aliyun,DIRECT
+# 1.2 云服务商控制台/API/Spaces：本地直连，不经机场隧道
+#   - GEOSITE,aws,🔌 国内直连
+#   - GEOSITE,azure,🔌 国内直连
+#   - GEOSITE,aliyun,🔌 国内直连
 
 # 1.3 机场管理面板：国内运营，固定直连避免登录异常
-# - DOMAIN-SUFFIX,example-airport.org,DIRECT
+#   - DOMAIN-SUFFIX,example-airport.org,🔌 国内直连
 
 # 1.4 其他需要直连的本地域名
-# - DOMAIN-SUFFIX,my-home-nas.local,DIRECT
+#   - DOMAIN-SUFFIX,my-home-nas.local,🔌 国内直连
 
 
 # ============================================
-# 二、手动代理（指定节点）
+# 2. 手动代理规则（指定节点，示例）
 # ============================================
 # 用于需要固定节点、不走负载均衡的场景
 
 # 2.1 指定美国节点
-# - DOMAIN-SUFFIX,chatgpt.com,美国
-# - DOMAIN-SUFFIX,openai.com,美国
+#   - DOMAIN-SUFFIX,chatgpt.com,美国
+#   - DOMAIN-SUFFIX,openai.com,美国
 
 # 2.2 指定香港节点
-# - DOMAIN-SUFFIX,netflix.com,香港
+#   - DOMAIN-SUFFIX,netflix.com,香港
 
 
 # ============================================
-# 三、自动选择（自动 / 故障转移 / 负载均衡）
+# 3. 自动选择规则（示例）
 # ============================================
 # 用于可接受多节点自动切换的场景
 
-# 3.1 海外流媒体（自动选最优）
-# - DOMAIN-KEYWORD,youtube,海外音影社
-# - DOMAIN-KEYWORD,netflix,海外音影社
-# - DOMAIN-KEYWORD,spotify,海外音影社
+# 3.1 海外流媒体
+#   - DOMAIN-KEYWORD,youtube,海外音影社
+#   - DOMAIN-KEYWORD,netflix,海外音影社
 
-# 3.2 社交媒体（故障转移）
-# - GEOSITE,twitter,社交媒体
-# - GEOSITE,telegram,社交媒体
+# 3.2 社交媒体
+#   - GEOSITE,twitter,社交媒体
+#   - GEOSITE,telegram,社交媒体
 
 
 # ============================================
-# 四、分国家/地区代理
+# 4. 分国家/地区代理规则（示例）
 # ============================================
-# 用于明确需要特定地区节点的场景
 
 # 4.1 日本
-# - GEOSITE,abema,日本
-# - DOMAIN-SUFFIX,unext.jp,日本
+#   - GEOSITE,abema,日本
+#   - DOMAIN-SUFFIX,unext.jp,日本
 
 # 4.2 韩国
-# - DOMAIN-SUFFIX,naver.com,韩国
-# - DOMAIN-SUFFIX,melon.com,韩国
+#   - DOMAIN-SUFFIX,naver.com,韩国
 
 # 4.3 新加坡
-# - DOMAIN-SUFFIX,carousell.sg,新加坡
-
-# 4.4 其他国家和地区
-# - DOMAIN-SUFFIX,bbc.co.uk,英国
-# - DOMAIN-SUFFIX,zdf.de,德国
-
-
-# ============================================
-# 五、兜底/测试规则
-# ============================================
-# - DOMAIN-KEYWORD,critical,DIRECT
-# - DOMAIN-SUFFIX,test-internal.local,DIRECT
+#   - DOMAIN-SUFFIX,carousell.sg,新加坡

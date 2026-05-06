@@ -587,6 +587,9 @@ rule-providers:
 
 rules:
   # __VERGE_INJECT_RULES_START__
+  # >>> 本地私有规则注入锚点（由 render-local.sh 从 override.local 注入）
+  # 作用：放置私有 IP 规则（本机需直连的 IP、机场面板、NAS 等），在标准规则之前最高优先级命中
+  # 说明：见 verge/generated/local/override.local.example，复制为 override.local 后编辑
   # === 规则片段注入（由 compose.sh 自动组装）===
   # 片段源：rulesets/_anchors/*.yaml
   # ================== 00-私有/局域网规则（基础直连） ==================

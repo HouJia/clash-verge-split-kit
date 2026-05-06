@@ -162,9 +162,18 @@ while IFS= read -r line || [[ -n "${line}" ]]; do
   # 检测规则注入开始标记
   if [[ "${line}" == "  # __VERGE_INJECT_RULES_START__" ]]; then
     echo "${line}"
+    echo "  # ============================================================================="
+    echo "  # 📋 本地私有规则（最高优先级，在标准规则之前命中）"
+    echo "  # ============================================================================="
+    echo "  # 【作用】纠正系统性配置错误（私有 IP、机场面板、NAS 等敏感信息）"
+    echo "  # 【添加/修改方法】"
+    echo "  #   1. 编辑 verge/generated/local/override.local（从此目录的 .example 文件复制）"
+    echo "  #   2. 重新生成：bash verge/scripts/render-local.sh ${ip}"
+    echo "  #   3. 本文件会被覆盖，修改后需将新产物复制到 Verge"
+    echo "  # 【通用规则】非私有的公共规则请修改 verge/rulesets/_anchors/*.yaml（可提交 git）"
+    echo "  # ============================================================================="
     # 注入本地私有规则（如果有）
     if snippet_non_comment_nonempty "${RULES_TMP}"; then
-      echo "  # === 本地私有规则（最高优先级，在标准规则之前）==="
       emit_normalized_snippet "${RULES_TMP}"
       echo
     fi
