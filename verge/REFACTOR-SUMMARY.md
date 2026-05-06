@@ -5,17 +5,15 @@
 
 ---
 
-## 重构成果
-
-### 目录结构变更
+## 清晰的分层架构
 
 ```
 verge/
 ├── derive/parts/
 │   ├── 10-runtime-verge-mihomo.yaml     # 运行时壳（保持不变）
-│   └── 20-routing-mihomo.yaml           # 路由骨架（精简版，使用占位符）
+│   └── 20-routing-mihomo.yaml           # 路由骨架（proxy-groups + 空的 rules 占位符）
 │
-├── rulesets/_anchors/                    # 新增：规则片段目录
+├── rulesets/_anchors/                    # 规则片段目录（维护侧）
 │   ├── 00-private.yaml                   # 私有/局域网规则
 │   ├── 10-ads.yaml                      # 广告拦截与遥测净化
 │   ├── 20-cursor.yaml                   # Cursor IDE
@@ -31,23 +29,63 @@ verge/
 │   ├── 80-geo.yaml                      # 地理分流 + 兜底
 │   └── README.md                        # 片段文档
 │
-├── scripts/
-│   ├── render-local.sh                  # 更新：注入片段规则 + IP替换
-│   └── sync-fragments.sh                # 新增：同步片段到骨架（备用）
+├── extend/airport-rule-split-extend.yaml  # 完整的标准规则（145条，纳入git管理）
 │
-└── generated/airport-rule-split.local.yaml  # 产物（单文件，~834行）
+├── generated/airport-rule-split.local.yaml  # 本机产物（148条，+本地私有规则，不纳入git）
+│
+└── scripts/
+    ├── compose.sh                         # 生成 extend 文件（注入片段规则）
+    └── render-local.sh                    # 生成本地文件（IP替换 + 本地规则注入）
 ```
 
-### 使用方式（保持不变）
+---
+
+## 清晰的流程
+
+### 第一层：生成标准规则（compose.sh）
+```
+derive/parts/
+  ├── 10-runtime-verge-mihomo.yaml    # 运行时壳
+  └── 20-routing-mihomo.yaml          # 路由骨架（proxy-groups + 空的 rules 占位符）
+           ↓ compose.sh（注入规则片段）
+extend/airport-rule-split-extend.yaml  # 完整的标准规则（145条，纳入git管理）
+```
+
+**产物**：`extend/airport-rule-split-extend.yaml`
+- 包含完整的 proxy-groups（29个策略组）
+- 包含完整的标准规则（145条，由片段组装）
+- **纳入 git 管理**
+
+### 第二层：生成本机产物（render-local.sh）
+```
+extend/airport-rule-split-extend.yaml  # 标准规则模板
+           ↓ render-local.sh
+    1. 替换 IP 占位符（192.0.2.1 → 真实IP）
+    2. 注入本地私有规则（最高优先级）
+           ↓
+generated/airport-rule-split.local.yaml  # 本机产物（148条，不纳入git管理）
+```
+
+**产物**：`generated/airport-rule-split.local.yaml`
+- 在 extend 基础上替换 IP 占位符
+- 在最前面注入本地私有规则（3条）
+- **不纳入 git 管理**
+
+---
+
+## 使用方式（保持不变）
 
 ```bash
-# 修改规则片段（如修改 Cursor 规则）
+# 1. 修改规则片段（如修改 Cursor 规则）
 vim verge/rulesets/_anchors/20-cursor.yaml
 
-# 渲染生成最终产物
+# 2. 重新生成 extend 文件（标准规则）
+bash verge/derive/compose.sh -o verge/extend/airport-rule-split-extend.yaml
+
+# 3. 生成本机产物（IP替换 + 本地规则）
 bash verge/scripts/render-local.sh
 
-# 复制单个文件到 Verge（使用方式完全不变）
+# 4. 复制单个文件到 Verge（使用方式完全不变）
 cat verge/generated/airport-rule-split.local.yaml | pbcopy
 # 或打开文件全选复制 → 粘贴到 Verge 全局扩展配置
 ```
@@ -67,15 +105,15 @@ bash scripts/render-local.sh → generated/*.local.yaml
 全文复制到 Verge
 ```
 
-### 重构后
+### 重构后（清晰分层）
 ```
-derive/parts/20-routing-mihomo.yaml (骨架，proxy-groups + 规则占位符)
+修改规则片段 → rulesets/_anchors/XX-name.yaml
         ↓
-bash derive/compose.sh → extend/airport-rule-split-extend.yaml
+bash derive/compose.sh → extend/airport-rule-split-extend.yaml（完整的标准规则，145条）
         ↓
-bash scripts/render-local.sh (注入片段) → generated/*.local.yaml
+bash scripts/render-local.sh → generated/*.local.yaml（本机产物，148条）
         ↓
-全文复制到 Verge（使用方式不变）
+全文复制到 Verge
 ```
 
 ### 修改规则示例
@@ -83,17 +121,18 @@ bash scripts/render-local.sh (注入片段) → generated/*.local.yaml
 **场景：添加新的 Cursor 相关域名**
 
 **重构前**：
-1. 编辑 `derive/parts/20-routing-mihomo.yaml`
-2. 在 746 行中找到 Cursor 段落（约行 475-487）
+1. 编辑 `derive/parts/20-routing-mihomo.yaml`（746行）
+2. 找到 Cursor 段落（约行 475-487）
 3. 添加新规则
 4. 运行 `compose.sh` + `render-local.sh`
 5. 全文复制
 
 **重构后**：
-1. 编辑 `rulesets/_anchors/20-cursor.yaml`（专注 Cursor 规则，仅 12 行）
+1. 编辑 `rulesets/_anchors/20-cursor.yaml`（专注 Cursor 规则，仅 11 行）
 2. 添加新规则
-3. 运行 `render-local.sh`
-4. 全文复制
+3. 运行 `compose.sh` 更新 extend 文件
+4. 运行 `render-local.sh` 生成本地文件
+5. 全文复制
 
 ---
 
@@ -114,7 +153,8 @@ bash scripts/render-local.sh (注入片段) → generated/*.local.yaml
 | 65-gaming.yaml | 27 | Steam/Epic/PlayStation |
 | 70-domestic.yaml | 8 | 国内流量 + PayPal |
 | 80-geo.yaml | 4 | 地理分流 + 兜底 |
-| **总计（片段）** | **~188** | 不含本地私有规则 |
+| **标准规则总计** | **188** | extend 文件（含 RULE-SET 引用） |
+| **本机产物总计** | **191** | generated 文件（+3条本地私有规则） |
 
 ---
 
@@ -124,9 +164,9 @@ bash scripts/render-local.sh (注入片段) → generated/*.local.yaml
 - 用户反馈：复制目录比复制单文件成本高
 - 方案：片段文件仅在**维护侧**存在，渲染后合并为单文件
 
-### 2. 不使用 YAML 锚点别名
-- 问题：`*anchor` 在列表中展开为嵌套数组，Mihomo 不支持
-- 方案：render-local.sh 直接将片段内容**扁平化注入**
+### 2. 清晰的分层
+- **extend 文件**：完整的标准规则，纳入 git 管理
+- **generated 文件**：本机产物（IP替换 + 本地规则），不纳入 git
 
 ### 3. 片段顺序控制
 - 使用编号前缀（00, 10, 20...）控制注入顺序
@@ -134,27 +174,17 @@ bash scripts/render-local.sh (注入片段) → generated/*.local.yaml
 
 ---
 
-## 后续优化建议
-
-1. **片段热更新**：目前修改片段后需重新运行 `render-local.sh`，未来可考虑支持片段级热重载
-
-2. **片段依赖检查**：添加脚本验证片段中的策略组名与骨架中 `proxy-groups` 的一致性
-
-3. **自动化 CI**：GitHub Action 自动在 PR 时运行渲染并校验产物
-
----
-
 ## 验证清单
 
-- [x] `compose.sh` 正常生成 extend 文件
-- [x] `render-local.sh` 正常生成 local 文件
-- [x] 产物为单文件（~834行）
+- [x] `compose.sh` 生成完整的 extend 文件（145条标准规则）
+- [x] `render-local.sh` 生成本地文件（IP替换 + 本地规则注入）
+- [x] extend 文件纳入 git 管理
+- [x] generated 文件不纳入 git 管理（在 .gitignore 中）
 - [x] 使用方式保持不变（复制单个文件）
 - [x] 规则片段逻辑分离（13个片段文件）
 - [x] 本地私有规则注入正常（最高优先级）
-- [x] IP 占位符替换正常（YOUR_VPS_IP → 真实IP）
 
 ---
 
 *重构完成时间: 2026-05-06*
-*方案版本: V2（单文件 + 片段化维护）*
+*方案版本: V2 清晰分层版（单文件 + 片段化维护）*
