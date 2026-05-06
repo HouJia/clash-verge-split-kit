@@ -1,6 +1,6 @@
 # Clash 配置模块化拆分方案 (机场B)
 
-本目录包含从 `ori-机场B-rule-split.local.yaml` 拆分出的模块化配置。
+本目录包含从 `ori-airport-b-rule-split.local.yaml` 拆分出的模块化配置。
 
 ## 拆分逻辑
 

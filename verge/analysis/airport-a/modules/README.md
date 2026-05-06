@@ -1,6 +1,6 @@
 # Clash 配置模块化拆分方案
 
-本目录包含从 `clash-after-phase03.local.yaml` 拆分出的模块化配置。
+本目录包含从 `ori-airport-a-rule-split.local.yaml` 拆分出的模块化配置。
 
 ## 拆分逻辑
 
