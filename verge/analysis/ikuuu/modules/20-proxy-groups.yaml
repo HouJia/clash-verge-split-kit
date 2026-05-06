@@ -1,0 +1,151 @@
+proxy-groups:
+  - name: 🔰 选择节点
+    type: select
+    proxies:
+      - 🇭🇰 香港A01
+      - 🇯🇵 日本A01 | IEPL
+      - 🇭🇰 香港A02 | IEPL
+      - 🇯🇵 日本A02 | IEPL
+      - 🇭🇰 香港A03 | IEPL
+      - 🇯🇵 日本A03 | IEPL
+      - 🇭🇰 香港A04 | IEPL
+      - 🇯🇵 日本A04 | IEPL
+      - 🇭🇰 香港A05 | IEPL
+      - 🇯🇵 日本A05 | 下载专用 | x0.01
+      - 🇭🇰 香港A06 | x0.8
+      - 🇯🇵 日本A06 | 下载专用 | x0.01
+      - 🇭🇰 香港A07 | x0.8
+      - 🇯🇵 日本A07 | IEPL
+      - 🇭🇰 香港A08 | x0.8
+      - 🇯🇵 日本A08 | IEPL
+      - 🇭🇰 香港A09 | IEPL
+      - 🇯🇵 日本A09 | IEPL
+      - 🇭🇰 香港A10 | IEPL
+      - 🇯🇵 日本A10 | IEPL
+      - 🇭🇰 香港A11 | IEPL
+      - 🇯🇵 日本A11 | IEPL
+      - 🇸🇬 新加坡A01 | IEPL | x2
+      - 🇸🇬 新加坡A02 | IEPL | x2
+      - 🇸🇬 新加坡A03 | IEPL | x2
+      - 🇨🇳 台湾A01 | IEPL | x2
+      - 🇺🇲 美国A01 | IEPL | x1.5
+      - 🇺🇲 美国A02 | IEPL | x1.5
+      - 🇬🇧 英国A01
+      - 🇦🇷 阿根廷A01
+      - 🇷🇺 俄罗斯A01
+      - 🇹🇷 土耳其A01
+      - 🇰🇷 韩国A01
+      - 🇮🇳 印度A01
+      - 🇩🇪 德国A01
+      - 🇨🇦 加拿大A01
+      - 🇦🇺 澳大利亚A01
+      - 🇫🇷 法国A01
+      - 🇺🇦 乌克兰A01
+      - 🇯🇵 免费-日本1-Ver.7
+      - 🇯🇵 免费-日本2-Ver.8
+      - 🇯🇵 免费-日本3-Ver.7
+      - 🇯🇵 免费-日本4-Ver.8
+      - 🇯🇵 免费-日本5-Ver.9
+      - 🇯🇵 免费-日本6-Ver.8
+      - 🇯🇵 免费-日本7-Ver.2
+      - DIRECT
+  - name: 🌏 爱奇艺&哔哩哔哩
+    type: select
+    proxies:
+      - DIRECT
+      - 🇭🇰 香港A01
+      - 🇭🇰 香港A02 | IEPL
+      - 🇭🇰 香港A03 | IEPL
+      - 🇭🇰 香港A04 | IEPL
+      - 🇭🇰 香港A05 | IEPL
+      - 🇭🇰 香港A06 | x0.8
+      - 🇭🇰 香港A07 | x0.8
+      - 🇭🇰 香港A08 | x0.8
+      - 🇭🇰 香港A09 | IEPL
+      - 🇭🇰 香港A10 | IEPL
+      - 🇭🇰 香港A11 | IEPL
+      - 🇨🇳 台湾A01 | IEPL | x2
+  - name: 📺 动画疯
+    type: select
+    proxies:
+      - 🔰 选择节点
+      - 🇨🇳 台湾A01 | IEPL | x2
+      - DIRECT
+  - name: 🎮 Steam 登录/下载
+    type: select
+    proxies:
+      - DIRECT
+      - 🔰 选择节点
+      - 🇦🇷 阿根廷A01
+      - 🇷🇺 俄罗斯A01
+      - 🇹🇷 土耳其A01
+      - 🇮🇳 印度A01
+  - name: 🎮 Steam 商店/社区
+    type: select
+    proxies:
+      - 🔰 选择节点
+      - 🇦🇷 阿根廷A01
+      - 🇷🇺 俄罗斯A01
+      - 🇹🇷 土耳其A01
+      - 🇮🇳 印度A01
+      - DIRECT
+  - name: 🌩️ Cloudflare
+    type: select
+    proxies:
+      - 🔰 选择节点
+      - DIRECT
+  - name: ☁️ OneDrive
+    type: select
+    proxies:
+      - 🔰 选择节点
+      - DIRECT
+      - 🇯🇵 日本A01 | IEPL
+      - 🇯🇵 日本A02 | IEPL
+      - 🇯🇵 日本A03 | IEPL
+      - 🇯🇵 日本A04 | IEPL
+      - 🇯🇵 日本A05 | 下载专用 | x0.01
+      - 🇯🇵 日本A06 | 下载专用 | x0.01
+      - 🇯🇵 日本A07 | IEPL
+      - 🇯🇵 日本A08 | IEPL
+      - 🇯🇵 日本A09 | IEPL
+      - 🇯🇵 日本A10 | IEPL
+      - 🇯🇵 日本A11 | IEPL
+      - 🇯🇵 免费-日本1-Ver.7
+      - 🇯🇵 免费-日本2-Ver.8
+      - 🇯🇵 免费-日本3-Ver.7
+      - 🇯🇵 免费-日本4-Ver.8
+      - 🇯🇵 免费-日本5-Ver.9
+      - 🇯🇵 免费-日本6-Ver.8
+      - 🇯🇵 免费-日本7-Ver.2
+      - 🇭🇰 香港A01
+      - 🇭🇰 香港A02 | IEPL
+      - 🇭🇰 香港A03 | IEPL
+      - 🇭🇰 香港A04 | IEPL
+      - 🇭🇰 香港A05 | IEPL
+      - 🇭🇰 香港A06 | x0.8
+      - 🇭🇰 香港A07 | x0.8
+      - 🇭🇰 香港A08 | x0.8
+      - 🇭🇰 香港A09 | IEPL
+      - 🇭🇰 香港A10 | IEPL
+      - 🇭🇰 香港A11 | IEPL
+  - name: 🎓学术网站
+    type: select
+    proxies:
+      - DIRECT
+      - 🔰 选择节点
+  - name: 🇨🇳 国内网站
+    type: select
+    proxies:
+      - DIRECT
+      - 🔰 选择节点
+  - name: 🛑 拦截广告
+    type: select
+    proxies:
+      - REJECT
+      - DIRECT
+      - 🔰 选择节点
+  - name: 🐟 漏网之鱼
+    type: select
+    proxies:
+      - 🔰 选择节点
+      - DIRECT

@@ -12,6 +12,8 @@
 /verge/generated/local/*
 !/verge/generated/local/*.example
 
-/verge/analysis/modules/00-core.yaml
-/verge/analysis/modules/10-proxies.yaml
-/verge/analysis/modules/25-rules-special.yaml
+# verge/analysis/ 下各机场目录中的敏感文件（含节点信息）
+/verge/analysis/机场A/*.yaml
+!/verge/analysis/机场A/modules/*.yaml
+/verge/analysis/机场B/*.yaml
+!/verge/analysis/机场B/modules/*.yaml

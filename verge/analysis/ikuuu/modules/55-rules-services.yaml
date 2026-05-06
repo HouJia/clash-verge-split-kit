@@ -1,0 +1,72 @@
+# ☁️ 云服务与学术规则
+# 云服务（OneDrive、Cloudflare）与学术网站规则
+# 规则数量: 67 条
+#
+rules:
+- DOMAIN-KEYWORD,1drv,☁️ OneDrive
+- DOMAIN-KEYWORD,onedrive,☁️ OneDrive
+- DOMAIN-KEYWORD,skydrive,☁️ OneDrive
+- DOMAIN-SUFFIX,livefilestore.com,☁️ OneDrive
+- DOMAIN-SUFFIX,oneclient.sfx.ms,☁️ OneDrive
+- DOMAIN-SUFFIX,onedrive.com,☁️ OneDrive
+- DOMAIN-SUFFIX,onedrive.live.com,☁️ OneDrive
+- DOMAIN-SUFFIX,photos.live.com,☁️ OneDrive
+- DOMAIN-SUFFIX,sharepoint.com,☁️ OneDrive
+- DOMAIN-SUFFIX,sharepointonline.com,☁️ OneDrive
+- DOMAIN-SUFFIX,skydrive.wns.windows.com,☁️ OneDrive
+- DOMAIN-SUFFIX,spoprod-a.akamaihd.net,☁️ OneDrive
+- DOMAIN-SUFFIX,storage.live.com,☁️ OneDrive
+- DOMAIN-SUFFIX,storage.msn.com,☁️ OneDrive
+- DOMAIN-SUFFIX,cloudflare-dns.com,🌩️ Cloudflare
+- DOMAIN-SUFFIX,cloudflare-ipfs.com,🌩️ Cloudflare
+- DOMAIN-SUFFIX,cloudflare-quic.com,🌩️ Cloudflare
+- DOMAIN-SUFFIX,cloudflare.com,🌩️ Cloudflare
+- DOMAIN-SUFFIX,cloudflare.net,🌩️ Cloudflare
+- DOMAIN-SUFFIX,cloudflareapps.com,🌩️ Cloudflare
+- DOMAIN-SUFFIX,cloudflarebolt.com,🌩️ Cloudflare
+- DOMAIN-SUFFIX,cloudflareclient.com,🌩️ Cloudflare
+- DOMAIN-SUFFIX,cloudflareinsights.com,🌩️ Cloudflare
+- DOMAIN-SUFFIX,cloudflareok.com,🌩️ Cloudflare
+- DOMAIN-SUFFIX,cloudflareresolve.com,🌩️ Cloudflare
+- DOMAIN-SUFFIX,cloudflaressl.com,🌩️ Cloudflare
+- DOMAIN-SUFFIX,cloudflarestatus.com,🌩️ Cloudflare
+- DOMAIN-SUFFIX,cloudflarestream.com,🌩️ Cloudflare
+- DOMAIN-SUFFIX,cloudflaretest.com,🌩️ Cloudflare
+- DOMAIN-SUFFIX,cloudflarewarp.com,🌩️ Cloudflare
+- DOMAIN-SUFFIX,one.one.one,🌩️ Cloudflare
+- DOMAIN-SUFFIX,pages.dev,🌩️ Cloudflare
+- DOMAIN-SUFFIX,videodelivery.net,🌩️ Cloudflare
+- DOMAIN-SUFFIX,warp.plus,🌩️ Cloudflare
+- DOMAIN-SUFFIX,workers.dev,🌩️ Cloudflare
+- IP-CIDR,173.245.48.0/20,🌩️ Cloudflare
+- IP-CIDR,103.21.244.0/22,🌩️ Cloudflare
+- IP-CIDR,103.22.200.0/22,🌩️ Cloudflare
+- IP-CIDR,103.31.4.0/22,🌩️ Cloudflare
+- IP-CIDR,141.101.64.0/18,🌩️ Cloudflare
+- IP-CIDR,108.162.192.0/18,🌩️ Cloudflare
+- IP-CIDR,190.93.240.0/20,🌩️ Cloudflare
+- IP-CIDR,188.114.96.0/20,🌩️ Cloudflare
+- IP-CIDR,197.234.240.0/22,🌩️ Cloudflare
+- IP-CIDR,198.41.128.0/17,🌩️ Cloudflare
+- IP-CIDR,162.158.0.0/15,🌩️ Cloudflare
+- IP-CIDR,104.16.0.0/13,🌩️ Cloudflare
+- IP-CIDR,104.24.0.0/14,🌩️ Cloudflare
+- IP-CIDR,172.64.0.0/13,🌩️ Cloudflare
+- IP-CIDR,131.0.72.0/22,🌩️ Cloudflare
+- DOMAIN-SUFFIX,webofscience.com,🎓学术网站
+- DOMAIN-SUFFIX,sciencedirect.com,🎓学术网站
+- DOMAIN-SUFFIX,webofknowledge.com,🎓学术网站
+- DOMAIN-SUFFIX,clarivate.com,🎓学术网站
+- DOMAIN-SUFFIX,taylorandfrancis.com,🎓学术网站
+- DOMAIN-SUFFIX,dl.acm.org,🎓学术网站
+- DOMAIN,acm-prod.disqus.com,🎓学术网站
+- DOMAIN-SUFFIX,sciencedirectassets.com,🎓学术网站
+- DOMAIN-SUFFIX,readspeaker.com,🎓学术网站
+- DOMAIN-SUFFIX,pubmed.ncbi.nlm.nih.gov,🎓学术网站
+- DOMAIN-SUFFIX,ieee.org,🎓学术网站
+- DOMAIN-SUFFIX,nature.com,🎓学术网站
+- DOMAIN-SUFFIX,elsevier.com,🎓学术网站
+- DOMAIN-SUFFIX,tandfonline.com,🎓学术网站
+- DOMAIN-SUFFIX,springer.com,🎓学术网站
+- DOMAIN-SUFFIX,onlinelibrary.wiley.com,🎓学术网站
+- DOMAIN-SUFFIX,taylorfrancis.com,🎓学术网站

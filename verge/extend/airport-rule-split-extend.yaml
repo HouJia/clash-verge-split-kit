@@ -12,7 +12,7 @@
 # Clash Verge — **扩展分流规则与策略（机场 / 订阅反哺主线）**
 # **文件：** `airport-rule-split-extend.yaml`（Verge 扩展合并稿）
 # **真值源（派生）：** `verge/derive/parts/` — `10-runtime-verge-mihomo.yaml`（Mihomo/Verge 运行时壳），`20-routing-mihomo.yaml`（`proxy-groups`/`rule-providers`/`rules`）。合并：`bash verge/derive/compose.sh`。`render-local.sh` 渲染前**默认**先合并（应急可 `VERGE_SKIP_COMPOSE=1`）。
-# **关联：** MECE 与「广告 vs 应用遥测」见 `verge/analysis/反哺摘录.md`；个人/专用稿为 **`extend/*-rule-split-extend.yaml`**（不经 `parts/`）。
+# **关联：** MECE 与「广告 vs 应用遥测」见 `verge/analysis/机场A/modules/README.md`；个人/专用稿为 **`extend/*-rule-split-extend.yaml`**（不经 `parts/`）。
 # **模板：** 默认 `IP-CIDR,192.0.2.1/32` 为 RFC 5737 占位；真实 VPS 由 `render-local.sh` 替换。**勿**提交可识别个人的全文。
 # **粘贴即用：** **proxy-groups + rules** 与订阅节点（`include-all-proxies`）分离。`reject-loyal` 见文档。`# >>> rulebase:*` 分段可由 `verge/analysis` 反哺（改 `parts` 内路由稿）。
 # **默认渲染：** `bash verge/scripts/render-local.sh` → **`verge/generated/airport-rule-split.local.yaml`**；其他稿用 **`VERGE_EXTEND_FILE=`**（见 `verge/README.md`）。

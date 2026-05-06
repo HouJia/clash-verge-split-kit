@@ -1,0 +1,26 @@
+# 🎮 游戏平台规则
+# Steam 游戏平台分流规则
+# 规则数量: 21 条
+#
+rules:
+- DOMAIN-SUFFIX,steamserver.net,🎮 Steam 登录/下载
+- DOMAIN-SUFFIX,cm.steampowered.com,🎮 Steam 登录/下载
+- DOMAIN,steambroadcast.akamaized.net,🎮 Steam 商店/社区
+- DOMAIN,steamcdn-a.akamaihd.net,🎮 Steam 商店/社区
+- DOMAIN,steamcommunity-a.akamaihd.net,🎮 Steam 商店/社区
+- DOMAIN,steampipe.akamaized.net,🎮 Steam 商店/社区
+- DOMAIN,steamstore-a.akamaihd.net,🎮 Steam 商店/社区
+- DOMAIN,steamusercontent-a.akamaihd.net,🎮 Steam 商店/社区
+- DOMAIN,steamuserimages-a.akamaihd.net,🎮 Steam 商店/社区
+- DOMAIN-SUFFIX,fanatical.com,🎮 Steam 商店/社区
+- DOMAIN-SUFFIX,humblebundle.com,🎮 Steam 商店/社区
+- DOMAIN-SUFFIX,playartifact.com,🎮 Steam 商店/社区
+- DOMAIN-SUFFIX,steam-chat.com,🎮 Steam 商店/社区
+- DOMAIN-SUFFIX,steamcommunity.com,🎮 Steam 商店/社区
+- DOMAIN-SUFFIX,steamgames.com,🎮 Steam 商店/社区
+- DOMAIN-SUFFIX,steampowered.com,🎮 Steam 商店/社区
+- DOMAIN-SUFFIX,steamstat.us,🎮 Steam 商店/社区
+- DOMAIN-SUFFIX,steamstatic.com,🎮 Steam 商店/社区
+- DOMAIN-SUFFIX,underlords.com,🎮 Steam 商店/社区
+- DOMAIN-SUFFIX,valvesoftware.com,🎮 Steam 商店/社区
+- DOMAIN-SUFFIX,steamusercontent.com,🎮 Steam 商店/社区

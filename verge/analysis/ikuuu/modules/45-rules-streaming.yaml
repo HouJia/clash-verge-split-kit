@@ -1,0 +1,22 @@
+# 📺 流媒体平台规则
+# 流媒体平台分流规则（B站、动画疯等）
+# 规则数量: 17 条
+#
+rules:
+- DOMAIN,app.biliapi.net,🌏 爱奇艺&哔哩哔哩
+- DOMAIN,grpc.biliapi.net,🌏 爱奇艺&哔哩哔哩
+- DOMAIN,p-bstarstatic.akamaized.net,🌏 爱奇艺&哔哩哔哩
+- DOMAIN,p.bstarstatic.com,🌏 爱奇艺&哔哩哔哩
+- DOMAIN,upos-bstar-mirrorakam.akamaized.net,🌏 爱奇艺&哔哩哔哩
+- DOMAIN,upos-bstar1-mirrorakam.akamaized.net,🌏 爱奇艺&哔哩哔哩
+- DOMAIN,upos-hz-mirrorakam.akamaized.net,🌏 爱奇艺&哔哩哔哩
+- DOMAIN-SUFFIX,acgvideo.com,🌏 爱奇艺&哔哩哔哩
+- DOMAIN-SUFFIX,bilibili.com,🌏 爱奇艺&哔哩哔哩
+- DOMAIN-SUFFIX,bilibili.tv,🌏 爱奇艺&哔哩哔哩
+- DOMAIN,cache.video.iqiyi.com,🌏 爱奇艺&哔哩哔哩
+- DOMAIN-SUFFIX,iq.com,🌏 爱奇艺&哔哩哔哩
+- DOMAIN,bahamut.akamaized.net,📺 动画疯
+- DOMAIN,gamer-cds.cdn.hinet.net,📺 动画疯
+- DOMAIN,gamer2-cds.cdn.hinet.net,📺 动画疯
+- DOMAIN-SUFFIX,bahamut.com.tw,📺 动画疯
+- DOMAIN-SUFFIX,gamer.com.tw,📺 动画疯
