@@ -26,7 +26,7 @@
 |------|------|------|
 | Rule-providers | 仅有 reject-loyal | 扩展更多场景化规则集 |
 | 广告拦截 | 依赖外部 reject-loyal | 评估本地轻量补充 |
-| 国内站点 | 部分依赖 GEOSITE,cn | 关键站点显式前置（如已做的 example-airport.org） |
+| 国内站点 | 部分依赖 GEOSITE,cn | 关键站点显式前置（如已做的 机场面板域名） |
 | 规则顺序 | 已分层，但可进一步优化 | 高频命中规则前置 |
 
 ---
@@ -42,7 +42,7 @@
 - [ ] **Cursor 规则** - 已添加 PROCESS-NAME + DOMAIN，观察是否需补充新域名
 - [ ] **AI 服务** - 检查 OpenAI/Claude/Perplexity 域名是否完整
 - [ ] **GitHub 生态** - ghcr.io/npm.pkg.github.com 已前置，观察是否需要补充 raw.githubusercontent.com
-- [ ] **机场面板** - ✅ 已添加 example-airport.org 直连，如有其他机场需类似处理
+- [ ] **机场面板** - ✅ 已添加 机场面板域名 直连，如有其他机场需类似处理
 
 **执行方式**：
 ```bash
@@ -56,7 +56,7 @@
 
 | 类别 | 示例域名 | 处理方式 |
 |------|----------|----------|
-| 机场面板 | example-airport.org | ✅ 已添加 |
+| 机场面板 | 机场面板域名 | ✅ 已添加 |
 | 国内视频 | bilibili/youku/iqiyi | 已用 GEOSITE，观察即可 |
 | 腾讯系 | qq.com/wechat.com | GEOSITE,tencent 兜底 |
 | 阿里云 | aliyun.com/alicdn.com | 评估是否需要显式添加 |
@@ -126,7 +126,7 @@ geo-update-interval: 24
 每条显式规则添加注释说明原因：
 ```yaml
 # 格式：[原因] [来源] [时间]
-- DOMAIN-SUFFIX,example-airport.org,🎯 国内直连  # [机场面板登录] [analysis/airport-b] [2026-05-06]
+- DOMAIN-SUFFIX,机场面板域名,🎯 国内直连  # [机场面板登录] [analysis/airport-b] [2026-05-06]
 ```
 
 #### 3.2 定期复盘机制
@@ -182,7 +182,7 @@ VERGE_EXTEND_FILE=airport-a-rule-split-extend.yaml bash verge/scripts/render-loc
 
 ## 下一步行动（本周）
 
-- [x] ✅ 添加 example-airport.org 直连规则
+- [x] ✅ 添加 机场面板域名 直连规则
 - [x] ✅ 创建 analysis/README.md 机场映射文档
 - [ ] 观察 Cursor 分流是否正常（新加坡/阿根廷跳动是否影响使用）
 - [ ] 如有需要，调整 Cursor 组默认走特定地区（而非 ♻️ 自动最优）
