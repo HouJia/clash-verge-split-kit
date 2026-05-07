@@ -1,13 +1,29 @@
 #!/usr/bin/env sh
-# 提交前检查：若修改了 derive/parts/rulesets/*.ini，提示重新生成 config-template.ini
+# 提交前自动生成本机配置
 set -e
 
 ROOT="$(git rev-parse --show-toplevel)"
+OVERRIDE="${ROOT}/verge/generated/local/override.local"
 
-# 检查是否修改了 INI 片段但未更新 config-template.ini
+# 检查是否修改了 INI 片段
 if git diff --cached --name-only | grep -qE '^verge/derive/parts/.*\.ini$'; then
-  echo "提示: 检测到 derive/parts/rulesets/*.ini 有修改。" >&2
-  echo "      如需更新模板，请运行: bash verge/derive/scripts/compose-ini.sh -o verge/template/config-template.ini" >&2
+  echo "检测到 derive/parts/rulesets/*.ini 有修改，正在重新生成配置..." >&2
+  
+  # 检查是否有 render-local.sh
+  if [ -f "${ROOT}/verge/derive/scripts/render-local.sh" ]; then
+    if [ -f "${OVERRIDE}" ]; then
+      # 尝试自动生成本机配置
+      if bash "${ROOT}/verge/derive/scripts/render-local.sh" >/dev/null 2>&1; then
+        echo "  ✓ 已自动更新 verge/generated/config.local.ini" >&2
+      else
+        echo "  ⚠ 自动生成失败，请手动运行：" >&2
+        echo "    bash verge/derive/scripts/render-local.sh 你的公网IPv4" >&2
+      fi
+    else
+      echo "  ⚠ 未找到 ${OVERRIDE}，跳过自动生成本机配置" >&2
+      echo "    如需生成本机配置，请复制 override.local.example 并配置 [vps] 节" >&2
+    fi
+  fi
 fi
 
 exit 0
