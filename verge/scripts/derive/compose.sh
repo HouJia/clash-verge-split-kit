@@ -4,13 +4,13 @@
 # 本脚本同时将 rulesets/_anchors/*.yaml 片段注入到 rules 部分。
 set -euo pipefail
 
-ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PARTS="${ROOT}/parts"
-ANCHORS_DIR="${ROOT}/../rulesets/_anchors"
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+PARTS="${ROOT}/derive/parts"
+ANCHORS_DIR="${ROOT}/rulesets/_anchors"
 OUT_PATH=""
 
 usage() {
-  echo "用法: $0 [-o verge/extend/airport-rule-split-extend.yaml]" >&2
+  echo "用法: $0 [-o verge/template/airport-rule-split-extend.yaml]" >&2
   echo "  默认打印到 stdout；-o 原子写入目标文件。" >&2
   exit 2
 }
@@ -120,7 +120,7 @@ emit() {
         # 本地私有规则锚点说明（由 render-local.sh 从此处注入 override.local 内容）
         echo "  # >>> 本地私有规则注入锚点（由 render-local.sh 从 override.local 注入）"
         echo "  # 作用：放置私有 IP 规则（本机需直连的 IP、机场面板、NAS 等），在标准规则之前最高优先级命中"
-        echo "  # 说明：见 verge/generated/local/override.local.example，复制为 override.local 后编辑"
+        echo "  # 说明：见 verge/generated/local/override.local.example（分节配置文件格式），复制为 override.local 后编辑"
         # 注入片段规则
         echo "  # === 规则片段注入（由 compose.sh 自动组装）==="
         echo "  # 片段源：rulesets/_anchors/*.yaml"
@@ -165,7 +165,7 @@ emit() {
         # 本地私有规则锚点说明（由 render-local.sh 从此处注入 override.local 内容）
         echo "  # >>> 本地私有规则注入锚点（由 render-local.sh 从 override.local 注入）"
         echo "  # 作用：放置私有 IP 规则（本机需直连的 IP、机场面板、NAS 等），在标准规则之前最高优先级命中"
-        echo "  # 说明：见 verge/generated/local/override.local.example，复制为 override.local 后编辑"
+        echo "  # 说明：见 verge/generated/local/override.local.example（分节配置文件格式），复制为 override.local 后编辑"
         # 注入片段规则
         echo "  # === 规则片段注入（由 compose.sh 自动组装）==="
         echo "  # 片段源：rulesets/_anchors/*.yaml"

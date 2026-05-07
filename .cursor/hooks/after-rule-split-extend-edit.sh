@@ -12,17 +12,17 @@ case "${NORMALIZED}" in
   if [[ -z "${REPO_ROOT}" ]]; then
     REPO_ROOT="$(cd "$(dirname "${FILE_PATH}")/../../.." && pwd)"
   fi
-  COMPOSE="${REPO_ROOT}/verge/derive/compose.sh"
+  COMPOSE="${REPO_ROOT}/verge/scripts/derive/compose.sh"
   SCRIPT="${REPO_ROOT}/verge/scripts/render-local.sh"
   if [[ -f "${COMPOSE}" ]]; then
-    bash "${COMPOSE}" -o "${REPO_ROOT}/verge/extend/airport-rule-split-extend.yaml" || exit 0
+    bash "${COMPOSE}" -o "${REPO_ROOT}/verge/template/airport-rule-split-extend.yaml" || exit 0
   fi
   if [[ -f "${SCRIPT}" ]]; then
     VERGE_EXTEND_FILE=airport-rule-split-extend.yaml bash "${SCRIPT}" >/dev/null 2>&1 || true
   fi
   exit 0
   ;;
-*/verge/extend/*-rule-split-extend.yaml) ;;
+*/verge/template/*-rule-split-extend.yaml) ;;
 *) exit 0 ;;
 esac
 
@@ -33,6 +33,8 @@ if [[ -z "${REPO_ROOT}" ]]; then
   REPO_ROOT="$(cd "${EXT_DIR}/../.." && pwd)"
 fi
 SCRIPT="${REPO_ROOT}/verge/scripts/render-local.sh"
+# 更新文件路径引用从 extend 到 template
+EXT_BASE="${EXT_BASE/extend/template}"
 
 if [[ ! -f "${SCRIPT}" ]]; then
   echo "verge-hook: 缺少 ${SCRIPT}" >&2

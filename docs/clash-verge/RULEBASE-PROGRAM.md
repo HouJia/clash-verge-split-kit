@@ -67,7 +67,7 @@
 
 | 方向 | 说明 |
 |------|------|
-| **第 1 阶段（当前优先）** | **Clash Verge + Mihomo**：**`verge/extend/*-rule-split-extend.yaml`** 为协作主稿，`render-local.sh` 出本机粘贴稿；`rule-providers` / `RULE-SET` 按 **`# >>> rulebase:*` 分段**维护；**`verge/analysis/`** 承接忍者云等**离线拆解与反哺**（脱敏见 §13）。 |
+| **第 1 阶段（当前优先）** | **Clash Verge + Mihomo**：**`verge/template/*-rule-split-extend.yaml`** 为协作主稿，`render-local.sh` 出本机粘贴稿；`rule-providers` / `RULE-SET` 按 **`# >>> rulebase:*` 分段**维护；**`verge/analysis/`** 承接忍者云等**离线拆解与反哺**（脱敏见 §13）。 |
 | 第 2 阶段（iOS 侧） | **Quantumult X、LOON、Shadowrocket**：各端模板 / 片段由同一 **base** 派生，与 Verge **同一分组哲学与出站意图**。 |
 | 第 3 阶段（OpenWrt 侧） | **OpenClash、Passwall、Passwall2、luci-app-xray** 等：规则或订阅转换模板注入，与 base 对齐。 |
 | 其它 | **Sing-box** 等按需接入同一 base，不阻塞前两阶段。 |
@@ -76,8 +76,8 @@
 
 ## 9. 与本仓库其它目录的关系
 
-- **`verge/derive/parts/`**：**机场主线**的策略与 **Verge/Mihomo 运行时壳** 分层真值源；合并为 **`verge/extend/airport-rule-split-extend.yaml`**（见 **`verge/derive/README.md`**）。  
-- **`verge/extend/*-rule-split-extend.yaml`**：**可提交的**策略层成稿（主线为合并产物；个人稿不经 `parts/`）；进库须遵守 **§13**。  
+- **`verge/derive/parts/`**：**机场主线**的策略与 **Verge/Mihomo 运行时壳** 分层真值源；合并为 **`verge/template/airport-rule-split-extend.yaml`**（见 **`verge/derive/README.md`**）。  
+- **`verge/template/*-rule-split-extend.yaml`**：**可提交的**策略层成稿（主线为合并产物；个人稿不经 `parts/`）；进库须遵守 **§13**。  
 - **`verge/analysis/airport-a/`**：对**机场A订阅快照**的整理、去重、片段化与审计；结论用于反哺 **Extend** 与各 modular 片段，**不等于**最终唯一真值源；**含敏感信息的快照与节点分析不得提交**（见 **§13**）。  
 - **`verge/analysis/airport-b/`**：对**机场B订阅快照**的离线分析与模块化拆分，结构与 airport-a 保持一致，便于对比不同机场的规则物料。
 
@@ -105,7 +105,7 @@
 
 ### 12.2 规则真值源
 
-- **手写与协作主源（Verge / Mihomo 第一阶段）：** **`verge/derive/parts/`** + **`verge/extend/*-rule-split-extend.yaml`** —— 其中 **机场主线**为 **`10-runtime-verge-mihomo.yaml`**（客户端运行时壳）与 **`20-routing-mihomo.yaml`**（`proxy-groups` / `rule-providers` / `rules`），由 **`verge/derive/compose.sh`** 合并为 **`extend/airport-rule-split-extend.yaml`** 后，再走 **`render-local.sh`** 生成本机粘贴稿。**Quantumult X / LOON / Shadowrocket** 等：未来应以 **与 `20-routing-mihomo.yaml` 相同的策略语义** 为输入做语法派生（本仓库尚未落地转换器）。  
+- **手写与协作主源（Verge / Mihomo 第一阶段）：** **`verge/derive/parts/`** + **`verge/template/*-rule-split-extend.yaml`** —— 其中 **机场主线**为 **`10-runtime-verge-mihomo.yaml`**（客户端运行时壳）与 **`20-routing-mihomo.yaml`**（`proxy-groups` / `rule-providers` / `rules`），由 **`verge/scripts/derive/compose.sh`** 合并为 **`template/airport-rule-split-extend.yaml`** 后，再走 **`render-local.sh`** 生成本机粘贴稿。**Quantumult X / LOON / Shadowrocket** 等：未来应以 **与 `20-routing-mihomo.yaml` 相同的策略语义** 为输入做语法派生（本仓库尚未落地转换器）。  
 - **与「忍者云」过长整包的关系：** 订阅全文仅作 **一次性或周期性分析输入**；落盘到仓库的应是 **结论**（策略语义、组名、`RULE-SET` 编排），而非复制整份远程配置。  
 - 脱敏红线与协作口径见本文 **§13**。
 
@@ -138,7 +138,7 @@
 
 ## 13. 可进库与脱敏红线（必须遵守）
 
-以下适用于 **任何** 拟提交到本公开仓库的路径（含 `verge/extend/`、`refactor-p04-rule-providers/`、`verge/analysis/**` 下**故意**提交的说明性文件等）：
+以下适用于 **任何** 拟提交到本公开仓库的路径（含 `verge/template/`、`refactor-p04-rule-providers/`、`verge/analysis/**` 下**故意**提交的说明性文件等）：
 
 **禁止出现（含链接查询串、Base64、拼在 URL 里的 token）：**
 

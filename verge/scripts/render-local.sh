@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# 将 extend/*.yaml Extend 模板中占位公网 IP（YOUR_VPS_IP 或 192.0.2.1）替换为真实公网 IP，
+# 将 template/*.yaml 模板中占位公网 IP（YOUR_VPS_IP 或 192.0.2.1）替换为真实公网 IP，
 # 并在规则列表最前面注入本地私有规则。
 #
 # 原因：模板里的 RFC 5737 测试地址 / 占位符仅便于入库；写入本机产物时必须改为真实 IPv4，
@@ -10,13 +10,13 @@
 #
 # 产物：generated/ 下与模板成对：去掉「-extend」再接「.local.yaml」。无大模型：仅 sed 与按行解析。
 #
-# 模板选择：环境变量 VERGE_EXTEND_FILE（仅文件名，位于 verge/extend/），默认 airport-rule-split-extend.yaml。
+# 模板选择：环境变量 VERGE_EXTEND_FILE（仅文件名，位于 verge/template/），默认 airport-rule-split-extend.yaml。
 # IP 优先级：命令行参数 > 环境变量 VPS_PUBLIC_IP > override.local 的 [vps] 段首行 IPv4
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 EXT_REL="${VERGE_EXTEND_FILE:-airport-rule-split-extend.yaml}"
-SRC="${ROOT}/extend/${EXT_REL}"
+SRC="${ROOT}/template/${EXT_REL}"
 DST_DIR="${ROOT}/generated"
 
 if [[ "${EXT_REL}" != *-extend.yaml ]]; then
@@ -27,10 +27,10 @@ DST="${DST_DIR}/${EXT_REL%-extend.yaml}.local.yaml"
 LOCAL_DIR="${DST_DIR}/local"
 MERGED_FILE="${LOCAL_DIR}/override.local"
 
-# 主线机场稿：先将 derive/parts/ 合并为 extend（策略层与 Verge/Mihomo 运行时壳分层维护）。
+# 主线机场稿：先将 derive/parts/ 合并为 template（策略层与 Verge/Mihomo 运行时壳分层维护）。
 # 应急仅想对手改合并稿做 IP 替换：VERGE_SKIP_COMPOSE=1 bash …/render-local.sh
 if [[ "${EXT_REL}" == "airport-rule-split-extend.yaml" ]] && [[ -z "${VERGE_SKIP_COMPOSE:-}" ]]; then
-  COMPOSE="${ROOT}/derive/compose.sh"
+  COMPOSE="${ROOT}/scripts/derive/compose.sh"
   if [[ -f "${COMPOSE}" ]] && [[ -f "${ROOT}/derive/parts/20-routing-mihomo.yaml" ]]; then
     bash "${COMPOSE}" -o "${SRC}" || exit 2
   fi
@@ -167,7 +167,7 @@ while IFS= read -r line || [[ -n "${line}" ]]; do
     echo "  # ============================================================================="
     echo "  # 【作用】纠正系统性配置错误（私有 IP、机场面板、NAS 等敏感信息）"
     echo "  # 【添加/修改方法】"
-    echo "  #   1. 编辑 verge/generated/local/override.local（从此目录的 .example 文件复制）"
+    echo "  #   1. 编辑 verge/generated/local/override.local（分节配置文件格式，从此目录的 .example 文件复制）"
     echo "  #   2. 重新生成：bash verge/scripts/render-local.sh ${ip}"
     echo "  #   3. 本文件会被覆盖，修改后需将新产物复制到 Verge"
     echo "  # 【通用规则】非私有的公共规则请修改 verge/rulesets/_anchors/*.yaml（可提交 git）"
@@ -190,7 +190,7 @@ while IFS= read -r line || [[ -n "${line}" ]]; do
       injected=0
       continue
     fi
-    # 保留原有的标准规则内容（从 extend 文件复制）
+    # 保留原有的标准规则内容（从 template 文件复制）
     printf '%s\n' "${line}"
     continue
   fi
@@ -207,7 +207,7 @@ GEN_TS="$(date '+%Y-%m-%d %H:%M:%S %z')"
   printf '# --- 自动生成元信息（下次执行 render-local.sh 会覆盖本段） ---\n'
   printf '# 生成时间：%s\n' "${GEN_TS}"
   printf '# 生成工具：bash verge/scripts/render-local.sh\n'
-  printf '# 源模板（extend）：%s\n' "${EXT_REL}"
+  printf '# 源模板（template）：%s\n' "${EXT_REL}"
   printf '# 本机产物（generated）：%s\n' "$(basename "${DST}")"
   printf '# 作者：我\n'
   printf '# ---\n'

@@ -1,0 +1,809 @@
+# =============================================================================
+# Mihomo/Clash Verge 扩展配置
+# 源文件：由 convert-ini-to-yaml.sh 从 INI 真值源转换生成
+# 警告：本文件为自动生成产物，修改请编辑 derive/parts/*.ini
+# =============================================================================
+
+# =============================================================================
+# Mihomo/Clash Verge 运行时壳配置（基础运行时参数）
+# =============================================================================
+# 本文件定义：
+#   - 代理模式、日志级别、IPv6 支持
+#   - GeoIP/Geosite 数据源与自动更新
+#   - 流量嗅探器（SNI 识别）
+#   - DNS 配置（fake-ip 模式、国内外分流解析）
+# 
+# 与 20-routing-mihomo.yaml 合并后生成完整配置。
+# 详见：verge/derive/README.md
+# =============================================================================
+
+mode: rule
+log-level: info
+ipv6: true
+
+# --- Geo 数据库配置 ---
+# 使用 geodata-mode 而非 classical-mode，内存占用更低
+# 每日自动更新 geo 数据库，确保分流准确性
+geodata-mode: true
+geo-auto-update: true
+geo-update-interval: 24
+
+# GeoIP/Geosite/Mmdb 数据源（MetaCubeX 社区维护，每日自动编译）
+geox-url:
+  geoip: https://github.com/MetaCubeX/meta-rules-dat/releases/download/latest/geoip.dat
+  geosite: https://github.com/MetaCubeX/meta-rules-dat/releases/download/latest/geosite.dat
+  mmdb: https://github.com/MetaCubeX/meta-rules-dat/releases/download/latest/country.mmdb
+  asn: https://github.com/MetaCubeX/meta-rules-dat/releases/download/latest/GeoLite2-ASN.mmdb
+
+# --- 流量嗅探器（SNI 识别）---
+# 启用后可根据 TLS/QUIC 握手信息识别真实域名，绕过 fake-ip 限制
+# 用于：TLS SNI 识别、HTTP Host 头重写、QUIC 流量分流
+sniffer:
+  enable: true
+  sniff:
+    HTTP:
+      ports: [80, 8080-8880]
+      override-destination: true
+    TLS:
+      ports: [443, 8443]
+    QUIC:
+      ports: [443, 8443]
+
+# --- DNS 配置 ---
+# 采用 fake-ip 模式，域名先解析为 198.18.x.x 虚拟 IP，再由 Mihomo 进行域名分流
+# 优点：规避 DNS 污染、支持进程级分流、减少真实 DNS 查询次数
+# 缺点：部分应用需要 fake-ip-filter 才能正常工作
+# 
+# 注意：proxy-server-nameserver 用于解析代理服务器域名，必须返回真实 IP
+dns:
+  enable: true
+  use-hosts: true
+  ipv6: true
+  enhanced-mode: fake-ip
+  fake-ip-range: 198.18.0.1/16
+  # 专用于解析代理服务器（节点）域名的 DNS，返回真实 IP
+  # 解决 Verge 节点测试超时问题：节点域名用真实 IP，其他域名走 fake-ip
+  proxy-server-nameserver:
+    - 223.5.5.5
+    - 119.29.29.29
+  default-nameserver:
+    - 223.5.5.5
+    - 119.29.29.29
+  # 默认 DNS：国内 DoH（DNSPod + 阿里云），解析国内域名快速稳定
+  nameserver:
+    - https://doh.pub/dns-query
+    - https://dns.alidns.com/dns-query
+  # Fallback DNS：国外 DoH/DoT（Cloudflare + Google），当国内无法解析时启用
+  fallback:
+    - https://dns.cloudflare.com/dns-query
+    - tls://8.8.8.8:853
+  # Fallback 触发条件：
+  # - 当解析结果 IP 为 CN 且 geoip-code 匹配时，优先使用国内 DNS
+  # - 保留 240.0.0.0/4（保留地址段）和 0.0.0.0/32 走 fallback
+  fallback-filter:
+    geoip: true
+    geoip-code: CN
+    ipcidr:
+      - 240.0.0.0/4
+      - 0.0.0.0/32
+  fake-ip-filter:
+    - '*.lan'
+    - '*.local'
+    - '+.msftconnecttest.com'
+    - '+.msftncsi.com'
+    - 'localhost.ptlogin2.qq.com'
+    # fake-ip-filter：指定域名不使用 fake-ip，返回真实 IP
+  # GitHub 相关域：跳过 fake-ip 避免 TLS 握手异常，但出站仍由规则走代理
+    - '+.github.com'
+    - '+.githubusercontent.com'
+    - '+.githubassets.com'
+
+proxy-groups:
+  - name: '♻️ 自动最优'
+    type: url-test
+    include-all-proxies: true
+    exclude-filter: '(?i)海外用户专用'
+    filter: '.'
+    url: '..'
+    interval: .cursor
+    tolerance: .DS_Store
+  - name: '🔌 国内直连'
+    type: select
+    proxies:
+      - ♻️ 自动最优
+  - name: '🎚️ 手动切换'
+    type: select
+    proxies:
+      - 🇭🇰 香港节点
+      - 🇯🇵 日本节点
+      - 🇸🇬 新加坡节点
+      - 🌺 台湾节点
+      - 🇺🇸 美国节点
+      - 🇰🇷 韩国节点
+      - 🌍 其它国家
+      - 🔌 国内直连
+  - name: '🔜 工具 · Cursor'
+    type: select
+    proxies:
+      - ..
+      - .cursor
+      - .DS_Store
+      - .git
+      - .githooks
+      - .github
+      - .gitignore
+      - .planning
+      - .pytest_cache
+      - ♻️ 自动最优
+      - 🎚️ 手动切换
+      - 🇭🇰 香港节点
+      - 🇯🇵 日本节点
+      - 🇸🇬 新加坡节点
+      - 🌺 台湾节点
+      - 🇺🇸 美国节点
+      - 🇰🇷 韩国节点
+      - 🌍 其它国家
+      - 🔌 国内直连
+  - name: '🧠 场景 · 境外 AI'
+    type: select
+    proxies:
+      - ..
+      - .cursor
+      - .DS_Store
+      - .git
+      - .githooks
+      - .github
+      - .gitignore
+      - .planning
+      - .pytest_cache
+      - 🇺🇸 美国节点
+      - 🇭🇰 香港节点
+      - 🇯🇵 日本节点
+      - 🇸🇬 新加坡节点
+      - 🌺 台湾节点
+      - 🇰🇷 韩国节点
+      - 🌍 其它国家
+      - 🎚️ 手动切换
+      - ♻️ 自动最优
+      - 🔌 国内直连
+  - name: '💬 场景 · 即时通讯'
+    type: select
+    proxies:
+      - ..
+      - .cursor
+      - .DS_Store
+      - .git
+      - .githooks
+      - .github
+      - .gitignore
+      - .planning
+      - .pytest_cache
+      - ♻️ 自动最优
+      - 🎚️ 手动切换
+      - 🇭🇰 香港节点
+      - 🇯🇵 日本节点
+      - 🇸🇬 新加坡节点
+      - 🌺 台湾节点
+      - 🇺🇸 美国节点
+      - 🇰🇷 韩国节点
+      - 🌍 其它国家
+      - 🔌 国内直连
+  - name: '📢 场景 · 谷歌推送'
+    type: select
+    proxies:
+      - ..
+      - .cursor
+      - .DS_Store
+      - .git
+      - .githooks
+      - .github
+      - .gitignore
+      - .planning
+      - .pytest_cache
+      - ♻️ 自动最优
+      - 🎚️ 手动切换
+      - 🇭🇰 香港节点
+      - 🇯🇵 日本节点
+      - 🇸🇬 新加坡节点
+      - 🌺 台湾节点
+      - 🇺🇸 美国节点
+      - 🇰🇷 韩国节点
+      - 🌍 其它国家
+      - 🔌 国内直连
+  - name: '🎬 场景 · 海外音影社'
+    type: select
+    proxies:
+      - ..
+      - .cursor
+      - .DS_Store
+      - .git
+      - .githooks
+      - .github
+      - .gitignore
+      - .planning
+      - .pytest_cache
+      - ♻️ 自动最优
+      - 🎚️ 手动切换
+      - 🇭🇰 香港节点
+      - 🇯🇵 日本节点
+      - 🇸🇬 新加坡节点
+      - 🌺 台湾节点
+      - 🇺🇸 美国节点
+      - 🇰🇷 韩国节点
+      - 🌍 其它国家
+      - 🔌 国内直连
+  - name: '📱 场景 · TikTok'
+    type: select
+    proxies:
+      - ..
+      - .cursor
+      - .DS_Store
+      - .git
+      - .githooks
+      - .github
+      - .gitignore
+      - .planning
+      - .pytest_cache
+      - 🇺🇸 美国节点
+      - ♻️ 自动最优
+      - 🎚️ 手动切换
+      - 🇭🇰 香港节点
+      - 🇯🇵 日本节点
+      - 🇸🇬 新加坡节点
+      - 🌺 台湾节点
+      - 🇰🇷 韩国节点
+      - 🌍 其它国家
+      - 🔌 国内直连
+  - name: '🐙 场景 · 开发源站'
+    type: select
+    proxies:
+      - ..
+      - .cursor
+      - .DS_Store
+      - .git
+      - .githooks
+      - .github
+      - .gitignore
+      - .planning
+      - .pytest_cache
+      - ♻️ 自动最优
+      - 🎚️ 手动切换
+      - 🇭🇰 香港节点
+      - 🇯🇵 日本节点
+      - 🇸🇬 新加坡节点
+      - 🌺 台湾节点
+      - 🇺🇸 美国节点
+      - 🇰🇷 韩国节点
+      - 🌍 其它国家
+      - 🔌 国内直连
+  - name: '📚 场景 · 学术与数据'
+    type: select
+    proxies:
+      - ..
+      - .cursor
+      - .DS_Store
+      - .git
+      - .githooks
+      - .github
+      - .gitignore
+      - .planning
+      - .pytest_cache
+      - ♻️ 自动最优
+      - 🎚️ 手动切换
+      - 🇭🇰 香港节点
+      - 🇯🇵 日本节点
+      - 🇸🇬 新加坡节点
+      - 🌺 台湾节点
+      - 🇺🇸 美国节点
+      - 🇰🇷 韩国节点
+      - 🌍 其它国家
+      - 🔌 国内直连
+  - name: '🎮 场景 · 游戏平台'
+    type: select
+    proxies:
+      - ..
+      - .cursor
+      - .DS_Store
+      - .git
+      - .githooks
+      - .github
+      - .gitignore
+      - .planning
+      - .pytest_cache
+      - ♻️ 自动最优
+      - 🎚️ 手动切换
+      - 🇭🇰 香港节点
+      - 🇯🇵 日本节点
+      - 🇸🇬 新加坡节点
+      - 🌺 台湾节点
+      - 🇺🇸 美国节点
+      - 🇰🇷 韩国节点
+      - 🌍 其它国家
+      - 🔌 国内直连
+  - name: '💳 PayPal · 国内线路'
+    type: select
+    proxies:
+      - ..
+      - .cursor
+      - .DS_Store
+      - .git
+      - .githooks
+      - .github
+      - .gitignore
+      - .planning
+      - .pytest_cache
+      - 🔌 国内直连
+      - ♻️ 自动最优
+      - 🎚️ 手动切换
+      - 🇭🇰 香港节点
+      - 🇯🇵 日本节点
+      - 🇸🇬 新加坡节点
+      - 🌺 台湾节点
+      - 🇺🇸 美国节点
+      - 🇰🇷 韩国节点
+      - 🌍 其它国家
+  - name: '💳 PayPal · 国际线路'
+    type: select
+    proxies:
+      - ..
+      - .cursor
+      - .DS_Store
+      - .git
+      - .githooks
+      - .github
+      - .gitignore
+      - .planning
+      - .pytest_cache
+      - ♻️ 自动最优
+      - 🎚️ 手动切换
+      - 🇭🇰 香港节点
+      - 🇯🇵 日本节点
+      - 🇸🇬 新加坡节点
+      - 🌺 台湾节点
+      - 🇺🇸 美国节点
+      - 🇰🇷 韩国节点
+      - 🌍 其它国家
+      - 🔌 国内直连
+  - name: '🍎 大厂 · 苹果'
+    type: select
+    proxies:
+      - ..
+      - .cursor
+      - .DS_Store
+      - .git
+      - .githooks
+      - .github
+      - .gitignore
+      - .planning
+      - .pytest_cache
+      - 🔌 国内直连
+      - ♻️ 自动最优
+      - 🎚️ 手动切换
+      - 🇭🇰 香港节点
+      - 🇯🇵 日本节点
+      - 🇸🇬 新加坡节点
+      - 🌺 台湾节点
+      - 🇺🇸 美国节点
+      - 🇰🇷 韩国节点
+      - 🌍 其它国家
+  - name: '🪟 大厂 · 微软'
+    type: select
+    proxies:
+      - ..
+      - .cursor
+      - .DS_Store
+      - .git
+      - .githooks
+      - .github
+      - .gitignore
+      - .planning
+      - .pytest_cache
+      - 🔌 国内直连
+      - ♻️ 自动最优
+      - 🎚️ 手动切换
+      - 🇭🇰 香港节点
+      - 🇯🇵 日本节点
+      - 🇸🇬 新加坡节点
+      - 🌺 台湾节点
+      - 🇺🇸 美国节点
+      - 🇰🇷 韩国节点
+      - 🌍 其它国家
+  - name: '💠 大厂 · 微软跨境'
+    type: select
+    proxies:
+      - ..
+      - .cursor
+      - .DS_Store
+      - .git
+      - .githooks
+      - .github
+      - .gitignore
+      - .planning
+      - .pytest_cache
+      - ♻️ 自动最优
+      - 🎚️ 手动切换
+      - 🇭🇰 香港节点
+      - 🇯🇵 日本节点
+      - 🇸🇬 新加坡节点
+      - 🌺 台湾节点
+      - 🇺🇸 美国节点
+      - 🇰🇷 韩国节点
+      - 🌍 其它国家
+      - 🔌 国内直连
+  - name: '🔍 大厂 · 谷歌'
+    type: select
+    proxies:
+      - ..
+      - .cursor
+      - .DS_Store
+      - .git
+      - .githooks
+      - .github
+      - .gitignore
+      - .planning
+      - .pytest_cache
+      - 🇺🇸 美国节点
+      - ♻️ 自动最优
+      - 🎚️ 手动切换
+      - 🇭🇰 香港节点
+      - 🇯🇵 日本节点
+      - 🇸🇬 新加坡节点
+      - 🌺 台湾节点
+      - 🇰🇷 韩国节点
+      - 🌍 其它国家
+      - 🔌 国内直连
+  - name: '👥 大厂 · 脸书系'
+    type: select
+    proxies:
+      - ..
+      - .cursor
+      - .DS_Store
+      - .git
+      - .githooks
+      - .github
+      - .gitignore
+      - .planning
+      - .pytest_cache
+      - ♻️ 自动最优
+      - 🎚️ 手动切换
+      - 🇭🇰 香港节点
+      - 🇯🇵 日本节点
+      - 🇸🇬 新加坡节点
+      - 🌺 台湾节点
+      - 🇺🇸 美国节点
+      - 🇰🇷 韩国节点
+      - 🌍 其它国家
+      - 🔌 国内直连
+  - name: '🚫 系统 · 广告拦截'
+    type: select
+    proxies:
+      - ..
+      - .cursor
+      - .DS_Store
+      - .git
+      - .githooks
+      - .github
+      - .gitignore
+      - .planning
+      - .pytest_cache
+      - REJECT
+      - 🎚️ 手动切换
+      - ♻️ 自动最优
+      - 🇭🇰 香港节点
+      - 🇯🇵 日本节点
+      - 🇸🇬 新加坡节点
+      - 🌺 台湾节点
+      - 🇺🇸 美国节点
+      - 🇰🇷 韩国节点
+      - 🌍 其它国家
+      - 🔌 国内直连
+  - name: '🍃 系统 · 应用遥测净化'
+    type: select
+    proxies:
+      - ..
+      - .cursor
+      - .DS_Store
+      - .git
+      - .githooks
+      - .github
+      - .gitignore
+      - .planning
+      - .pytest_cache
+      - REJECT
+      - 🎚️ 手动切换
+      - ♻️ 自动最优
+      - 🇭🇰 香港节点
+      - 🇯🇵 日本节点
+      - 🇸🇬 新加坡节点
+      - 🌺 台湾节点
+      - 🇺🇸 美国节点
+      - 🇰🇷 韩国节点
+      - 🌍 其它国家
+      - 🔌 国内直连
+  - name: '🐟 系统 · 漏网之鱼'
+    type: select
+    proxies:
+      - ..
+      - .cursor
+      - .DS_Store
+      - .git
+      - .githooks
+      - .github
+      - .gitignore
+      - .planning
+      - .pytest_cache
+      - ♻️ 自动最优
+      - 🎚️ 手动切换
+      - 🇭🇰 香港节点
+      - 🇯🇵 日本节点
+      - 🇸🇬 新加坡节点
+      - 🌺 台湾节点
+      - 🇺🇸 美国节点
+      - 🇰🇷 韩国节点
+      - 🌍 其它国家
+      - 🔌 国内直连
+  - name: '🇭🇰 香港节点'
+    type: url-test
+    include-all-proxies: true
+    exclude-filter: '(?i)海外用户专用'
+    filter: '(香港|HK|Hong Kong)'
+    url: 'http://www.gstatic.com/generate_204'
+    interval: 300,,50
+    tolerance: 50
+  - name: '🇯🇵 日本节点'
+    type: url-test
+    include-all-proxies: true
+    exclude-filter: '(?i)海外用户专用'
+    filter: '(日本|JP|Japan)'
+    url: 'http://www.gstatic.com/generate_204'
+    interval: 300,,50
+    tolerance: 50
+  - name: '🇸🇬 新加坡节点'
+    type: url-test
+    include-all-proxies: true
+    exclude-filter: '(?i)海外用户专用'
+    filter: '(新加坡|SG|Singapore)'
+    url: 'http://www.gstatic.com/generate_204'
+    interval: 300,,50
+    tolerance: 50
+  - name: '🌺 台湾节点'
+    type: url-test
+    include-all-proxies: true
+    exclude-filter: '(?i)海外用户专用'
+    filter: '(台湾|TW|Taiwan)'
+    url: 'http://www.gstatic.com/generate_204'
+    interval: 300,,50
+    tolerance: 50
+  - name: '🇺🇸 美国节点'
+    type: url-test
+    include-all-proxies: true
+    exclude-filter: '(?i)海外用户专用'
+    filter: '(美国|US|USA|United States)'
+    url: 'http://www.gstatic.com/generate_204'
+    interval: 300,,50
+    tolerance: 50
+  - name: '🇰🇷 韩国节点'
+    type: url-test
+    include-all-proxies: true
+    exclude-filter: '(?i)海外用户专用'
+    filter: '(韩国|KR|Korea|首尔|Seoul)'
+    url: 'http://www.gstatic.com/generate_204'
+    interval: 300,,50
+    tolerance: 50
+  - name: '🌍 其它国家'
+    type: url-test
+    include-all-proxies: true
+    exclude-filter: '(?i)海外用户专用'
+    filter: '^(?!.*(?:海外用户专用|香港|HK|Hong Kong|日本|JP|Japan|新加坡|SG|Singapore|台湾|TW|Taiwan|美国|US|USA|United States|韩国|KR|Korea|首尔|Seoul)).*$'
+    url: 'http://www.gstatic.com/generate_204'
+    interval: 300,,50
+    tolerance: 50
+
+rule-providers:
+  reject-loyal:
+    type: http
+    behavior: domain
+    format: text
+    url: https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/reject.txt
+    path: ./ruleset/reject-loyal.txt
+    interval: 86400
+
+rules:
+  - GEOSITE,private,DIRECT
+  - GEOIP,private,DIRECT,no-resolve
+  - GEOSITE,category-ads-all,🚫 系统 · 广告拦截
+  - GEOSITE,tracker,🍃 系统 · 应用遥测净化
+  - PROCESS-NAME,Cursor,🔜 工具 · Cursor
+  - PROCESS-NAME,Cursor Helper,🔜 工具 · Cursor
+  - PROCESS-NAME,Cursor Helper (GPU),🔜 工具 · Cursor
+  - PROCESS-NAME,Cursor Helper (Plugin),🔜 工具 · Cursor
+  - PROCESS-NAME,Cursor Helper (Renderer),🔜 工具 · Cursor
+  - PROCESS-NAME,Cursor.exe,🔜 工具 · Cursor
+  - PROCESS-NAME,cursor,🔜 工具 · Cursor
+  - DOMAIN-SUFFIX,cursor.com,🔜 工具 · Cursor
+  - DOMAIN-SUFFIX,cursor.sh,🔜 工具 · Cursor
+  - DOMAIN-SUFFIX,cursor-cdn.com,🔜 工具 · Cursor
+  - DOMAIN-SUFFIX,cursorapi.com,🔜 工具 · Cursor
+  - DOMAIN-SUFFIX,openai.com,🧠 场景 · 境外 AI
+  - DOMAIN-SUFFIX,chatgpt.com,🧠 场景 · 境外 AI
+  - DOMAIN-SUFFIX,chat.openai.com,🧠 场景 · 境外 AI
+  - DOMAIN-SUFFIX,oaistatic.com,🧠 场景 · 境外 AI
+  - DOMAIN-SUFFIX,oaiusercontent.com,🧠 场景 · 境外 AI
+  - DOMAIN-SUFFIX,openaimerge.com,🧠 场景 · 境外 AI
+  - DOMAIN-SUFFIX,cdn.openaimerge.com,🧠 场景 · 境外 AI
+  - DOMAIN-SUFFIX,statsig.com,🧠 场景 · 境外 AI
+  - DOMAIN-SUFFIX,statsigapi.net,🧠 场景 · 境外 AI
+  - DOMAIN-SUFFIX,featuregates.org,🧠 场景 · 境外 AI
+  - DOMAIN-SUFFIX,featureassets.org,🧠 场景 · 境外 AI
+  - DOMAIN-SUFFIX,prodregistryv2.org,🧠 场景 · 境外 AI
+  - DOMAIN-SUFFIX,intercom.io,🧠 场景 · 境外 AI
+  - DOMAIN-SUFFIX,intercomcdn.com,🧠 场景 · 境外 AI
+  - DOMAIN-SUFFIX,js.intercomcdn.com,🧠 场景 · 境外 AI
+  - DOMAIN-SUFFIX,ct.sendgrid.net,🧠 场景 · 境外 AI
+  - DOMAIN-SUFFIX,workos.com,🧠 场景 · 境外 AI
+  - DOMAIN-SUFFIX,cdn.workos.com,🧠 场景 · 境外 AI
+  - DOMAIN-SUFFIX,workoscdn.com,🧠 场景 · 境外 AI
+  - DOMAIN-SUFFIX,images.workoscdn.com,🧠 场景 · 境外 AI
+  - DOMAIN,workos.imgix.net,🧠 场景 · 境外 AI
+  - DOMAIN,forwarder.workos.com,🧠 场景 · 境外 AI
+  - DOMAIN,setup.workos.com,🧠 场景 · 境外 AI
+  - DOMAIN,js.stripe.com,🧠 场景 · 境外 AI
+  - DOMAIN,challenges.cloudflare.com,🧠 场景 · 境外 AI
+  - DOMAIN-SUFFIX,ingest.sentry.io,🧠 场景 · 境外 AI
+  - DOMAIN,rum.browser-intake-datadoghq.com,🧠 场景 · 境外 AI
+  - DOMAIN-SUFFIX,anthropic.com,🧠 场景 · 境外 AI
+  - DOMAIN-SUFFIX,claude.ai,🧠 场景 · 境外 AI
+  - DOMAIN-SUFFIX,claude.com,🧠 场景 · 境外 AI
+  - DOMAIN-SUFFIX,platform.claude.com,🧠 场景 · 境外 AI
+  - DOMAIN-SUFFIX,downloads.claude.ai,🧠 场景 · 境外 AI
+  - DOMAIN-SUFFIX,claudeusercontent.com,🧠 场景 · 境外 AI
+  - DOMAIN-SUFFIX,bridge.claudeusercontent.com,🧠 场景 · 境外 AI
+  - GEOSITE,openai,🧠 场景 · 境外 AI
+  - GEOSITE,anthropic,🧠 场景 · 境外 AI
+  - GEOSITE,meta,👥 大厂 · 脸书系
+  - DOMAIN-SUFFIX,t.me,💬 场景 · 即时通讯
+  - DOMAIN-SUFFIX,tdesktop.com,💬 场景 · 即时通讯
+  - DOMAIN-SUFFIX,telegra.ph,💬 场景 · 即时通讯
+  - DOMAIN-SUFFIX,telegram.me,💬 场景 · 即时通讯
+  - DOMAIN-SUFFIX,telegram.org,💬 场景 · 即时通讯
+  - DOMAIN-SUFFIX,telesco.pe,💬 场景 · 即时通讯
+  - IP-CIDR,91.108.0.0/16,💬 场景 · 即时通讯,no-resolve
+  - IP-CIDR,109.239.140.0/24,💬 场景 · 即时通讯,no-resolve
+  - IP-CIDR,149.154.160.0/20,💬 场景 · 即时通讯,no-resolve
+  - DOMAIN-SUFFIX,whatsapp.com,💬 场景 · 即时通讯
+  - DOMAIN-SUFFIX,whatsapp.net,💬 场景 · 即时通讯
+  - GEOSITE,whatsapp,💬 场景 · 即时通讯
+  - DOMAIN,mtalk.google.com,📢 场景 · 谷歌推送
+  - DOMAIN,alt1-mtalk.google.com,📢 场景 · 谷歌推送
+  - DOMAIN,alt2-mtalk.google.com,📢 场景 · 谷歌推送
+  - DOMAIN,alt3-mtalk.google.com,📢 场景 · 谷歌推送
+  - DOMAIN,alt4-mtalk.google.com,📢 场景 · 谷歌推送
+  - DOMAIN,alt5-mtalk.google.com,📢 场景 · 谷歌推送
+  - DOMAIN,alt6-mtalk.google.com,📢 场景 · 谷歌推送
+  - DOMAIN,alt7-mtalk.google.com,📢 场景 · 谷歌推送
+  - DOMAIN,alt8-mtalk.google.com,📢 场景 · 谷歌推送
+  - IP-CIDR,64.233.177.188/32,📢 场景 · 谷歌推送,no-resolve
+  - IP-CIDR,64.233.186.188/32,📢 场景 · 谷歌推送,no-resolve
+  - IP-CIDR,64.233.187.188/32,📢 场景 · 谷歌推送,no-resolve
+  - IP-CIDR,64.233.188.188/32,📢 场景 · 谷歌推送,no-resolve
+  - IP-CIDR,64.233.189.188/32,📢 场景 · 谷歌推送,no-resolve
+  - IP-CIDR,74.125.23.188/32,📢 场景 · 谷歌推送,no-resolve
+  - IP-CIDR,74.125.24.188/32,📢 场景 · 谷歌推送,no-resolve
+  - IP-CIDR,74.125.28.188/32,📢 场景 · 谷歌推送,no-resolve
+  - IP-CIDR,74.125.127.188/32,📢 场景 · 谷歌推送,no-resolve
+  - IP-CIDR,74.125.137.188/32,📢 场景 · 谷歌推送,no-resolve
+  - IP-CIDR,74.125.203.188/32,📢 场景 · 谷歌推送,no-resolve
+  - IP-CIDR,74.125.204.188/32,📢 场景 · 谷歌推送,no-resolve
+  - IP-CIDR,74.125.206.188/32,📢 场景 · 谷歌推送,no-resolve
+  - IP-CIDR,108.177.125.188/32,📢 场景 · 谷歌推送,no-resolve
+  - IP-CIDR,142.250.4.188/32,📢 场景 · 谷歌推送,no-resolve
+  - IP-CIDR,142.250.10.188/32,📢 场景 · 谷歌推送,no-resolve
+  - IP-CIDR,142.250.31.188/32,📢 场景 · 谷歌推送,no-resolve
+  - IP-CIDR,142.250.96.188/32,📢 场景 · 谷歌推送,no-resolve
+  - IP-CIDR,172.217.194.188/32,📢 场景 · 谷歌推送,no-resolve
+  - IP-CIDR,172.217.218.188/32,📢 场景 · 谷歌推送,no-resolve
+  - IP-CIDR,172.217.219.188/32,📢 场景 · 谷歌推送,no-resolve
+  - IP-CIDR,172.253.63.188/32,📢 场景 · 谷歌推送,no-resolve
+  - IP-CIDR,172.253.122.188/32,📢 场景 · 谷歌推送,no-resolve
+  - IP-CIDR,173.194.175.188/32,📢 场景 · 谷歌推送,no-resolve
+  - IP-CIDR,173.194.218.188/32,📢 场景 · 谷歌推送,no-resolve
+  - IP-CIDR,209.85.233.188/32,📢 场景 · 谷歌推送,no-resolve
+  - GEOSITE,netflix,🎬 场景 · 海外音影社
+  - GEOSITE,disney,🎬 场景 · 海外音影社
+  - GEOSITE,hulu,🎬 场景 · 海外音影社
+  - GEOSITE,primevideo,🎬 场景 · 海外音影社
+  - GEOSITE,hbo,🎬 场景 · 海外音影社
+  - GEOSITE,spotify,🎬 场景 · 海外音影社
+  - GEOSITE,twitch,🎬 场景 · 海外音影社
+  - GEOSITE,pixiv,🎬 场景 · 海外音影社
+  - GEOSITE,reddit,🎬 场景 · 海外音影社
+  - GEOSITE,discord,🎬 场景 · 海外音影社
+  - GEOSITE,twitter,🎬 场景 · 海外音影社
+  - DOMAIN-SUFFIX,gamer.com.tw,🎬 场景 · 海外音影社
+  - DOMAIN-SUFFIX,bahamut.com.tw,🎬 场景 · 海外音影社
+  - DOMAIN-SUFFIX,emby.wtf,🎬 场景 · 海外音影社
+  - DOMAIN-SUFFIX,emby.nz,🎬 场景 · 海外音影社
+  - GEOSITE,tiktok,📱 场景 · TikTok
+  - GEOSITE,docker,🐙 场景 · 开发源站
+  - GEOSITE,npmjs,🐙 场景 · 开发源站
+  - DOMAIN-SUFFIX,registry.npmjs.org,🐙 场景 · 开发源站
+  - DOMAIN-SUFFIX,npmjs.org,🐙 场景 · 开发源站
+  - DOMAIN-SUFFIX,pypi.org,🐙 场景 · 开发源站
+  - DOMAIN-SUFFIX,pythonhosted.org,🐙 场景 · 开发源站
+  - DOMAIN-SUFFIX,files.pythonhosted.org,🐙 场景 · 开发源站
+  - DOMAIN-SUFFIX,crates.io,🐙 场景 · 开发源站
+  - DOMAIN-SUFFIX,ghcr.io,🐙 场景 · 开发源站
+  - DOMAIN-SUFFIX,npm.pkg.github.com,🐙 场景 · 开发源站
+  - GEOSITE,github,🐙 场景 · 开发源站
+  - GEOSITE,category-scholar-!cn,📚 场景 · 学术与数据
+  - GEOSITE,google,🔍 大厂 · 谷歌
+  - GEOSITE,youtube,🔍 大厂 · 谷歌
+  - DOMAIN-SUFFIX,gmail.com,🔍 大厂 · 谷歌
+  - DOMAIN-SUFFIX,googlemail.com,🔍 大厂 · 谷歌
+  - DOMAIN,pop.gmail.com,🔍 大厂 · 谷歌
+  - DOMAIN,smtp.gmail.com,🔍 大厂 · 谷歌
+  - DOMAIN,imap.gmail.com,🔍 大厂 · 谷歌
+  - GEOSITE,apple,🍎 大厂 · 苹果
+  - GEOSITE,icloud,🍎 大厂 · 苹果
+  - GEOSITE,apple-dev,🍎 大厂 · 苹果
+  - GEOSITE,itunes,🍎 大厂 · 苹果
+  - GEOSITE,apple-update,🍎 大厂 · 苹果
+  - DOMAIN-SUFFIX,copilot.microsoft.com,💠 大厂 · 微软跨境
+  - DOMAIN-SUFFIX,copilotstudio.microsoft.com,💠 大厂 · 微软跨境
+  - DOMAIN,edgeservices.bing.com,💠 大厂 · 微软跨境
+  - DOMAIN-SUFFIX,sydney.bing.com,💠 大厂 · 微软跨境
+  - DOMAIN-SUFFIX,bingapis.com,💠 大厂 · 微软跨境
+  - GEOSITE,microsoft,🪟 大厂 · 微软
+  - GEOSITE,onedrive,🪟 大厂 · 微软
+  - GEOSITE,linkedin,🪟 大厂 · 微软
+  - DOMAIN-SUFFIX,outlook.com,🪟 大厂 · 微软
+  - DOMAIN-SUFFIX,hotmail.com,🪟 大厂 · 微软
+  - DOMAIN-SUFFIX,live.com,🪟 大厂 · 微软
+  - DOMAIN-SUFFIX,office.com,🪟 大厂 · 微软
+  - DOMAIN-SUFFIX,microsoft365.com,🪟 大厂 · 微软
+  - DOMAIN-SUFFIX,steampowered.com,🎮 场景 · 游戏平台
+  - DOMAIN-SUFFIX,steamcommunity.com,🎮 场景 · 游戏平台
+  - DOMAIN-SUFFIX,steamgames.com,🎮 场景 · 游戏平台
+  - DOMAIN-SUFFIX,steamusercontent.com,🎮 场景 · 游戏平台
+  - DOMAIN-SUFFIX,steamcontent.com,🎮 场景 · 游戏平台
+  - DOMAIN-SUFFIX,steamstatic.com,🎮 场景 · 游戏平台
+  - DOMAIN-SUFFIX,steambroadcast.akamaized.net,🎮 场景 · 游戏平台
+  - DOMAIN-SUFFIX,epicgames.com,🎮 场景 · 游戏平台
+  - DOMAIN-SUFFIX,helpshift.com,🎮 场景 · 游戏平台
+  - DOMAIN-SUFFIX,paragon.com,🎮 场景 · 游戏平台
+  - DOMAIN-SUFFIX,unrealengine.com,🎮 场景 · 游戏平台
+  - DOMAIN-SUFFIX,playstation.com,🎮 场景 · 游戏平台
+  - DOMAIN-SUFFIX,playstation.net,🎮 场景 · 游戏平台
+  - DOMAIN-SUFFIX,playstationnetwork.com,🎮 场景 · 游戏平台
+  - DOMAIN-SUFFIX,sony.com,🎮 场景 · 游戏平台
+  - DOMAIN-SUFFIX,sonyentertainmentnetwork.com,🎮 场景 · 游戏平台
+  - DOMAIN-SUFFIX,xbox.com,🎮 场景 · 游戏平台
+  - DOMAIN-SUFFIX,xboxlive.com,🎮 场景 · 游戏平台
+  - DOMAIN-SUFFIX,xboxlive.com.cn,🎮 场景 · 游戏平台
+  - DOMAIN-SUFFIX,nintendo.com,🎮 场景 · 游戏平台
+  - DOMAIN-SUFFIX,nintendo.net,🎮 场景 · 游戏平台
+  - DOMAIN-SUFFIX,nintendo.co.jp,🎮 场景 · 游戏平台
+  - DOMAIN-SUFFIX,ea.com,🎮 场景 · 游戏平台
+  - DOMAIN-SUFFIX,origin.com,🎮 场景 · 游戏平台
+  - DOMAIN-SUFFIX,ubisoft.com,🎮 场景 · 游戏平台
+  - DOMAIN-SUFFIX,uplay.com,🎮 场景 · 游戏平台
+  - GEOSITE,steam,🎮 场景 · 游戏平台
+  - GEOSITE,epicgames,🎮 场景 · 游戏平台
+  - GEOSITE,xbox,🎮 场景 · 游戏平台
+  - GEOSITE,nintendo,🎮 场景 · 游戏平台
+  - GEOSITE,bilibili,🔌 国内直连
+  - GEOSITE,youku,🔌 国内直连
+  - GEOSITE,iqiyi,🔌 国内直连
+  - GEOSITE,tencent,DIRECT
+  - DOMAIN-SUFFIX,paypal.cn,💳 PayPal · 国内线路
+  - DOMAIN-SUFFIX,gopay.com.cn,💳 PayPal · 国内线路
+  - GEOSITE,paypal,💳 PayPal · 国际线路
+  - DOMAIN-SUFFIX,openwrt.ai,🎚️ 手动切换
+  - GEOSITE,cn,🔌 国内直连
+  - GEOIP,cn,🔌 国内直连,no-resolve
+  - GEOSITE,geolocation-!cn,🎚️ 手动切换
+  - MATCH,🐟 系统 · 漏网之鱼
+  - GEOSITE,cn,🔌 国内直连
+  - GEOIP,cn,🔌 国内直连,no-resolve
+  - GEOSITE,geolocation-!cn,🎚️ 手动切换
+  - MATCH,🐟 系统 · 漏网之鱼
