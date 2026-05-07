@@ -61,18 +61,44 @@ emit_ruleset_fragments() {
   for fragment in "${fragments[@]}"; do
     file="${RULESETS_DIR}/${fragment}"
     if [[ -f "${file}" ]]; then
-      # 读取文件内容，过滤出 ruleset= 行
-      while IFS= read -r line || [[ -n "${line}" ]]; do
-        # 跳过注释和空行
-        [[ -z "${line}" ]] && continue
-        [[ "${line}" =~ ^[[:space:]]*\; ]] && continue
-        # 只输出 ruleset= 开头的行
-        if [[ "${line}" =~ ^ruleset= ]]; then
-          echo "${line}"
+      # 提取编号（如 30）从文件名（30-ai.ini）
+      local fragment_num="${fragment%%-*}"
+
+      # 读取片段标题（第一行注释）和详细说明（第二行注释）
+      local title="" desc=""
+      local line_num=0
+      while IFS= read -r line && [[ ${line_num} -lt 2 ]]; do
+        if [[ "${line}" =~ ^\;[[:space:]]*(.+)$ ]]; then
+          local clean_line="${BASH_REMATCH[1]}"
+          if [[ ${line_num} -eq 0 ]]; then
+            title="${clean_line}"
+          else
+            desc="${clean_line}"
+          fi
         fi
+        ((line_num++))
+      done < "${file}"
+
+      # 输出分隔线和标题（对齐 YAML 格式：编号-标题）
+      echo ""
+      if [[ -n "${title}" ]]; then
+        echo "; ================== ${fragment_num}-${title} =================="
+      fi
+      if [[ -n "${desc}" ]]; then
+        echo "; ${desc}"
+      fi
+
+      # 输出片段内容（保留注释，跳过前两行标题）
+      local skip=0
+      while IFS= read -r line || [[ -n "${line}" ]]; do
+        ((skip++))
+        [[ ${skip} -le 2 ]] && continue  # 跳过前两行标题
+        # 输出所有内容（包括注释和空行）
+        echo "${line}"
       done < "${file}"
     fi
   done
+  echo ""
 }
 
 # 合并并注入片段
