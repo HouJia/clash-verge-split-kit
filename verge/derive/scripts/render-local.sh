@@ -133,7 +133,30 @@ while IFS= read -r line || [[ -n "${line}" ]]; do
       echo "; 📋 本地私有规则（最高优先级，在标准规则之前命中）"
       echo "; 来源：${OVERRIDE_FILE} 的 [rules] 节"
       echo "; ============================================================================="
-      cat "${RULES_TMP}"
+      # 将 YAML 格式规则转换为 INI 的 ruleset= 格式
+      while IFS= read -r rule_line || [[ -n "${rule_line}" ]]; do
+        [[ -z "${rule_line// }" ]] && continue
+        [[ "${rule_line}" =~ ^[[:space:]]*# ]] && continue
+        # 解析 YAML 格式: "- TYPE,CONTENT,GROUP,no-resolve"
+        if [[ "${rule_line}" =~ ^[[:space:]]*-[[:space:]]+(.+)$ ]]; then
+          rule_content="${BASH_REMATCH[1]}"
+          # 替换 IP 占位符
+          rule_content="${rule_content//YOUR_VPS_IP/${ip}}"
+          rule_content="${rule_content//192.0.2.1/${ip}}"
+          # 解析规则: TYPE,CONTENT,GROUP,no-resolve
+          IFS=',' read -ra parts <<< "${rule_content}"
+          if [[ ${#parts[@]} -ge 3 ]]; then
+            rule_type="${parts[0]}"
+            rule_value="${parts[1]}"
+            group_name="${parts[2]}"
+            no_resolve=""
+            if [[ ${#parts[@]} -ge 4 && "${parts[3]}" == "no-resolve" ]]; then
+              no_resolve=",no-resolve"
+            fi
+            echo "ruleset=${group_name},[]${rule_type},${rule_value}${no_resolve}"
+          fi
+        fi
+      done <"${RULES_TMP}"
       echo ""
     fi
     
@@ -207,6 +230,11 @@ done <"${tmp_ip}" >"${tmp_ini}"
       
       case "${type}" in
       "select")
+        # 如果 filter 是 .*，表示包含所有节点
+        if [[ "${filter}" == ".*" ]]; then
+          echo "    include-all-proxies: true"
+          echo "    exclude-filter: '(?i)海外用户专用'"
+        fi
         if [[ ${#options[@]} -gt 0 ]]; then
           echo "    proxies:"
           for opt in "${options[@]}"; do
