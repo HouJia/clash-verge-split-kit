@@ -470,3 +470,36 @@ echo "VPS IP：${ip}"
 if has_content "${RULES_TMP}"; then
   echo "已注入本地私有规则（来自 ${OVERRIDE_FILE}）"
 fi
+
+# =============================================================================
+# 运行配置回归测试
+# =============================================================================
+echo ""
+echo "=========================================="
+echo "  运行配置回归测试..."
+echo "=========================================="
+echo ""
+
+TESTS_DIR="${ROOT}/verge/tests"
+if [[ -f "${TESTS_DIR}/test_config.py" ]]; then
+  if command -v python3 &> /dev/null; then
+    if python3 -c "import yaml" 2>/dev/null; then
+      if python3 "${TESTS_DIR}/test_config.py" 2>&1; then
+        echo ""
+        echo "✅ 配置回归测试通过！"
+      else
+        echo ""
+        echo "❌ 配置回归测试失败！"
+        echo "请检查生成的配置文件是否有误。"
+        exit 1
+      fi
+    else
+      echo "⚠️  未安装 PyYAML，跳过配置验证"
+      echo "建议运行: pip3 install pyyaml"
+    fi
+  else
+    echo "⚠️  未找到 Python3，跳过配置验证"
+  fi
+else
+  echo "⚠️  未找到测试脚本，跳过配置验证"
+fi
