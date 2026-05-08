@@ -133,16 +133,17 @@ while IFS= read -r line || [[ -n "${line}" ]]; do
       echo "; 📋 本地私有规则（最高优先级，在标准规则之前命中）"
       echo "; 来源：${OVERRIDE_FILE} 的 [rules] 节"
       echo "; ============================================================================="
-      # 将 YAML 格式规则转换为 INI 的 ruleset= 格式
+      # 支持两种格式：YAML 格式（- TYPE,CONTENT,GROUP）或 INI 格式（ruleset=GROUP,[]TYPE,CONTENT）
       while IFS= read -r rule_line || [[ -n "${rule_line}" ]]; do
         [[ -z "${rule_line// }" ]] && continue
         [[ "${rule_line}" =~ ^[[:space:]]*# ]] && continue
+        [[ "${rule_line}" =~ ^[[:space:]]*\; ]] && continue
+        # 替换 IP 占位符
+        rule_line="${rule_line//YOUR_VPS_IP/${ip}}"
+        rule_line="${rule_line//192.0.2.1/${ip}}"
         # 解析 YAML 格式: "- TYPE,CONTENT,GROUP,no-resolve"
         if [[ "${rule_line}" =~ ^[[:space:]]*-[[:space:]]+(.+)$ ]]; then
           rule_content="${BASH_REMATCH[1]}"
-          # 替换 IP 占位符
-          rule_content="${rule_content//YOUR_VPS_IP/${ip}}"
-          rule_content="${rule_content//192.0.2.1/${ip}}"
           # 解析规则: TYPE,CONTENT,GROUP,no-resolve
           IFS=',' read -ra parts <<< "${rule_content}"
           if [[ ${#parts[@]} -ge 3 ]]; then
@@ -155,6 +156,9 @@ while IFS= read -r line || [[ -n "${line}" ]]; do
             fi
             echo "ruleset=${group_name},[]${rule_type},${rule_value}${no_resolve}"
           fi
+        # 解析 INI 格式: "ruleset=GROUP,[]TYPE,CONTENT,no-resolve"
+        elif [[ "${rule_line}" =~ ^ruleset=(.+)$ ]]; then
+          echo "${rule_line}"
         fi
       done <"${RULES_TMP}"
       echo ""
