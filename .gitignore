@@ -2,7 +2,7 @@
 
 # --- 本机 / 生成物（命名约定）---
 # · *.local.yaml — Mihomo/Verge「粘贴扩展」类本机稿（任意目录），勿提交。
-# · verge/generated/ — 脚本与生成器输出目录；仅 **verge/generated/local/*.example** 可入库（本机覆写见同目录 override.local）。
+# · verge/generated/ — 脚本与生成器输出目录；仅 **verge/generated/local/*.example** 可入库（本机覆写见同目录 override.local.ini）。
 # · verge/analysis/ — 订阅拆解审计材料（可能含脱敏前配置），勿提交。
 
 *.local.yaml

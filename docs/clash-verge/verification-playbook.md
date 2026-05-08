@@ -12,7 +12,7 @@
 ## 前置
 
 - Clash Verge 使用 **规则（Rule）模式**；分流才按 `rules` 生效（与 `local-split-vps.md` 一致）。
-- 已在 Verge 中加载 **全局扩展**，且扩展内容与所选 **`VERGE_EXTEND_FILE`**（或默认机场稿）成对的 **`verge/generated/*-rule-split.local.yaml`**（均由 **`bash verge/scripts/render-local.sh`** 写出）一致；勿提交上述本机稿或 **`verge/generated/local/override.local`**。**密钥类内容勿写入公开文档。**
+- 已在 Verge 中加载 **全局扩展**，且扩展内容与所选 **`VERGE_EXTEND_FILE`**（或默认机场稿）成对的 **`verge/generated/*-rule-split.local.yaml`**（均由 **`bash verge/scripts/render-local.sh`** 写出）一致；勿提交上述本机稿或 **`verge/generated/local/override.local.ini`**。**密钥类内容勿写入公开文档。**
 - 客户端菜单、「当前运行时配置」「Connections」等名称以 **你本机已安装的 Clash Verge / mihomo** 为准。
 
 ---

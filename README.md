@@ -10,7 +10,7 @@
 | [`docs/clash-verge/`](docs/clash-verge/) | 自用说明与里程碑白话 FAQ。 |
 | [`.planning/`](.planning/) | 路线图、需求、阶段上下文（GSD）。 |
 
-快速分流：**机场主线**改 [`verge/derive/parts/`](verge/derive/parts/) 后按 [`verge/README.md`](verge/README.md) 执行 `compose` / `render-local.sh`；**个人稿**直接维护 `verge/template/*-rule-split-extend.yaml`。可配合 **`verge/generated/local/override.local`**（分节配置文件格式）与 Hooks。
+快速分流：**机场主线**改 [`verge/derive/parts/`](verge/derive/parts/) 后按 [`verge/README.md`](verge/README.md) 执行 `compose` / `render-local.sh`；**个人稿**直接维护 `verge/template/*-rule-split-extend.yaml`。可配合 **`verge/generated/local/override.local.ini`**（INI 格式）与 Hooks。
 
 ## v1.1 文档与工具链
 

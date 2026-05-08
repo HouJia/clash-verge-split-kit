@@ -17,7 +17,7 @@
 - **已发布版本：** v1.0（标签 `v1.0`）— CLI 与审计 UI 已交付
 - **v1.1 交付：** Phase 2–4 已完成；入口见根 `README.md` 中「v1.1 文档与工具链」；验证见 [`docs/clash-verge/verification-playbook.md`](../docs/clash-verge/verification-playbook.md)
 - **技术栈：** Python 3.9+、setuptools、PyYAML、标准库 `http.server`
-- **主要路径：** `hjs-egress-ip-cli/src/hjs_egress_ip/`（CLI、`formatters`、`web`、`data/probes.packaged.json`）；`verge/scripts/render-local.sh` + `.cursor/hooks/` / `.githooks/`（扩展 `*-rule-split-extend.yaml` → 成对的 `verge/generated/*-rule-split.local.yaml`）；本机覆写 **`verge/generated/local/override.local`**（示例见同目录 **`*.example`**，根 `.gitignore` 约定）
+- **主要路径：** `hjs-egress-ip-cli/src/hjs_egress_ip/`（CLI、`formatters`、`web`、`data/probes.packaged.json`）；`verge/scripts/render-local.sh` + `.cursor/hooks/` / `.githooks/`（扩展 `*-rule-split-extend.yaml` → 成对的 `verge/generated/*-rule-split.local.yaml`）；本机覆写 **`verge/generated/local/override.local.ini`**（示例见同目录 **`*.example`**，根 `.gitignore` 约定）
 - **质量：** `pytest` 覆盖解析与分组；v1.0 审查 Warning 已闭环
 - **v1.0 规划归档：** `.planning/milestones/v1.0-phases/01-hjs-egress-ip-cli-tool/`
 

@@ -18,7 +18,7 @@ TEMPLATE="${ROOT}/verge/template/config-template.ini"
 RULESETS_DIR="${ROOT}/verge/derive/parts/rulesets"
 DST_DIR="${ROOT}/verge/generated"
 LOCAL_DIR="${DST_DIR}/local"
-OVERRIDE_FILE="${LOCAL_DIR}/override.local"
+OVERRIDE_FILE="${LOCAL_DIR}/override.local.ini"
 DST_INI="${DST_DIR}/config.local.ini"
 DST_YAML="${DST_DIR}/config.local.yaml"
 
@@ -188,7 +188,7 @@ done <"${tmp_ip}" >"${tmp_ini}"
   printf '; VPS IP：%s\n' "${ip}"
   printf '; 源模板：verge/template/config-template.ini\n'
   printf '; 本机产物：verge/generated/config.local.ini\n'
-  printf '; 注意：修改请编辑 derive/parts/rulesets/*.ini 和 generated/local/override.local\n'
+  printf '; 注意：修改请编辑 derive/parts/rulesets/*.ini 和 generated/local/override.local.ini\n'
   printf '; ---\n\n'
   cat "${tmp_ini}"
 } >"${DST_INI}"
@@ -200,7 +200,7 @@ done <"${tmp_ip}" >"${tmp_ini}"
   printf '# VPS IP：%s\n' "${ip}"
   printf '# 源模板：verge/template/config-template.ini\n'
   printf '# 本机产物：verge/generated/config.local.yaml\n'
-  printf '# 注意：修改请编辑 derive/parts/rulesets/*.ini 和 generated/local/override.local\n'
+  printf '# 注意：修改请编辑 derive/parts/rulesets/*.ini 和 generated/local/override.local.ini\n'
   printf '# ---\n\n'
 
   # 生成 proxy-groups

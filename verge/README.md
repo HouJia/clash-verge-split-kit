@@ -13,16 +13,16 @@
 | [`template/airport-rule-split-extend.yaml`](template/airport-rule-split-extend.yaml) | **默认主线合并稿**（由 **`derive/parts/`** 生成；日常改策略请编辑 **`derive/parts/20-routing-mihomo.yaml`** 等后再 `compose.sh` / `render-local.sh`）。含 **`# >>> rulebase:*`** 分段。 |
 | [`template/` 下其它 `*-rule-split-extend.yaml`](template/) | **个人/专用稿**：不经 `derive/parts/`；渲染时 **`VERGE_EXTEND_FILE`** 为**文件名**。 |
 | `generated/` 下 **`*-rule-split.local.yaml`** | **本机产物**：与各 Extend **一一成对**（见上文命名约定）；任选其一全文复制进 Verge **全局扩展配置**。**勿提交**。 |
-| [`scripts/render-local.sh`](scripts/render-local.sh) | 对 **`airport-rule-split-extend.yaml`**：**先** `scripts/derive/compose.sh` 写入合并稿（可用 **`VERGE_SKIP_COMPOSE=1`** 跳过）；再 **`sed`** 替换 **`YOUR_VPS_IP`** / **`192.0.2.1`**；可选并入 **`generated/local/override.local`** 的 **`[rules]`**（分节配置文件格式）。`VERGE_EXTEND_FILE` 选其它 extend **文件名**。 |
-| [`generated/local/override.local.example`](generated/local/override.local.example) | 复制为 **`generated/local/override.local`**（勿提交）；分节配置文件格式，含 **`[vps]`** 与 **`[rules]`** 节。 |
+| [`scripts/render-local.sh`](scripts/render-local.sh) | 对 **`airport-rule-split-extend.yaml`**：**先** `scripts/derive/compose.sh` 写入合并稿（可用 **`VERGE_SKIP_COMPOSE=1`** 跳过）；再 **`sed`** 替换 **`YOUR_VPS_IP`** / **`192.0.2.1`**；可选并入 **`generated/local/override.local.ini`** 的 **`[rules]`**（INI 格式）。`VERGE_EXTEND_FILE` 选其它 extend **文件名**。 |
+| [`generated/local/override.local.ini.example`](generated/local/override.local.ini.example) | 复制为 **`generated/local/override.local.ini`**（勿提交）；INI 格式，含 **`[vps]`** 与 **`[rules]`** 节。 |
 
-**忽略规则（根 `.gitignore`）：** **`*.local.yaml`** 覆盖仓库内任意位置的 Mihomo 粘贴稿；**`verge/generated/*`** 默认可忽略，**仅放行 `verge/generated/local/*.example`**（本机覆写 **`override.local`** 不在仓库中）。
+**忽略规则（根 `.gitignore`）：** **`*.local.yaml`** 覆盖仓库内任意位置的 Mihomo 粘贴稿；**`verge/generated/*`** 默认可忽略，**仅放行 `verge/generated/local/*.example`**（本机覆写 **`override.ini`** 不在仓库中）。
 
 ## 一次性配置（本机）
 
 1. **本机合并配置（推荐）**  
    ```bash
-   cp verge/generated/local/override.local.example verge/generated/local/override.local
+   cp verge/generated/local/override.local.ini.example verge/generated/local/override.local.ini
    # 编辑：在 [vps] 下写一行公网 IPv4；按需填写 [rules-before-cn]（可留空仅注释）
    ```
    **说明：** Hooks / 无参运行依赖 **`[vps]`** 中已填写 IPv4，或本机已导出 **`VPS_PUBLIC_IP`**。
@@ -41,13 +41,13 @@
 
 1. **主线机场稿**：编辑 **`verge/derive/parts/`**（**`10-runtime-verge-mihomo.yaml`** 或 **`20-routing-mihomo.yaml`**）；保存后 **`render-local.sh` / Hook** 会先 `compose` 再生成 `generated/`（也可手工：`bash verge/scripts/derive/compose.sh -o verge/template/airport-rule-split-extend.yaml`）。  
 2. **个人稿**：直接编辑 **`verge/template/`** 下非 `airport` 的 **`*-rule-split-extend.yaml`**。  
-3. **自动生成**：若已配置 `generated/local/override.local`（`[vps]`，分节配置文件格式）且使用 Cursor Hooks，或提交前 Hook，会得到最新的 **`generated/airport-rule-split.local.yaml`**（或其它稿的成对 `.local.yaml`）。  
+3. **自动生成**：若已配置 `generated/local/override.local.ini`（`[vps]`，INI 格式）且使用 Cursor Hooks，或提交前 Hook，会得到最新的 **`generated/config.local.yaml`**。  
 4. **手动生成**（任意时刻）：  
    ```bash
    bash verge/scripts/render-local.sh
    # 或改用个人稿：
    # VERGE_EXTEND_FILE=myvps-DO-rule-split-extend.yaml bash verge/scripts/render-local.sh
-   # 或未写 override.local 的 [vps] 时：
+   # 或未写 override.ini 的 [vps] 时：
    bash verge/scripts/render-local.sh 你的公网IPv4
    ```  
 5. 打开 `generated/airport-rule-split.local.yaml`（或当前稿对应的 `*-rule-split.local.yaml`）→ 全选复制 → Verge **全局扩展配置** → 保存；**模式** 选 **规则（Rule）**。

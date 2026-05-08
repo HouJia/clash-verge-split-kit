@@ -53,14 +53,14 @@ verge/analysis/
 **反哺方式**：
 - 从 `modules/` 中提取通用的规则模式
 - 将通用规则添加到 `verge/derive/parts/20-routing-mihomo.yaml`
-- 将私有/机场特定规则添加到本地 `override.local`，**不走 Git**
+- 将私有/机场特定规则添加到本地 `override.local.ini`，**不走 Git**
 
 ## 本地配置文件
 
 对于仅本机生效的规则（如机场面板域名），使用：
 
 ```bash
-verge/generated/local/override.local
+verge/generated/local/override.local.ini
 ```
 
 此文件已在 `.gitignore` 中排除，**不会**提交到 Git。
@@ -68,9 +68,9 @@ verge/generated/local/override.local
 示例用法：
 ```bash
 # 1. 复制示例文件
-cp verge/generated/local/override.local.example verge/generated/local/override.local
+cp verge/generated/local/override.local.ini.example verge/generated/local/override.local.ini
 
-# 2. 编辑 override.local，在 [rules-before-cn] 节中添加本地规则
+# 2. 编辑 override.local.ini，在 [rules] 节中添加本地规则
 # 例如：机场面板域名直连、个人域名等
 
 # 3. 重新生成配置

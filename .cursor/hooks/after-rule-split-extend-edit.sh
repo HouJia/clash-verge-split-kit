@@ -42,7 +42,7 @@ if [[ ! -f "${SCRIPT}" ]]; then
 fi
 
 if ! VERGE_EXTEND_FILE="${EXT_BASE}" bash "${SCRIPT}" >/dev/null 2>&1; then
-  echo "verge-hook: render-local.sh 未生成（请配置 verge/generated/local/override.local 的 [vps]、或 VPS_PUBLIC_IP）。详见 verge/README.md" >&2
+  echo "verge-hook: render-local.sh 未生成（请配置 verge/generated/local/override.local.ini 的 [vps]、或 VPS_PUBLIC_IP）。详见 verge/README.md" >&2
 fi
 
 exit 0

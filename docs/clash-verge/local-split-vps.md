@@ -6,7 +6,7 @@
 
 **主路径：** [Clash Verge — Extend](https://www.clashverge.dev/guide/extend.html)：`airport` **主线**的真值源为 **`verge/derive/parts/`**，经 **`verge/derive/compose.sh`** 得到 [`verge/extend/airport-rule-split-extend.yaml`](../../verge/extend/airport-rule-split-extend.yaml)，再 **`bash verge/scripts/render-local.sh`**（或 `VERGE_EXTEND_FILE=…` 选用个人稿）得到 **`verge/generated/*-rule-split.local.yaml`**，粘贴进 **全局扩展配置**。详见 [`verge/derive/README.md`](../../verge/derive/README.md) 与 [`verge/README.md`](../../verge/README.md)。
 
-**换机：** 克隆仓库 → 复制 `verge/generated/local/override.local.example` 为 **`override.local`** 并填写 **`[vps]`**（及可选 **`[rules-before-cn]`**）→ 在 Verge 里重新接入节点 → 按所用模板生成或刷新成对的 `*-rule-split.local.yaml`（默认 `airport-rule-split.local.yaml`）再贴扩展。
+**换机：** 克隆仓库 → 复制 `verge/generated/local/override.local.ini.example` 为 **`override.local.ini`** 并填写 **`[vps]`**（及可选 **`[rules]`**）→ 在 Verge 里重新接入节点 → 按所用模板生成或刷新成对的 `config.local.yaml` 再贴扩展。
 
 ---
 
@@ -40,7 +40,7 @@
 ## 4. 公开仓库要注意啥？
 
 - **可进 Git：** 文档、`verge/extend/*-rule-split-extend.yaml`（仅含占位 IP 的模板）。
-- **勿进 Git：** `*.local.yaml`（任意路径）、`verge/generated/local/override.local`、订阅、`uuid`、密码等；**`verge/generated/local/*.example`** 可提交（见根 `.gitignore`）。
+- **勿进 Git：** `*.local.yaml`（任意路径）、`verge/generated/local/override.local.ini`、订阅、`uuid`、密码等；**`verge/generated/local/*.example`** 可提交（见根 `.gitignore`）。
 
 ---
 
