@@ -431,17 +431,29 @@ class TestRules(unittest.TestCase):
                                 f"规则引用了不存在的策略组: {target}\n规则: {rule}")
 
     def test_201_private_rules_first(self):
-        """测试: 私有/局域网规则应该在前面"""
-        found_non_private = False
-        private_types = {'GEOSITE,private', 'GEOIP,private'}
+        """测试: GEOSITE/GEOIP private 应早于后续片段中的 DOMAIN/IP-CIDR 规则。
 
+        列表首部允许本地注入的直连规则（render-local 写入的 IP-CIDR、DOMAIN-SUFFIX 等），
+        它们优先于私网库规则命中，与模板注释「最高优先级」一致。
+        """
+        private_types = {'GEOSITE,private', 'GEOIP,private'}
+        first_private_idx = None
         for i, rule in enumerate(self.yaml_rules):
-            if isinstance(rule, str):
-                if any(pt in rule for pt in private_types):
-                    if found_non_private:
-                        self.fail(f"私有规则应该在前面，但在位置 {i} 发现: {rule}")
-                elif 'DOMAIN' in rule or 'IP-CIDR' in rule:
-                    found_non_private = True
+            if isinstance(rule, str) and any(pt in rule for pt in private_types):
+                first_private_idx = i
+                break
+        self.assertIsNotNone(first_private_idx, '缺少 GEOSITE,private 或 GEOIP,private')
+
+        found_non_private = False
+        domain_ip_markers = ('DOMAIN-SUFFIX', 'DOMAIN-KEYWORD', 'IP-CIDR')
+        for i, rule in enumerate(self.yaml_rules):
+            if not isinstance(rule, str):
+                continue
+            if any(pt in rule for pt in private_types):
+                if found_non_private:
+                    self.fail(f"私有规则应该在前面，但在位置 {i} 发现: {rule}")
+            elif i > first_private_idx and any(m in rule for m in domain_ip_markers):
+                found_non_private = True
 
     def test_202_cursor_rules_exist(self):
         """测试: Cursor 规则必须存在"""

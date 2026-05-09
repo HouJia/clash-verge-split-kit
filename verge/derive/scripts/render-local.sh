@@ -38,6 +38,7 @@ read_ip_from_override() {
     fi
     if [[ "${in_vps}" -eq 1 ]]; then
       [[ "${line}" =~ ^[[:space:]]*# ]] && continue
+      [[ "${line}" =~ ^[[:space:]]*\; ]] && continue
       ip="$(echo "${line}" | tr -d '[:space:]')"
       [[ -n "${ip}" ]] && echo "${ip}" && return 0
     fi
@@ -345,14 +346,47 @@ done <"${tmp_ip}" >"${tmp_ini}"
     echo "# ============================================================================="
     while IFS= read -r line || [[ -n "${line}" ]]; do
       [[ "${line}" =~ ^[[:space:]]*# ]] && continue
+      [[ "${line}" =~ ^[[:space:]]*\; ]] && continue
       [[ -z "${line// }" ]] && continue
-      # 转换 YAML 格式
+      # 转换 YAML 格式: "- TYPE,CONTENT,GROUP"
       if [[ "${line}" =~ ^[[:space:]]*-[[:space:]]+(.+)$ ]]; then
         rule_line="${BASH_REMATCH[1]}"
         # 替换 IP
         rule_line="${rule_line//YOUR_VPS_IP/${ip}}"
         rule_line="${rule_line//192.0.2.1/${ip}}"
         echo "  - ${rule_line}"
+      # 与 INI 注入一致：ruleset=GROUP,[]TYPE,CONTENT,no-resolve
+      elif [[ "${line}" =~ ^[[:space:]]*ruleset=(.+)$ ]]; then
+        ruleset_def="${BASH_REMATCH[1]}"
+        group_name=""
+        rule_def=""
+        if [[ "${ruleset_def}" =~ ^([^,]+),(.+)$ ]]; then
+          group_name="${BASH_REMATCH[1]}"
+          rule_def="${BASH_REMATCH[2]}"
+        else
+          continue
+        fi
+        if [[ "${rule_def}" =~ ^\[\](.+)$ ]]; then
+          local_rule="${BASH_REMATCH[1]}"
+          local_rule="${local_rule//YOUR_VPS_IP/${ip}}"
+          local_rule="${local_rule//192.0.2.1/${ip}}"
+          if [[ "${local_rule}" =~ ^([^,]+),(.+)$ ]]; then
+            rule_type="${BASH_REMATCH[1]}"
+            rule_content="${BASH_REMATCH[2]}"
+            rule_content="${rule_content//YOUR_VPS_IP/${ip}}"
+            rule_content="${rule_content//192.0.2.1/${ip}}"
+            if [[ "${rule_content}" =~ ,no-resolve$ ]]; then
+              rule_content="${rule_content%,no-resolve}"
+              echo "  - ${rule_type},${rule_content},${group_name},no-resolve"
+            elif [[ "${rule_type}" == "FINAL" ]]; then
+              echo "  - MATCH,${group_name}"
+            else
+              echo "  - ${rule_type},${rule_content},${group_name}"
+            fi
+          elif [[ "${local_rule}" == "FINAL" ]]; then
+            echo "  - MATCH,${group_name}"
+          fi
+        fi
       fi
     done <"${RULES_TMP}"
   fi
