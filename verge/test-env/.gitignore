@@ -10,3 +10,6 @@ logs/*.log
 # Rule set cache
 ruleset/*
 
+# Mihomo runtime cache (test-env -d)
+cache.db
+
