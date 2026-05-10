@@ -7,6 +7,10 @@ mode: rule
 log-level: debug
 ipv6: true
 
+# 订阅域名直连解析（避免 fake-ip / 远端 DNS 抖动导致首轮拉订阅失败）
+hosts:
+  cc.hjshome.cc: 45.59.128.247
+
 # 允许局域网连接（可选）
 allow-lan: true
 bind-address: '*'
@@ -73,12 +77,35 @@ dns:
     - '+.githubusercontent.com'
     - '+.githubassets.com'
 
+# ========== CC 机场订阅（cc.hjshome.cc，与面板「订阅」路径一致）==========
+proxy-providers:
+  cc-airport:
+    type: http
+    url: "https://cc.hjshome.cc/link/2nyd0fv1fx7bihor"
+    path: ./ruleset/cc-airport.yaml
+    interval: 43200
+    # 拉订阅走本机直连，避免「要靠节点才能拉订阅」的死锁
+    proxy: DIRECT
+    health-check:
+      enable: true
+      url: https://www.gstatic.com/generate_204
+      interval: 300
+
 # ========== 代理组 ==========
 # 注意: DIRECT 是 mihomo 内置代理，无需在 proxies 中定义
 proxy-groups:
+  - name: ♻️ CC-机场自动
+    type: url-test
+    use:
+      - cc-airport
+    url: https://www.gstatic.com/generate_204
+    interval: 300
+    tolerance: 40
+
   - name: '🌍 节点选择'
     type: select
     proxies:
+      - ♻️ CC-机场自动
       - DIRECT
 
   - name: '🏠 全球直连'
@@ -211,7 +238,8 @@ rules:
 
   # === 兜底规则 ===
   - GEOIP,CN,🏠 全球直连,no-resolve
-  - MATCH,🏠 全球直连
+  # 非上述规则流量走「节点选择」（默认 url-test 选用延迟最优的 CC 入站）
+  - MATCH,🌍 节点选择
 
 # ========== 规则集（可选） ==========
 # 如需使用规则集，可在此配置
