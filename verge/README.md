@@ -35,7 +35,7 @@
    之后凡 **暂存** **`verge/derive/parts/*`**、**`verge/template/airport-rule-split-extend.yaml`** 或任一其它 **`verge/template/*-rule-split-extend.yaml`** 并 `git commit`：会先校验 **parts 与 airport 合并稿一致**（仅涉机场稿时）；并对 template 尝试渲染 `generated/*-rule-split.local.yaml`（失败仅提示，不拦提交）。
 
 3. **Cursor 保存后自动生成（可选）**  
-   仓库已含 [`.cursor/hooks.json`](../.cursor/hooks.json)：编辑 **`verge/derive/parts/*`** 或 **`verge/template/*-rule-split-extend.yaml`** 并保存后，会调用 [`after-rule-split-extend-edit.sh`](../.cursor/hooks/after-rule-split-extend-edit.sh)（parts：`compose` + `render-local`；template：按文件名 `VERGE_EXTEND_FILE=… render-local.sh`）。需在 Cursor **信任本工作区** 且 Hooks 已启用。
+   仓库已含 [`.cursor/hooks.json`](../.cursor/hooks.json)：编辑 **`verge/derive/parts/*`**、**`verge/generated/local/override.local.ini`** 或 **`verge/template/*-rule-split-extend.yaml`** 并保存后，会调用 [`after-rule-split-extend-edit.sh`](../.cursor/hooks/after-rule-split-extend-edit.sh)（parts：`compose-ini.sh` + `derive/scripts/render-local.sh`；override：仅 `render-local`；template：按文件名 `VERGE_EXTEND_FILE=… render-local.sh`）。需在 Cursor **信任本工作区** 且 Hooks 已启用。
 
 ## 日常流程
 
