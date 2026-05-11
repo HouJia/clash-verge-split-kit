@@ -1,11 +1,11 @@
 # 广告拦截与遥测净化规则
-# 策略组: 🚫 系统 · 广告拦截 / 🍃 系统 · 应用遥测净化
+# 策略组: 系统 · 🚫 广告拦截 / 系统 · 🍃 应用遥测净化
 # 说明: 前置拦截广告与追踪域
 # 与 GEOSITE,category-ads-all 互补；remote 由 Mihomo 缓存至 path
 
-- GEOSITE,category-ads-all,🚫 系统 · 广告拦截
+- GEOSITE,category-ads-all,系统 · 🚫 广告拦截
 
 # tracker（统计／上报域）：归入「应用遥测净化」，与展示类广告列表分列，可按需放行排障
-- GEOSITE,tracker,🍃 系统 · 应用遥测净化
+- GEOSITE,tracker,系统 · 🍃 应用遥测净化
 
-- RULE-SET,reject-loyal,🚫 系统 · 广告拦截
+- RULE-SET,reject-loyal,系统 · 🚫 广告拦截

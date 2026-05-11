@@ -187,9 +187,9 @@ class TestProxyGroups(unittest.TestCase):
     def test_100_base_groups_exist(self):
         """测试: 底座策略组必须存在"""
         base_groups = [
-            '♻️ 自动最优',
-            '🔌 国内直连',
-            '🎚️ 手动切换',
+            '底座 · ♻️ 自动最优',
+            '底座 · 🔌 国内直连',
+            '底座 · 🎚️ 手动切换',
         ]
         for group in base_groups:
             self.assertIn(group, self.ini_group_names, f"INI 缺少底座组: {group}")
@@ -198,17 +198,17 @@ class TestProxyGroups(unittest.TestCase):
     def test_101_business_groups_exist(self):
         """测试: 业务场景策略组必须存在"""
         business_groups = [
-            '🔜 工具 · Cursor',
-            '🧠 场景 · 境外 AI',
-            '💬 场景 · 即时通讯',
-            '📢 场景 · 谷歌推送',
-            '🎬 场景 · 海外音影社',
-            '📱 场景 · TikTok',
-            '🐙 场景 · 开发源站',
-            '📚 场景 · 学术与数据',
-            '🎮 场景 · 游戏平台',
-            '💳 PayPal · 国内线路',
-            '💳 PayPal · 国际线路',
+            '工具 · 🔜 Cursor',
+            '场景 · 🧠 境外 AI',
+            '场景 · 💬 即时通讯',
+            '场景 · 📢 谷歌推送',
+            '场景 · 🎬 海外音影社',
+            '场景 · 📱 TikTok',
+            '场景 · 🐙 开发源站',
+            '场景 · 📚 学术与数据',
+            '场景 · 🎮 游戏平台',
+            'PayPal · 💳 国内线路',
+            'PayPal · 💳 国际线路',
         ]
         for group in business_groups:
             self.assertIn(group, self.ini_group_names, f"INI 缺少业务组: {group}")
@@ -217,11 +217,11 @@ class TestProxyGroups(unittest.TestCase):
     def test_102_big_tech_groups_exist(self):
         """测试: 大厂策略组必须存在"""
         tech_groups = [
-            '🍎 大厂 · 苹果',
-            '🪟 大厂 · 微软',
-            '💠 大厂 · 微软跨境',
-            '🔍 大厂 · 谷歌',
-            '👥 大厂 · 脸书系',
+            '大厂 · 🍎 苹果',
+            '大厂 · 🪟 微软',
+            '大厂 · 💠 微软跨境',
+            '大厂 · 🔍 谷歌',
+            '大厂 · 👥 脸书系',
         ]
         for group in tech_groups:
             self.assertIn(group, self.ini_group_names, f"INI 缺少大厂组: {group}")
@@ -230,9 +230,9 @@ class TestProxyGroups(unittest.TestCase):
     def test_103_system_groups_exist(self):
         """测试: 系统策略组必须存在"""
         system_groups = [
-            '🚫 系统 · 广告拦截',
-            '🍃 系统 · 应用遥测净化',
-            '🐟 系统 · 漏网之鱼',
+            '系统 · 🚫 广告拦截',
+            '系统 · 🍃 应用遥测净化',
+            '系统 · 🐟 漏网之鱼',
         ]
         for group in system_groups:
             self.assertIn(group, self.ini_group_names, f"INI 缺少系统组: {group}")
@@ -241,20 +241,20 @@ class TestProxyGroups(unittest.TestCase):
     def test_104_region_groups_exist(self):
         """测试: 国家/地区节点分组必须存在"""
         region_groups = [
-            '🇺🇸 地区 · 美国节点',
-            '🇭🇰 地区 · 香港节点',
-            '🇯🇵 地区 · 日本节点',
-            '🇸🇬 地区 · 新加坡节点',
-            '🌺 地区 · 台湾节点',
-            '🌍 地区 · 其它国家',
+            '地区 · 🇺🇸 美国节点',
+            '地区 · 🇭🇰 香港节点',
+            '地区 · 🇯🇵 日本节点',
+            '地区 · 🇸🇬 新加坡节点',
+            '地区 · 🌺 台湾节点',
+            '地区 · 🌍 其它国家',
         ]
         for group in region_groups:
             self.assertIn(group, self.ini_group_names, f"INI 缺少地区组: {group}")
             self.assertIn(group, self.yaml_group_map, f"YAML 缺少地区组: {group}")
 
     def test_105_auto_best_group_type(self):
-        """测试: ♻️ 自动最优 必须是 url-test 类型"""
-        group = self.yaml_group_map.get('♻️ 自动最优')
+        """测试: 底座 · ♻️ 自动最优 必须是 url-test 类型"""
+        group = self.yaml_group_map.get('底座 · ♻️ 自动最优')
         self.assertIsNotNone(group)
         self.assertEqual(group['type'], 'url-test')
         self.assertIn('url', group)
@@ -263,8 +263,8 @@ class TestProxyGroups(unittest.TestCase):
 
     def test_106_region_groups_are_url_test(self):
         """测试: 地区节点分组必须是 url-test 类型"""
-        region_groups = ['🇺🇸 地区 · 美国节点', '🇭🇰 地区 · 香港节点', '🇯🇵 地区 · 日本节点',
-                        '🇸🇬 地区 · 新加坡节点', '🌺 地区 · 台湾节点', '🌍 地区 · 其它国家']
+        region_groups = ['地区 · 🇺🇸 美国节点', '地区 · 🇭🇰 香港节点', '地区 · 🇯🇵 日本节点',
+                        '地区 · 🇸🇬 新加坡节点', '地区 · 🌺 台湾节点', '地区 · 🌍 其它国家']
         for name in region_groups:
             group = self.yaml_group_map.get(name)
             self.assertIsNotNone(group, f"找不到组: {name}")
@@ -273,8 +273,8 @@ class TestProxyGroups(unittest.TestCase):
             self.assertIn('filter', group, f"{name} 应该有 filter 字段")
 
     def test_107_other_countries_filter_pattern(self):
-        """测试: 🌍 地区 · 其它国家 必须有正确的排除正则"""
-        group = self.yaml_group_map.get('🌍 地区 · 其它国家')
+        """测试: 地区 · 🌍 其它国家 必须有正确的排除正则"""
+        group = self.yaml_group_map.get('地区 · 🌍 其它国家')
         self.assertIsNotNone(group)
         filter_pattern = group.get('filter', '')
 
@@ -294,100 +294,100 @@ class TestProxyGroups(unittest.TestCase):
                                  f"{group['name']} 的 proxies 不能为空")
 
     def test_109_manual_switch_first_options(self):
-        """测试: 🎚️ 手动切换 的选项顺序检查"""
-        group = self.yaml_group_map.get('🎚️ 手动切换')
+        """测试: 底座 · 🎚️ 手动切换 的选项顺序检查"""
+        group = self.yaml_group_map.get('底座 · 🎚️ 手动切换')
         self.assertIsNotNone(group)
         proxies = group.get('proxies', [])
 
-        # 检查第一个选项应该是 ♻️ 自动最优
+        # 检查第一个选项应该是 底座 · ♻️ 自动最优
         if len(proxies) > 0:
-            self.assertEqual(proxies[0], '♻️ 自动最优',
-                           "🎚️ 手动切换 的第一个选项应该是 ♻️ 自动最优")
+            self.assertEqual(proxies[0], '底座 · ♻️ 自动最优',
+                           "底座 · 🎚️ 手动切换 的第一个选项应该是 底座 · ♻️ 自动最优")
 
     def test_110_overseas_ai_default_preference(self):
-        """测试: 🧠 场景 · 境外 AI 默认优先美国节点"""
-        group = self.yaml_group_map.get('🧠 场景 · 境外 AI')
+        """测试: 场景 · 🧠 境外 AI 默认优先美国节点"""
+        group = self.yaml_group_map.get('场景 · 🧠 境外 AI')
         self.assertIsNotNone(group)
         proxies = group.get('proxies', [])
 
         if len(proxies) > 0:
-            self.assertEqual(proxies[0], '🇺🇸 地区 · 美国节点',
-                           "🧠 场景 · 境外 AI 的第一个选项应该是 🇺🇸 地区 · 美国节点")
+            self.assertEqual(proxies[0], '地区 · 🇺🇸 美国节点',
+                           "场景 · 🧠 境外 AI 的第一个选项应该是 地区 · 🇺🇸 美国节点")
 
     def test_111_tiktok_default_preference(self):
-        """测试: 📱 场景 · TikTok 默认优先美国节点"""
-        group = self.yaml_group_map.get('📱 场景 · TikTok')
+        """测试: 场景 · 📱 TikTok 默认优先美国节点"""
+        group = self.yaml_group_map.get('场景 · 📱 TikTok')
         self.assertIsNotNone(group)
         proxies = group.get('proxies', [])
 
         if len(proxies) > 0:
-            self.assertEqual(proxies[0], '🇺🇸 地区 · 美国节点',
-                           "📱 场景 · TikTok 的第一个选项应该是 🇺🇸 地区 · 美国节点")
+            self.assertEqual(proxies[0], '地区 · 🇺🇸 美国节点',
+                           "场景 · 📱 TikTok 的第一个选项应该是 地区 · 🇺🇸 美国节点")
 
     def test_112_google_group_default_preference(self):
-        """测试: 🔍 大厂 · 谷歌 默认优先美国节点"""
-        group = self.yaml_group_map.get('🔍 大厂 · 谷歌')
+        """测试: 大厂 · 🔍 谷歌 默认优先美国节点"""
+        group = self.yaml_group_map.get('大厂 · 🔍 谷歌')
         self.assertIsNotNone(group)
         proxies = group.get('proxies', [])
 
         if len(proxies) > 0:
-            self.assertEqual(proxies[0], '🇺🇸 地区 · 美国节点',
-                           "🔍 大厂 · 谷歌 的第一个选项应该是 🇺🇸 地区 · 美国节点")
+            self.assertEqual(proxies[0], '地区 · 🇺🇸 美国节点',
+                           "大厂 · 🔍 谷歌 的第一个选项应该是 地区 · 🇺🇸 美国节点")
 
     def test_113_apple_microsoft_default_direct(self):
         """测试: 苹果和微软组默认优先直连"""
-        groups_to_check = ['🍎 大厂 · 苹果', '🪟 大厂 · 微软']
+        groups_to_check = ['大厂 · 🍎 苹果', '大厂 · 🪟 微软']
         for name in groups_to_check:
             group = self.yaml_group_map.get(name)
             self.assertIsNotNone(group, f"找不到组: {name}")
             proxies = group.get('proxies', [])
             if len(proxies) > 0:
-                self.assertEqual(proxies[0], '🔌 国内直连',
-                               f"{name} 的第一个选项应该是 🔌 国内直连")
+                self.assertEqual(proxies[0], '底座 · 🔌 国内直连',
+                               f"{name} 的第一个选项应该是 底座 · 🔌 国内直连")
 
     def test_114_ad_block_first_option_reject(self):
         """测试: 广告拦截组第一个选项必须是 REJECT"""
-        group = self.yaml_group_map.get('🚫 系统 · 广告拦截')
+        group = self.yaml_group_map.get('系统 · 🚫 广告拦截')
         self.assertIsNotNone(group)
         proxies = group.get('proxies', [])
 
         if len(proxies) > 0:
             self.assertEqual(proxies[0], 'REJECT',
-                           "🚫 系统 · 广告拦截 的第一个选项应该是 REJECT")
+                           "系统 · 🚫 广告拦截 的第一个选项应该是 REJECT")
 
     def test_115_final_group_options(self):
-        """测试: 🐟 系统 · 漏网之鱼 选项完整性"""
-        group = self.yaml_group_map.get('🐟 系统 · 漏网之鱼')
+        """测试: 系统 · 🐟 漏网之鱼 选项完整性"""
+        group = self.yaml_group_map.get('系统 · 🐟 漏网之鱼')
         self.assertIsNotNone(group)
         proxies = group.get('proxies', [])
 
         # 应该包含所有主要出口选项
-        required_options = ['♻️ 自动最优', '🔌 国内直连', '🎚️ 手动切换',
-                           '🇺🇸 地区 · 美国节点']
+        required_options = ['底座 · ♻️ 自动最优', '底座 · 🔌 国内直连', '底座 · 🎚️ 手动切换',
+                           '地区 · 🇺🇸 美国节点']
         for opt in required_options:
-            self.assertIn(opt, proxies, f"🐟 系统 · 漏网之鱼 缺少选项: {opt}")
+            self.assertIn(opt, proxies, f"系统 · 🐟 漏网之鱼 缺少选项: {opt}")
         if len(proxies) >= 3:
-            self.assertEqual(proxies[0], '♻️ 自动最优')
-            self.assertEqual(proxies[1], '🔌 国内直连')
-            self.assertEqual(proxies[2], '🎚️ 手动切换',
-                           '🐟 系统 · 漏网之鱼 前三项应为 自动最优、国内直连、手动切换')
+            self.assertEqual(proxies[0], '底座 · ♻️ 自动最优')
+            self.assertEqual(proxies[1], '底座 · 🔌 国内直连')
+            self.assertEqual(proxies[2], '底座 · 🎚️ 手动切换',
+                           '系统 · 🐟 漏网之鱼 前三项应为 自动最优、国内直连、手动切换')
 
     def test_116_paypal_groups_order(self):
         """测试: PayPal 分组默认选项检查"""
         # 国内线路默认直连
-        cn_group = self.yaml_group_map.get('💳 PayPal · 国内线路')
+        cn_group = self.yaml_group_map.get('PayPal · 💳 国内线路')
         self.assertIsNotNone(cn_group)
         cn_proxies = cn_group.get('proxies', [])
         if len(cn_proxies) > 0:
-            self.assertEqual(cn_proxies[0], '🔌 国内直连',
+            self.assertEqual(cn_proxies[0], '底座 · 🔌 国内直连',
                            "PayPal 国内线路默认应该是直连")
 
         # 国际线路默认自动最优
-        intl_group = self.yaml_group_map.get('💳 PayPal · 国际线路')
+        intl_group = self.yaml_group_map.get('PayPal · 💳 国际线路')
         self.assertIsNotNone(intl_group)
         intl_proxies = intl_group.get('proxies', [])
         if len(intl_proxies) > 0:
-            self.assertEqual(intl_proxies[0], '♻️ 自动最优',
+            self.assertEqual(intl_proxies[0], '底座 · ♻️ 自动最优',
                            "PayPal 国际线路默认应该是自动最优")
 
     def test_117_all_groups_exclude_filter(self):
@@ -464,7 +464,7 @@ class TestRules(unittest.TestCase):
     def test_202_cursor_rules_exist(self):
         """测试: Cursor 规则必须存在"""
         cursor_rules = [r for r in self.yaml_rules
-                       if isinstance(r, str) and '🔜 工具 · Cursor' in r]
+                       if isinstance(r, str) and '工具 · 🔜 Cursor' in r]
         self.assertGreater(len(cursor_rules), 0, "缺少 Cursor 规则")
 
         # 检查必须有进程名规则
@@ -474,7 +474,7 @@ class TestRules(unittest.TestCase):
     def test_203_ai_rules_exist(self):
         """测试: 境外 AI 规则必须存在"""
         ai_rules = [r for r in self.yaml_rules
-                   if isinstance(r, str) and '🧠 场景 · 境外 AI' in r]
+                   if isinstance(r, str) and '场景 · 🧠 境外 AI' in r]
         self.assertGreater(len(ai_rules), 5, "境外 AI 规则数量不足")
 
         # 检查必须包含 OpenAI 和 Anthropic 相关域名
@@ -487,7 +487,7 @@ class TestRules(unittest.TestCase):
     def test_204_telegram_rules_exist(self):
         """测试: Telegram 规则必须存在"""
         tg_rules = [r for r in self.yaml_rules
-                   if isinstance(r, str) and '💬 场景 · 即时通讯' in r]
+                   if isinstance(r, str) and '场景 · 💬 即时通讯' in r]
         self.assertGreater(len(tg_rules), 0, "缺少 Telegram 规则")
 
         # 检查 IP 段规则
@@ -497,7 +497,7 @@ class TestRules(unittest.TestCase):
     def test_205_fcm_rules_exist(self):
         """测试: FCM 推送规则必须存在"""
         fcm_rules = [r for r in self.yaml_rules
-                    if isinstance(r, str) and '📢 场景 · 谷歌推送' in r]
+                    if isinstance(r, str) and '场景 · 📢 谷歌推送' in r]
         self.assertGreater(len(fcm_rules), 10, "FCM 规则数量不足")
 
         # 检查 mtalk.google.com 规则
@@ -507,13 +507,13 @@ class TestRules(unittest.TestCase):
     def test_206_github_rules_exist(self):
         """测试: GitHub 规则必须存在"""
         github_rules = [r for r in self.yaml_rules
-                       if isinstance(r, str) and '🐙 场景 · 开发源站' in r]
+                       if isinstance(r, str) and '场景 · 🐙 开发源站' in r]
         self.assertGreater(len(github_rules), 0, "缺少 GitHub 规则")
 
     def test_207_netflix_rules_exist(self):
         """测试: Netflix 等流媒体规则必须存在"""
         media_rules = [r for r in self.yaml_rules
-                      if isinstance(r, str) and '🎬 场景 · 海外音影社' in r]
+                      if isinstance(r, str) and '场景 · 🎬 海外音影社' in r]
         self.assertGreater(len(media_rules), 0, "缺少流媒体规则")
 
         netflix_found = any('netflix' in r.lower() for r in media_rules)
@@ -522,13 +522,13 @@ class TestRules(unittest.TestCase):
     def test_208_tiktok_separate_group(self):
         """测试: TikTok 应该有独立的策略组"""
         tiktok_rules = [r for r in self.yaml_rules
-                       if isinstance(r, str) and '📱 场景 · TikTok' in r]
-        self.assertGreater(len(tiktok_rules), 0, "TikTok 应该有独立规则指向 📱 场景 · TikTok")
+                       if isinstance(r, str) and '场景 · 📱 TikTok' in r]
+        self.assertGreater(len(tiktok_rules), 0, "TikTok 应该有独立规则指向 场景 · 📱 TikTok")
 
     def test_209_paypal_cn_rules_exist(self):
         """测试: PayPal 国内规则必须存在"""
         paypal_cn_rules = [r for r in self.yaml_rules
-                          if isinstance(r, str) and '💳 PayPal · 国内线路' in r]
+                          if isinstance(r, str) and 'PayPal · 💳 国内线路' in r]
         self.assertGreater(len(paypal_cn_rules), 0, "缺少 PayPal 国内线路规则")
 
         paypal_cn_found = any('paypal.cn' in r for r in paypal_cn_rules)
@@ -537,34 +537,34 @@ class TestRules(unittest.TestCase):
     def test_210_paypal_intl_rules_exist(self):
         """测试: PayPal 国际规则必须存在"""
         paypal_intl_rules = [r for r in self.yaml_rules
-                            if isinstance(r, str) and '💳 PayPal · 国际线路' in r]
+                            if isinstance(r, str) and 'PayPal · 💳 国际线路' in r]
         self.assertGreater(len(paypal_intl_rules), 0, "缺少 PayPal 国际线路规则")
 
     def test_211_google_rules_exist(self):
         """测试: Google 规则必须存在"""
         google_rules = [r for r in self.yaml_rules
-                       if isinstance(r, str) and '🔍 大厂 · 谷歌' in r]
+                       if isinstance(r, str) and '大厂 · 🔍 谷歌' in r]
         self.assertGreater(len(google_rules), 0, "缺少 Google 规则")
 
     def test_212_apple_rules_exist(self):
         """测试: Apple 规则必须存在"""
         apple_rules = [r for r in self.yaml_rules
-                      if isinstance(r, str) and '🍎 大厂 · 苹果' in r]
+                      if isinstance(r, str) and '大厂 · 🍎 苹果' in r]
         self.assertGreater(len(apple_rules), 0, "缺少 Apple 规则")
 
     def test_213_microsoft_rules_exist(self):
         """测试: Microsoft 规则必须存在"""
         ms_rules = [r for r in self.yaml_rules
-                   if isinstance(r, str) and '🪟 大厂 · 微软' in r]
+                   if isinstance(r, str) and '大厂 · 🪟 微软' in r]
         ms_cross_rules = [r for r in self.yaml_rules
-                         if isinstance(r, str) and '💠 大厂 · 微软跨境' in r]
+                         if isinstance(r, str) and '大厂 · 💠 微软跨境' in r]
         self.assertGreater(len(ms_rules), 0, "缺少 Microsoft 规则")
         self.assertGreater(len(ms_cross_rules), 0, "缺少 Microsoft 跨境规则")
 
     def test_214_cn_direct_rules_exist(self):
         """测试: 国内直连规则必须存在"""
         cn_rules = [r for r in self.yaml_rules
-                   if isinstance(r, str) and '🔌 国内直连' in r]
+                   if isinstance(r, str) and '底座 · 🔌 国内直连' in r]
         self.assertGreater(len(cn_rules), 0, "缺少国内直连规则")
 
         # 检查 GEOSITE,cn 和 GEOIP,cn
@@ -581,21 +581,21 @@ class TestRules(unittest.TestCase):
 
         last_rule = self.yaml_rules[-1]
         self.assertIn('MATCH', str(last_rule), "最后一条规则应该是 MATCH")
-        self.assertIn('🐟 系统 · 漏网之鱼', str(last_rule),
-                     "MATCH 应该指向 🐟 系统 · 漏网之鱼")
+        self.assertIn('系统 · 🐟 漏网之鱼', str(last_rule),
+                     "MATCH 应该指向 系统 · 🐟 漏网之鱼")
 
     def test_216_geolocation_not_cn_rule(self):
         """测试: 必须有 GEOSITE,geolocation-!cn 规则"""
         geo_rules = [r for r in self.yaml_rules
                     if isinstance(r, str) and 'geolocation-!cn' in r]
         self.assertEqual(len(geo_rules), 1, "应该有且只有一条 geolocation-!cn 规则")
-        self.assertIn('🎚️ 手动切换', geo_rules[0],
-                     "geolocation-!cn 应该指向 🎚️ 手动切换")
+        self.assertIn('底座 · 🎚️ 手动切换', geo_rules[0],
+                     "geolocation-!cn 应该指向 底座 · 🎚️ 手动切换")
 
     def test_217_ads_rules_exist(self):
         """测试: 广告拦截规则必须存在"""
         ads_rules = [r for r in self.yaml_rules
-                    if isinstance(r, str) and '🚫 系统 · 广告拦截' in r]
+                    if isinstance(r, str) and '系统 · 🚫 广告拦截' in r]
         self.assertGreater(len(ads_rules), 0, "缺少广告拦截规则")
 
         category_ads = any('category-ads-all' in r for r in ads_rules)
@@ -604,7 +604,7 @@ class TestRules(unittest.TestCase):
     def test_218_tracker_rules_exist(self):
         """测试: 遥测净化规则必须存在"""
         tracker_rules = [r for r in self.yaml_rules
-                        if isinstance(r, str) and '🍃 系统 · 应用遥测净化' in r]
+                        if isinstance(r, str) and '系统 · 🍃 应用遥测净化' in r]
         self.assertGreater(len(tracker_rules), 0, "缺少遥测净化规则")
 
 
@@ -647,7 +647,7 @@ class TestConsistency(unittest.TestCase):
 
     def test_302_cursor_group_in_both(self):
         """测试: Cursor 组在 INI 和 YAML 中都必须存在"""
-        cursor_name = '🔜 工具 · Cursor'
+        cursor_name = '工具 · 🔜 Cursor'
         self.assertIn(cursor_name, self.ini_group_names)
         self.assertIn(cursor_name, self.yaml_group_names)
 
@@ -698,7 +698,7 @@ class TestOrderAndCompleteness(unittest.TestCase):
 
     def test_400_base_groups_first(self):
         """测试: 底座组应该排在前面"""
-        base_groups = ['♻️ 自动最优', '🔌 国内直连', '🎚️ 手动切换']
+        base_groups = ['底座 · ♻️ 自动最优', '底座 · 🔌 国内直连', '底座 · 🎚️ 手动切换']
         base_indices = [self.group_order.index(g) for g in base_groups if g in self.group_order]
 
         if len(base_indices) >= 2:
@@ -708,10 +708,10 @@ class TestOrderAndCompleteness(unittest.TestCase):
 
     def test_401_region_groups_last(self):
         """测试: 地区节点分组应该排在后面"""
-        region_groups = ['🇺🇸 地区 · 美国节点', '🇭🇰 地区 · 香港节点', '🇯🇵 地区 · 日本节点',
-                        '🇸🇬 地区 · 新加坡节点', '🌺 地区 · 台湾节点', '🌍 地区 · 其它国家']
+        region_groups = ['地区 · 🇺🇸 美国节点', '地区 · 🇭🇰 香港节点', '地区 · 🇯🇵 日本节点',
+                        '地区 · 🇸🇬 新加坡节点', '地区 · 🌺 台湾节点', '地区 · 🌍 其它国家']
         region_indices = [self.group_order.index(g) for g in region_groups if g in self.group_order]
-        business_groups = ['🔜 工具 · Cursor', '🧠 场景 · 境外 AI', '🎬 场景 · 海外音影社']
+        business_groups = ['工具 · 🔜 Cursor', '场景 · 🧠 境外 AI', '场景 · 🎬 海外音影社']
         business_indices = [self.group_order.index(g) for g in business_groups if g in self.group_order]
 
         if region_indices and business_indices:
@@ -720,8 +720,8 @@ class TestOrderAndCompleteness(unittest.TestCase):
 
     def test_402_all_region_groups_present(self):
         """测试: 所有地区组都必须存在且完整"""
-        region_groups = ['🇺🇸 地区 · 美国节点', '🇭🇰 地区 · 香港节点', '🇯🇵 地区 · 日本节点',
-                        '🇸🇬 地区 · 新加坡节点', '🌺 地区 · 台湾节点', '🌍 地区 · 其它国家']
+        region_groups = ['地区 · 🇺🇸 美国节点', '地区 · 🇭🇰 香港节点', '地区 · 🇯🇵 日本节点',
+                        '地区 · 🇸🇬 新加坡节点', '地区 · 🌺 台湾节点', '地区 · 🌍 其它国家']
         for group in region_groups:
             self.assertIn(group, self.group_order, f"缺少地区组: {group}")
 
@@ -790,7 +790,7 @@ class TestSpecificRules(unittest.TestCase):
     def test_501_fcm_before_google(self):
         """测试: FCM 规则必须在 Google 规则之前"""
         fcm_indices = [i for i, r in enumerate(self.yaml_rules)
-                      if isinstance(r, str) and '📢 场景 · 谷歌推送' in r]
+                      if isinstance(r, str) and '场景 · 📢 谷歌推送' in r]
         google_indices = [i for i, r in enumerate(self.yaml_rules)
                          if isinstance(r, str) and r.startswith('GEOSITE,google')]
 
@@ -801,9 +801,9 @@ class TestSpecificRules(unittest.TestCase):
     def test_502_microsoft_cross_before_microsoft(self):
         """测试: 微软跨境规则必须在微软主规则之前"""
         cross_indices = [i for i, r in enumerate(self.yaml_rules)
-                        if isinstance(r, str) and '💠 大厂 · 微软跨境' in r]
+                        if isinstance(r, str) and '大厂 · 💠 微软跨境' in r]
         ms_indices = [i for i, r in enumerate(self.yaml_rules)
-                     if isinstance(r, str) and '🪟 大厂 · 微软' in r and 'GEOSITE,microsoft' in r]
+                     if isinstance(r, str) and '大厂 · 🪟 微软' in r and 'GEOSITE,microsoft' in r]
 
         if cross_indices and ms_indices:
             self.assertLess(max(cross_indices), min(ms_indices),
@@ -812,7 +812,7 @@ class TestSpecificRules(unittest.TestCase):
     def test_503_github_before_microsoft(self):
         """测试: GitHub 规则应该在 Microsoft 规则之前"""
         github_indices = [i for i, r in enumerate(self.yaml_rules)
-                         if isinstance(r, str) and '🐙 场景 · 开发源站' in r and 'GEOSITE,github' in r]
+                         if isinstance(r, str) and '场景 · 🐙 开发源站' in r and 'GEOSITE,github' in r]
         ms_indices = [i for i, r in enumerate(self.yaml_rules)
                      if isinstance(r, str) and 'GEOSITE,microsoft' in r]
 
@@ -823,22 +823,22 @@ class TestSpecificRules(unittest.TestCase):
     def test_504_paypal_cn_before_paypal_intl(self):
         """测试: PayPal 国内规则应该在国际规则之前"""
         cn_indices = [i for i, r in enumerate(self.yaml_rules)
-                     if isinstance(r, str) and '💳 PayPal · 国内线路' in r]
+                     if isinstance(r, str) and 'PayPal · 💳 国内线路' in r]
         intl_indices = [i for i, r in enumerate(self.yaml_rules)
-                       if isinstance(r, str) and '💳 PayPal · 国际线路' in r]
+                       if isinstance(r, str) and 'PayPal · 💳 国际线路' in r]
 
         if cn_indices and intl_indices:
             self.assertLess(max(cn_indices), min(intl_indices),
                           "PayPal 国内规则应该在国际规则之前")
 
     def test_505_openwrt_ai_in_manual(self):
-        """测试: openwrt.ai 域名应该在 🎚️ 手动切换 组"""
+        """测试: openwrt.ai 域名应该在 底座 · 🎚️ 手动切换 组"""
         openwrt_rules = [r for r in self.yaml_rules
                         if isinstance(r, str) and 'openwrt.ai' in r]
         if openwrt_rules:
             for rule in openwrt_rules:
-                self.assertIn('🎚️ 手动切换', rule,
-                            f"openwrt.ai 应该指向 🎚️ 手动切换: {rule}")
+                self.assertIn('底座 · 🎚️ 手动切换', rule,
+                            f"openwrt.ai 应该指向 底座 · 🎚️ 手动切换: {rule}")
 
 
 def run_tests():

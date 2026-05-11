@@ -1,16 +1,16 @@
-# 🔜 工具 · Cursor
+# 工具 · 🔜 Cursor
 # Cursor IDE 专用规则
 # 进程名优先（Windows/macOS 多进程名覆盖），域名兜底
 
-- PROCESS-NAME,Cursor,🔜 工具 · Cursor
-- PROCESS-NAME,Cursor Helper,🔜 工具 · Cursor
-- PROCESS-NAME,Cursor Helper (GPU),🔜 工具 · Cursor
-- PROCESS-NAME,Cursor Helper (Plugin),🔜 工具 · Cursor
-- PROCESS-NAME,Cursor Helper (Renderer),🔜 工具 · Cursor
-- PROCESS-NAME,Cursor.exe,🔜 工具 · Cursor
-- PROCESS-NAME,cursor,🔜 工具 · Cursor
+- PROCESS-NAME,Cursor,工具 · 🔜 Cursor
+- PROCESS-NAME,Cursor Helper,工具 · 🔜 Cursor
+- PROCESS-NAME,Cursor Helper (GPU),工具 · 🔜 Cursor
+- PROCESS-NAME,Cursor Helper (Plugin),工具 · 🔜 Cursor
+- PROCESS-NAME,Cursor Helper (Renderer),工具 · 🔜 Cursor
+- PROCESS-NAME,Cursor.exe,工具 · 🔜 Cursor
+- PROCESS-NAME,cursor,工具 · 🔜 Cursor
 # 域名兜底（无进程上下文或旁路由仅用 DOMAIN）
-- DOMAIN-SUFFIX,cursor.com,🔜 工具 · Cursor
-- DOMAIN-SUFFIX,cursor.sh,🔜 工具 · Cursor
-- DOMAIN-SUFFIX,cursor-cdn.com,🔜 工具 · Cursor
-- DOMAIN-SUFFIX,cursorapi.com,🔜 工具 · Cursor
+- DOMAIN-SUFFIX,cursor.com,工具 · 🔜 Cursor
+- DOMAIN-SUFFIX,cursor.sh,工具 · 🔜 Cursor
+- DOMAIN-SUFFIX,cursor-cdn.com,工具 · 🔜 Cursor
+- DOMAIN-SUFFIX,cursorapi.com,工具 · 🔜 Cursor

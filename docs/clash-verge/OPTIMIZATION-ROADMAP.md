@@ -185,7 +185,7 @@ VERGE_EXTEND_FILE=airport-a-rule-split-extend.yaml bash verge/scripts/render-loc
 - [x] ✅ 添加 机场面板域名 直连规则
 - [x] ✅ 创建 analysis/README.md 机场映射文档
 - [ ] 观察 Cursor 分流是否正常（新加坡/阿根廷跳动是否影响使用）
-- [ ] 如有需要，调整 Cursor 组默认走特定地区（而非 ♻️ 自动最优）
+- [ ] 如有需要，调整 Cursor 组默认走特定地区（而非 底座 · ♻️ 自动最优）
 
 ---
 

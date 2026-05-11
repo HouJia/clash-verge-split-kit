@@ -1,48 +1,48 @@
-# 🎮 场景 · 游戏平台
+# 场景 · 🎮 游戏平台
 # Steam / Epic / PlayStation / Xbox / Nintendo 等
 
 # Steam 平台
-- DOMAIN-SUFFIX,steampowered.com,🎮 场景 · 游戏平台
-- DOMAIN-SUFFIX,steamcommunity.com,🎮 场景 · 游戏平台
-- DOMAIN-SUFFIX,steamgames.com,🎮 场景 · 游戏平台
-- DOMAIN-SUFFIX,steamusercontent.com,🎮 场景 · 游戏平台
-- DOMAIN-SUFFIX,steamcontent.com,🎮 场景 · 游戏平台
-- DOMAIN-SUFFIX,steamstatic.com,🎮 场景 · 游戏平台
-- DOMAIN-SUFFIX,steambroadcast.akamaized.net,🎮 场景 · 游戏平台
+- DOMAIN-SUFFIX,steampowered.com,场景 · 🎮 游戏平台
+- DOMAIN-SUFFIX,steamcommunity.com,场景 · 🎮 游戏平台
+- DOMAIN-SUFFIX,steamgames.com,场景 · 🎮 游戏平台
+- DOMAIN-SUFFIX,steamusercontent.com,场景 · 🎮 游戏平台
+- DOMAIN-SUFFIX,steamcontent.com,场景 · 🎮 游戏平台
+- DOMAIN-SUFFIX,steamstatic.com,场景 · 🎮 游戏平台
+- DOMAIN-SUFFIX,steambroadcast.akamaized.net,场景 · 🎮 游戏平台
 
 # Epic 平台
-- DOMAIN-SUFFIX,epicgames.com,🎮 场景 · 游戏平台
-- DOMAIN-SUFFIX,helpshift.com,🎮 场景 · 游戏平台
-- DOMAIN-SUFFIX,paragon.com,🎮 场景 · 游戏平台
-- DOMAIN-SUFFIX,unrealengine.com,🎮 场景 · 游戏平台
+- DOMAIN-SUFFIX,epicgames.com,场景 · 🎮 游戏平台
+- DOMAIN-SUFFIX,helpshift.com,场景 · 🎮 游戏平台
+- DOMAIN-SUFFIX,paragon.com,场景 · 🎮 游戏平台
+- DOMAIN-SUFFIX,unrealengine.com,场景 · 🎮 游戏平台
 
 # PlayStation 平台
-- DOMAIN-SUFFIX,playstation.com,🎮 场景 · 游戏平台
-- DOMAIN-SUFFIX,playstation.net,🎮 场景 · 游戏平台
-- DOMAIN-SUFFIX,playstationnetwork.com,🎮 场景 · 游戏平台
-- DOMAIN-SUFFIX,sony.com,🎮 场景 · 游戏平台
-- DOMAIN-SUFFIX,sonyentertainmentnetwork.com,🎮 场景 · 游戏平台
+- DOMAIN-SUFFIX,playstation.com,场景 · 🎮 游戏平台
+- DOMAIN-SUFFIX,playstation.net,场景 · 🎮 游戏平台
+- DOMAIN-SUFFIX,playstationnetwork.com,场景 · 🎮 游戏平台
+- DOMAIN-SUFFIX,sony.com,场景 · 🎮 游戏平台
+- DOMAIN-SUFFIX,sonyentertainmentnetwork.com,场景 · 🎮 游戏平台
 
 # Xbox 平台
-- DOMAIN-SUFFIX,xbox.com,🎮 场景 · 游戏平台
-- DOMAIN-SUFFIX,xboxlive.com,🎮 场景 · 游戏平台
-- DOMAIN-SUFFIX,xboxlive.com.cn,🎮 场景 · 游戏平台
+- DOMAIN-SUFFIX,xbox.com,场景 · 🎮 游戏平台
+- DOMAIN-SUFFIX,xboxlive.com,场景 · 🎮 游戏平台
+- DOMAIN-SUFFIX,xboxlive.com.cn,场景 · 🎮 游戏平台
 
 # Nintendo 平台
-- DOMAIN-SUFFIX,nintendo.com,🎮 场景 · 游戏平台
-- DOMAIN-SUFFIX,nintendo.net,🎮 场景 · 游戏平台
-- DOMAIN-SUFFIX,nintendo.co.jp,🎮 场景 · 游戏平台
+- DOMAIN-SUFFIX,nintendo.com,场景 · 🎮 游戏平台
+- DOMAIN-SUFFIX,nintendo.net,场景 · 🎮 游戏平台
+- DOMAIN-SUFFIX,nintendo.co.jp,场景 · 🎮 游戏平台
 
 # EA/Origin 平台
-- DOMAIN-SUFFIX,ea.com,🎮 场景 · 游戏平台
-- DOMAIN-SUFFIX,origin.com,🎮 场景 · 游戏平台
+- DOMAIN-SUFFIX,ea.com,场景 · 🎮 游戏平台
+- DOMAIN-SUFFIX,origin.com,场景 · 🎮 游戏平台
 
 # Ubisoft 平台
-- DOMAIN-SUFFIX,ubisoft.com,🎮 场景 · 游戏平台
-- DOMAIN-SUFFIX,uplay.com,🎮 场景 · 游戏平台
+- DOMAIN-SUFFIX,ubisoft.com,场景 · 🎮 游戏平台
+- DOMAIN-SUFFIX,uplay.com,场景 · 🎮 游戏平台
 
 # GEOSITE 兜底
-- GEOSITE,steam,🎮 场景 · 游戏平台
-- GEOSITE,epicgames,🎮 场景 · 游戏平台
-- GEOSITE,xbox,🎮 场景 · 游戏平台
-- GEOSITE,nintendo,🎮 场景 · 游戏平台
+- GEOSITE,steam,场景 · 🎮 游戏平台
+- GEOSITE,epicgames,场景 · 🎮 游戏平台
+- GEOSITE,xbox,场景 · 🎮 游戏平台
+- GEOSITE,nintendo,场景 · 🎮 游戏平台

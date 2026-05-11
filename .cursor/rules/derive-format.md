@@ -20,66 +20,66 @@
 ## INI 格式示例
 
 ```ini
-; ================== 30-🧠 场景 · 境外 AI ==================
+; ================== 30-场景 · 🧠 境外 AI ==================
 ; OpenAI / ChatGPT / Codex / Anthropic / Claude / Claude Code
 
 ; OpenAI 域名对齐官方 Network recommendations
-ruleset=🧠 场景 · 境外 AI,[]DOMAIN-SUFFIX,openai.com
-ruleset=🧠 场景 · 境外 AI,[]DOMAIN-SUFFIX,chatgpt.com
+ruleset=场景 · 🧠 境外 AI,[]DOMAIN-SUFFIX,openai.com
+ruleset=场景 · 🧠 境外 AI,[]DOMAIN-SUFFIX,chatgpt.com
 ...
 
 ; Anthropic / Claude
-ruleset=🧠 场景 · 境外 AI,[]DOMAIN-SUFFIX,anthropic.com
-ruleset=🧠 场景 · 境外 AI,[]DOMAIN-SUFFIX,claude.ai
+ruleset=场景 · 🧠 境外 AI,[]DOMAIN-SUFFIX,anthropic.com
+ruleset=场景 · 🧠 境外 AI,[]DOMAIN-SUFFIX,claude.ai
 
 ; GEOSITE 兜底（新子域）
-ruleset=🧠 场景 · 境外 AI,[]GEOSITE,openai
-ruleset=🧠 场景 · 境外 AI,[]GEOSITE,anthropic
+ruleset=场景 · 🧠 境外 AI,[]GEOSITE,openai
+ruleset=场景 · 🧠 境外 AI,[]GEOSITE,anthropic
 
 
-; ================== 40-📢 场景 · 谷歌推送 ==================
+; ================== 40-场景 · 📢 谷歌推送 ==================
 ; FCM / Firebase Cloud Messaging
 ; 放在 GEOSITE,google 前面避免被截胡
 
 ; Android 设备推送服务
-ruleset=📢 场景 · 谷歌推送,[]DOMAIN,mtalk.google.com
+ruleset=场景 · 📢 谷歌推送,[]DOMAIN,mtalk.google.com
 ...
 
 ; IP 段覆盖 Google 推送服务出口
-ruleset=📢 场景 · 谷歌推送,[]IP-CIDR,64.233.177.188/32,no-resolve
+ruleset=场景 · 📢 谷歌推送,[]IP-CIDR,64.233.177.188/32,no-resolve
 ...
 ```
 
 ## YAML 格式对应
 
 ```yaml
-# ================== 30-🧠 场景 · 境外 AI ==================
+# ================== 30-场景 · 🧠 境外 AI ==================
 # OpenAI / ChatGPT / Codex / Anthropic / Claude / Claude Code
 
 # OpenAI 域名对齐官方 Network recommendations
-- DOMAIN-SUFFIX,openai.com,🧠 场景 · 境外 AI
-- DOMAIN-SUFFIX,chatgpt.com,🧠 场景 · 境外 AI
+- DOMAIN-SUFFIX,openai.com,场景 · 🧠 境外 AI
+- DOMAIN-SUFFIX,chatgpt.com,场景 · 🧠 境外 AI
 ...
 
 # Anthropic / Claude
-- DOMAIN-SUFFIX,anthropic.com,🧠 场景 · 境外 AI
-- DOMAIN-SUFFIX,claude.ai,🧠 场景 · 境外 AI
+- DOMAIN-SUFFIX,anthropic.com,场景 · 🧠 境外 AI
+- DOMAIN-SUFFIX,claude.ai,场景 · 🧠 境外 AI
 
 # GEOSITE 兜底（新子域）
-- GEOSITE,openai,🧠 场景 · 境外 AI
-- GEOSITE,anthropic,🧠 场景 · 境外 AI
+- GEOSITE,openai,场景 · 🧠 境外 AI
+- GEOSITE,anthropic,场景 · 🧠 境外 AI
 
 
-# ================== 40-📢 场景 · 谷歌推送 ==================
+# ================== 40-场景 · 📢 谷歌推送 ==================
 # FCM / Firebase Cloud Messaging
 # 放在 GEOSITE,google 前面避免被截胡
 
 # Android 设备推送服务
-- DOMAIN,mtalk.google.com,📢 场景 · 谷歌推送
+- DOMAIN,mtalk.google.com,场景 · 📢 谷歌推送
 ...
 
 # IP 段覆盖 Google 推送服务出口
-- IP-CIDR,64.233.177.188/32,📢 场景 · 谷歌推送,no-resolve
+- IP-CIDR,64.233.177.188/32,场景 · 📢 谷歌推送,no-resolve
 ...
 ```
 
@@ -98,13 +98,13 @@ ruleset=📢 场景 · 谷歌推送,[]IP-CIDR,64.233.177.188/32,no-resolve
 片段文件（如 `30-ai.ini`）的前两行定义节标题和说明：
 
 ```ini
-; 🧠 场景 · 境外 AI
+; 场景 · 🧠 境外 AI
 ; OpenAI / ChatGPT / Codex / Anthropic / Claude / Claude Code
 ```
 
 生成时转换为：
-- INI: `; ================== 30-🧠 场景 · 境外 AI ==================`
-- YAML: `# ================== 30-🧠 场景 · 境外 AI ==================`
+- INI: `; ================== 30-场景 · 🧠 境外 AI ==================`
+- YAML: `# ================== 30-场景 · 🧠 境外 AI ==================`
 
 ## 文件名到编号映射
 
@@ -112,14 +112,14 @@ ruleset=📢 场景 · 谷歌推送,[]IP-CIDR,64.233.177.188/32,no-resolve
 |--------|------|--------|
 | 00-private.ini | 00 | 私有/局域网规则（基础直连） |
 | 10-ads.ini | 10 | 广告拦截与遥测净化规则 |
-| 20-cursor.ini | 20 | 🔜 工具 · Cursor |
-| 30-ai.ini | 30 | 🧠 场景 · 境外 AI |
-| 35-messaging.ini | 35 | 💬 场景 · 即时通讯 |
-| 40-fcm.ini | 40 | 📢 场景 · 谷歌推送 |
-| 45-streaming.ini | 45 | 🎬 场景 · 海外音影社 |
-| 50-dev.ini | 50 | 🐙 场景 · 开发源站 |
-| 55-scholar.ini | 55 | 📚 场景 · 学术与数据 |
-| 60-tech-giants.ini | 60 | 🔍 大厂 · 谷歌 / 🍎 大厂 · 苹果 / 💠 大厂 · 微软跨境 / 🪟 大厂 · 微软 |
-| 65-gaming.ini | 65 | 🎮 场景 · 游戏平台 |
-| 70-domestic.ini | 70 | 🔌 国内直连 |
-| 80-geo.ini | 80 | 🎚️ 手动切换 / 🐟 系统 · 漏网之鱼 |
+| 20-cursor.ini | 20 | 工具 · 🔜 Cursor |
+| 30-ai.ini | 30 | 场景 · 🧠 境外 AI |
+| 35-messaging.ini | 35 | 场景 · 💬 即时通讯 |
+| 40-fcm.ini | 40 | 场景 · 📢 谷歌推送 |
+| 45-streaming.ini | 45 | 场景 · 🎬 海外音影社 |
+| 50-dev.ini | 50 | 场景 · 🐙 开发源站 |
+| 55-scholar.ini | 55 | 场景 · 📚 学术与数据 |
+| 60-tech-giants.ini | 60 | 大厂 · 🔍 谷歌 / 大厂 · 🍎 苹果 / 大厂 · 💠 微软跨境 / 大厂 · 🪟 微软 |
+| 65-gaming.ini | 65 | 场景 · 🎮 游戏平台 |
+| 70-domestic.ini | 70 | 国内直连 |
+| 80-geo.ini | 80 | 地理分流与兜底 |
