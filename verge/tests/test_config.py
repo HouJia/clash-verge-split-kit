@@ -241,12 +241,12 @@ class TestProxyGroups(unittest.TestCase):
     def test_104_region_groups_exist(self):
         """测试: 国家/地区节点分组必须存在"""
         region_groups = [
-            '🇺🇸 美国节点',
-            '🇭🇰 香港节点',
-            '🇯🇵 日本节点',
-            '🇸🇬 新加坡节点',
-            '🌺 台湾节点',
-            '🌍 其它国家',
+            '🇺🇸 地区 · 美国节点',
+            '🇭🇰 地区 · 香港节点',
+            '🇯🇵 地区 · 日本节点',
+            '🇸🇬 地区 · 新加坡节点',
+            '🌺 地区 · 台湾节点',
+            '🌍 地区 · 其它国家',
         ]
         for group in region_groups:
             self.assertIn(group, self.ini_group_names, f"INI 缺少地区组: {group}")
@@ -263,8 +263,8 @@ class TestProxyGroups(unittest.TestCase):
 
     def test_106_region_groups_are_url_test(self):
         """测试: 地区节点分组必须是 url-test 类型"""
-        region_groups = ['🇺🇸 美国节点', '🇭🇰 香港节点', '🇯🇵 日本节点',
-                        '🇸🇬 新加坡节点', '🌺 台湾节点', '🌍 其它国家']
+        region_groups = ['🇺🇸 地区 · 美国节点', '🇭🇰 地区 · 香港节点', '🇯🇵 地区 · 日本节点',
+                        '🇸🇬 地区 · 新加坡节点', '🌺 地区 · 台湾节点', '🌍 地区 · 其它国家']
         for name in region_groups:
             group = self.yaml_group_map.get(name)
             self.assertIsNotNone(group, f"找不到组: {name}")
@@ -273,8 +273,8 @@ class TestProxyGroups(unittest.TestCase):
             self.assertIn('filter', group, f"{name} 应该有 filter 字段")
 
     def test_107_other_countries_filter_pattern(self):
-        """测试: 🌍 其它国家 必须有正确的排除正则"""
-        group = self.yaml_group_map.get('🌍 其它国家')
+        """测试: 🌍 地区 · 其它国家 必须有正确的排除正则"""
+        group = self.yaml_group_map.get('🌍 地区 · 其它国家')
         self.assertIsNotNone(group)
         filter_pattern = group.get('filter', '')
 
@@ -311,8 +311,8 @@ class TestProxyGroups(unittest.TestCase):
         proxies = group.get('proxies', [])
 
         if len(proxies) > 0:
-            self.assertEqual(proxies[0], '🇺🇸 美国节点',
-                           "🧠 场景 · 境外 AI 的第一个选项应该是 🇺🇸 美国节点")
+            self.assertEqual(proxies[0], '🇺🇸 地区 · 美国节点',
+                           "🧠 场景 · 境外 AI 的第一个选项应该是 🇺🇸 地区 · 美国节点")
 
     def test_111_tiktok_default_preference(self):
         """测试: 📱 场景 · TikTok 默认优先美国节点"""
@@ -321,8 +321,8 @@ class TestProxyGroups(unittest.TestCase):
         proxies = group.get('proxies', [])
 
         if len(proxies) > 0:
-            self.assertEqual(proxies[0], '🇺🇸 美国节点',
-                           "📱 场景 · TikTok 的第一个选项应该是 🇺🇸 美国节点")
+            self.assertEqual(proxies[0], '🇺🇸 地区 · 美国节点',
+                           "📱 场景 · TikTok 的第一个选项应该是 🇺🇸 地区 · 美国节点")
 
     def test_112_google_group_default_preference(self):
         """测试: 🔍 大厂 · 谷歌 默认优先美国节点"""
@@ -331,8 +331,8 @@ class TestProxyGroups(unittest.TestCase):
         proxies = group.get('proxies', [])
 
         if len(proxies) > 0:
-            self.assertEqual(proxies[0], '🇺🇸 美国节点',
-                           "🔍 大厂 · 谷歌 的第一个选项应该是 🇺🇸 美国节点")
+            self.assertEqual(proxies[0], '🇺🇸 地区 · 美国节点',
+                           "🔍 大厂 · 谷歌 的第一个选项应该是 🇺🇸 地区 · 美国节点")
 
     def test_113_apple_microsoft_default_direct(self):
         """测试: 苹果和微软组默认优先直连"""
@@ -362,9 +362,15 @@ class TestProxyGroups(unittest.TestCase):
         proxies = group.get('proxies', [])
 
         # 应该包含所有主要出口选项
-        required_options = ['♻️ 自动最优', '🎚️ 手动切换', '🇺🇸 美国节点', '🔌 国内直连']
+        required_options = ['♻️ 自动最优', '🔌 国内直连', '🎚️ 手动切换',
+                           '🇺🇸 地区 · 美国节点']
         for opt in required_options:
             self.assertIn(opt, proxies, f"🐟 系统 · 漏网之鱼 缺少选项: {opt}")
+        if len(proxies) >= 3:
+            self.assertEqual(proxies[0], '♻️ 自动最优')
+            self.assertEqual(proxies[1], '🔌 国内直连')
+            self.assertEqual(proxies[2], '🎚️ 手动切换',
+                           '🐟 系统 · 漏网之鱼 前三项应为 自动最优、国内直连、手动切换')
 
     def test_116_paypal_groups_order(self):
         """测试: PayPal 分组默认选项检查"""
@@ -702,8 +708,8 @@ class TestOrderAndCompleteness(unittest.TestCase):
 
     def test_401_region_groups_last(self):
         """测试: 地区节点分组应该排在后面"""
-        region_groups = ['🇺🇸 美国节点', '🇭🇰 香港节点', '🇯🇵 日本节点',
-                        '🇸🇬 新加坡节点', '🌺 台湾节点', '🌍 其它国家']
+        region_groups = ['🇺🇸 地区 · 美国节点', '🇭🇰 地区 · 香港节点', '🇯🇵 地区 · 日本节点',
+                        '🇸🇬 地区 · 新加坡节点', '🌺 地区 · 台湾节点', '🌍 地区 · 其它国家']
         region_indices = [self.group_order.index(g) for g in region_groups if g in self.group_order]
         business_groups = ['🔜 工具 · Cursor', '🧠 场景 · 境外 AI', '🎬 场景 · 海外音影社']
         business_indices = [self.group_order.index(g) for g in business_groups if g in self.group_order]
@@ -714,8 +720,8 @@ class TestOrderAndCompleteness(unittest.TestCase):
 
     def test_402_all_region_groups_present(self):
         """测试: 所有地区组都必须存在且完整"""
-        region_groups = ['🇺🇸 美国节点', '🇭🇰 香港节点', '🇯🇵 日本节点',
-                        '🇸🇬 新加坡节点', '🌺 台湾节点', '🌍 其它国家']
+        region_groups = ['🇺🇸 地区 · 美国节点', '🇭🇰 地区 · 香港节点', '🇯🇵 地区 · 日本节点',
+                        '🇸🇬 地区 · 新加坡节点', '🌺 地区 · 台湾节点', '🌍 地区 · 其它国家']
         for group in region_groups:
             self.assertIn(group, self.group_order, f"缺少地区组: {group}")
 
