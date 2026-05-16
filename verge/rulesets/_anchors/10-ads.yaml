@@ -5,7 +5,7 @@
 
 - GEOSITE,category-ads-all,系统 · 🚫 广告拦截
 
-# tracker（统计／上报域）：归入「应用遥测净化」，与展示类广告列表分列，可按需放行排障
-- GEOSITE,tracker,系统 · 🍃 应用遥测净化
+# category-public-tracker（OpenClash/Mihomo GeoSite；统计／上报域）：归入「应用遥测净化」，与展示类广告列表分列，可按需放行排障
+- GEOSITE,category-public-tracker,系统 · 🍃 应用遥测净化
 
 - RULE-SET,reject-loyal,系统 · 🚫 广告拦截
