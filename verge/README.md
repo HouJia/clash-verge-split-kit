@@ -15,6 +15,8 @@
 | `generated/` 下 **`*-rule-split.local.yaml`** | **本机产物**：与各 Extend **一一成对**（见上文命名约定）；任选其一全文复制进 Verge **全局扩展配置**。**勿提交**。 |
 | [`scripts/render-local.sh`](scripts/render-local.sh) | 对 **`airport-rule-split-extend.yaml`**：**先** `scripts/derive/compose.sh` 写入合并稿（可用 **`VERGE_SKIP_COMPOSE=1`** 跳过）；再 **`sed`** 替换 **`YOUR_VPS_IP`** / **`192.0.2.1`**；可选并入 **`generated/local/override.local.ini`** 的 **`[rules]`**（INI 格式）。`VERGE_EXTEND_FILE` 选其它 extend **文件名**。 |
 | [`generated/local/override.local.ini.example`](generated/local/override.local.ini.example) | 复制为 **`generated/local/override.local.ini`**（勿提交）；INI 格式，含 **`[vps]`** 与 **`[rules]`** 节。 |
+| [`generated/local/gist-sync.local.env.example`](generated/local/gist-sync.local.env.example) | 复制为 **`gist-sync.local.env`**（勿提交），仅填 **Gist ID**；用于 **`derive/scripts/sync-generated-gists.sh`** 把 `config.local.*` 与 **`override.local.ini`** 推到 **secret gist**。路径与 Gist 的对照只写在同目录 **`GIST-SYNC.local.md`**（勿提交），避免映射进入 GitHub。 |
+| [`derive/scripts/sync-generated-gists.sh`](derive/scripts/sync-generated-gists.sh) | 读取 **`generated/local/gist-sync.local.env`**，用 **`gh gist edit`** 覆盖远端 gist 中的同名文件（需已 `gh auth login`）。 |
 
 **忽略规则（根 `.gitignore`）：** **`*.local.yaml`** 覆盖仓库内任意位置的 Mihomo 粘贴稿；**`verge/generated/*`** 默认可忽略，**仅放行 `verge/generated/local/*.example`**（本机覆写 **`override.ini`** 不在仓库中）。
 
