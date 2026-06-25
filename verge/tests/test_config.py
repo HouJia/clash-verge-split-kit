@@ -317,6 +317,17 @@ class TestProxyGroups(unittest.TestCase):
             self.assertIn('isp', combined.lower(),
                           f"{group['name']} 的 url-test 应排除 isp")
 
+    def test_120_region_filters_no_trailing_wildcard(self):
+        """测试: 地区 url-test 的 filter 末尾勿带 .*（subconverter 会把剩余节点塞进组）"""
+        region_groups = ['地区 · 🇺🇸 美国节点', '地区 · 🇭🇰 香港节点', '地区 · 🌺 台湾节点',
+                        '地区 · 🇸🇬 新加坡节点', '地区 · 🇯🇵 日本节点']
+        for name in region_groups:
+            group = self.yaml_group_map.get(name)
+            self.assertIsNotNone(group)
+            filter_pattern = group.get('filter', '')
+            self.assertFalse(filter_pattern.endswith('.*$'),
+                           f"{name} filter 末尾不应为 .*$（subconverter 兼容）")
+
     def test_108_select_groups_have_proxies(self):
         """测试: select 类型的组必须有 proxies 列表，或 include-all-proxies + filter"""
         for group in self.yaml_data.get('proxy-groups', []):
