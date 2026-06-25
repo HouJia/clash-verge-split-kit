@@ -1,6 +1,20 @@
 # Clash Verge 扩展分流（INI 模板 + 本机稿）
 
+| 项目 | 内容 |
+|---|---|
+| **创建时间** | 2026-03-01 |
+| **最后更新** | 2026-06-25 |
+
+## 更新记录
+
+| 日期 | 更新内容 |
+|---|----|
+| 2026-06-25 | 补充 SubConverter 排障文档链接、交叉验收脚本说明 |
+| 2026-03-01 | 初稿：INI 模板与本机稿数据流 |
+
 长期目标与脱敏红线见 **[`docs/clash-verge/RULEBASE-PROGRAM.md`](../docs/clash-verge/RULEBASE-PROGRAM.md)**。
+
+**SubConverter / 原生 ISP 踩坑：** 见 **[`derive/TROUBLESHOOTING-subconverter-ini.md`](derive/TROUBLESHOOTING-subconverter-ini.md)**（订阅走 gist INI 时必读）。
 
 ## 数据流（当前主线）
 
@@ -28,7 +42,9 @@ verge/generated/config.local.ini / .yaml    ← 本机产物（勿提交）
 | [`template/config-template.ini`](template/config-template.ini) | **合并后的 subconverter INI 模板**（由 compose 生成，日常改 parts 后需重跑 compose） |
 | [`derive/scripts/render-local.sh`](derive/scripts/render-local.sh) | 读模板 + 注入 `override.local.ini` 的 `[rules]` → 写出 `generated/config.local.*` |
 | [`generated/local/override.local.ini.example`](generated/local/override.local.ini.example) | 复制为 `override.local.ini`（勿提交） |
-| [`derive/scripts/sync-generated-gists.sh`](derive/scripts/sync-generated-gists.sh) | 将本机产物推到 secret gist（需 `gist-sync.local.env`） |
+| [`derive/scripts/sync-generated-gists.sh`](derive/scripts/sync-generated-gists.sh) | 将本机产物推到 secret gist（需 `gist-sync.local.env`）；末尾自动跑交叉验收 |
+| [`derive/scripts/verify-native-split.sh`](derive/scripts/verify-native-split.sh) | INI + gist + SubConverter 原生/ISP 分流交叉验收 |
+| [`derive/TROUBLESHOOTING-subconverter-ini.md`](derive/TROUBLESHOOTING-subconverter-ini.md) | SubConverter INI 排障与原生 ISP 经验沉淀 |
 
 ## 一次性配置（本机）
 
@@ -42,8 +58,11 @@ cp verge/generated/local/override.local.ini.example verge/generated/local/overri
 1. **改通用规则：** 编辑 `verge/derive/parts/rulesets/*.ini` 或 `20-routing.ini`  
 2. **合并模板：** `bash verge/derive/scripts/compose-ini.sh -o verge/template/config-template.ini`  
 3. **生成本机稿：** `bash verge/derive/scripts/render-local.sh`  
-4. **（可选）同步 gist：** `bash verge/derive/scripts/sync-generated-gists.sh`  
-5. 将 `verge/generated/config.local.yaml` 用于 Sub-Store / subconverter，或按你的 Verge 接入方式粘贴规则段
+4. **（可选）同步 gist：** `bash verge/derive/scripts/sync-generated-gists.sh`（内含 verify）  
+5. **改策略组 filter 后建议交叉验收：** `bash verge/derive/scripts/verify-native-split.sh`  
+6. 将 `verge/generated/config.local.yaml` 用于 Sub-Store / subconverter，或按你的 Verge 接入方式粘贴规则段
+
+若 Verge 订阅 URL 的 `config=` 指向 gist INI，**以 INI 的 `custom_proxy_group` 为准**；仅改 YAML `exclude-filter` 不会生效（详见排障文档）。
 
 编辑 `derive/parts/*` 或 `override.local.ini` 并保存时，Cursor Hook（[`.cursor/hooks.json`](../.cursor/hooks.json)）会尝试自动执行 compose + render。
 

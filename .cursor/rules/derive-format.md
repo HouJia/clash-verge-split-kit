@@ -123,3 +123,21 @@ ruleset=场景 · 📢 谷歌推送,[]IP-CIDR,64.233.177.188/32,no-resolve
 | 65-gaming.ini | 65 | 场景 · 🎮 游戏平台 |
 | 70-domestic.ini | 70 | 国内直连 |
 | 80-geo.ini | 80 | 地理分流与兜底 |
+
+## custom_proxy_group（SubConverter INI）
+
+策略组定义在 [`verge/derive/parts/20-routing.ini`](../verge/derive/parts/20-routing.ini) 的 `[custom]` 节，格式：
+
+```ini
+custom_proxy_group=组名`类型`filter正则`…
+```
+
+**SubConverter 订阅路径下，第三段 filter 才是运行时节点筛选真值**（YAML 的 `exclude-filter` 不生效）。
+
+要点：
+
+- 排除原生/ISP：`(?i)^(?!.*(海外用户专用|原生|isp))` 前缀用于所有 url-test 组
+- **地区 url-test**：filter 在地区关键字后直接接反引号，**勿**写 `(美国|…).*$`（subconverter [#119](https://github.com/tindy2013/subconverter/issues/119)）
+- catch-all（自动最优、其它国家）：可用末尾 `.*$`
+
+完整踩坑与验收见 **[`verge/derive/TROUBLESHOOTING-subconverter-ini.md`](../verge/derive/TROUBLESHOOTING-subconverter-ini.md)**。

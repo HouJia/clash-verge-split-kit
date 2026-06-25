@@ -1,5 +1,17 @@
 # Clash Verge Split Kit - 配置回归测试
 
+| 项目 | 内容 |
+|---|---|
+| **创建时间** | 2026-05-08 |
+| **最后更新** | 2026-06-25 |
+
+## 更新记录
+
+| 日期 | 更新内容 |
+|---|----|
+| 2026-06-25 | 补充 verify-native-split 交叉验收与 SubConverter 排障索引 |
+| 2026-05-08 | 初稿：配置回归测试说明 |
+
 本目录包含自动化回归测试脚本，用于验证生成的 `config.local.ini` 和 `config.local.yaml` 配置文件的正确性。
 
 ## 测试范围
@@ -108,17 +120,14 @@ OK
 
 ## 集成到生成流程
 
-建议将测试集成到配置生成脚本中，每次生成后自动运行：
+`render-local.sh` 末尾已自动运行 `test_config.py`。改 **策略组 filter / 原生 ISP** 时，另跑交叉验收：
 
 ```bash
-# 在 render-local.sh 或相关生成脚本末尾添加:
-echo "运行配置回归测试..."
-if ! python3 "$(dirname "$0")/tests/test_config.py"; then
-    echo "❌ 配置测试失败，请检查生成的配置"
-    exit 1
-fi
-echo "✅ 配置测试通过"
+# 仓库根
+bash verge/derive/scripts/verify-native-split.sh
 ```
+
+详见 [`derive/TROUBLESHOOTING-subconverter-ini.md`](../derive/TROUBLESHOOTING-subconverter-ini.md)。
 
 ## 故障排查
 
@@ -136,6 +145,8 @@ echo "✅ 配置测试通过"
 | 规则顺序错误 | rulesets 片段文件名顺序问题 | 检查 `derive/parts/rulesets/` 中文件的数字前缀顺序 |
 | 默认选项错误 | 组定义中的选项顺序变化 | 检查模板中 `proxies` 列表的顺序 |
 | INI/YAML 不一致 | 生成脚本转换逻辑问题 | 检查 `render-local.sh` 中的转换逻辑 |
+| url-test 仍含原生节点（SubConverter） | 只改了 YAML `exclude-filter` 或地区 filter 末尾有 `.*$` | 改 `20-routing.ini` 第三段 filter；见排障文档 |
+| pytest 过、Verge 仍旧 | gist 未 sync 或 CDN 延迟 | `sync-generated-gists.sh` + `verify-native-split.sh` |
 
 ## 扩展测试
 
@@ -152,8 +163,4 @@ def test_xxx_your_test_name(self):
 - 测试方法以 `test_` 开头
 - 使用三位数字前缀分类（100-代理组、200-规则、300-一致性等）
 
-## 维护记录
-
-- **创建时间**: 2026-05-08
-- **测试数量**: 61 项
-- **覆盖维度**: 结构、策略组、规则、一致性、顺序
+**SubConverter 运行时问题**（pytest 无法覆盖 gist/SubConverter 路径）：见 [`derive/TROUBLESHOOTING-subconverter-ini.md`](../derive/TROUBLESHOOTING-subconverter-ini.md)。

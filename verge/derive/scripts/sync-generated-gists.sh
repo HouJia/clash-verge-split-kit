@@ -47,3 +47,12 @@ gh gist edit "${CONFIG_PAIR_GIST_ID}" --filename config.local.yaml "${YAML}"
 gh gist edit "${OVERRIDE_GIST_ID}" --filename override.local.ini "${OVERRIDE}"
 
 echo "ok: 已用本地文件更新两份 secret gist（对照仅写在 GIST-SYNC.local.md）"
+
+# gist raw CDN 有延迟；交叉验收 INI 关键行 + SubConverter 运行时
+sleep 3
+VERIFY="${ROOT}/verge/derive/scripts/verify-native-split.sh"
+if [[ -x "${VERIFY}" ]]; then
+  bash "${VERIFY}"
+else
+  bash "${VERIFY}" # 首次无 +x 时仍执行
+fi
