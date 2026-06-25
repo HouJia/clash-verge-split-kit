@@ -110,7 +110,14 @@ parse_proxy_groups() {
       # 根据类型输出不同字段
       case "${type}" in
       "select")
-        # select 类型输出 proxies 列表
+        if [[ "${filter}" == ".*" ]]; then
+          echo "    include-all-proxies: true"
+          echo "    exclude-filter: '$(proxy_group_exclude_filter "${name}")'"
+        elif [[ -n "${filter}" ]]; then
+          echo "    include-all-proxies: true"
+          echo "    exclude-filter: '$(proxy_group_exclude_filter "${name}")'"
+          echo "    filter: '${filter}'"
+        fi
         if [[ ${#options[@]} -gt 0 ]]; then
           echo "    proxies:"
           for opt in "${options[@]}"; do

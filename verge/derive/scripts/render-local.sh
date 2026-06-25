@@ -201,6 +201,10 @@ done <"${TEMPLATE}" >"${tmp_ini}"
         if [[ "${filter}" == ".*" ]]; then
           echo "    include-all-proxies: true"
           echo "    exclude-filter: '$(proxy_group_exclude_filter "${name}")'"
+        elif [[ -n "${filter}" ]]; then
+          echo "    include-all-proxies: true"
+          echo "    exclude-filter: '$(proxy_group_exclude_filter "${name}")'"
+          echo "    filter: '${filter}'"
         fi
         if [[ ${#options[@]} -gt 0 ]]; then
           echo "    proxies:"

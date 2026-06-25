@@ -271,13 +271,15 @@ class TestProxyGroups(unittest.TestCase):
         self.assertIn('isp', exclude.lower(), "自动最优 exclude-filter 应排除 isp")
 
     def test_105c_native_isp_group(self):
-        """测试: 底座 · 🏠 原生 ISP 仅匹配原生/ISP 节点"""
+        """测试: 底座 · 🏠 原生 ISP 为手动 select，仅匹配原生/ISP 节点"""
         group = self.yaml_group_map.get('底座 · 🏠 原生 ISP')
         self.assertIsNotNone(group, "缺少底座 · 🏠 原生 ISP 组")
-        self.assertEqual(group['type'], 'url-test')
+        self.assertEqual(group['type'], 'select')
         filter_pattern = group.get('filter', '')
         self.assertIn('原生', filter_pattern)
         self.assertIn('isp', filter_pattern.lower())
+        self.assertIn('include-all-proxies', group)
+        self.assertNotIn('url', group, "原生 ISP 组不应自动测速")
 
     def test_106_region_groups_are_url_test(self):
         """测试: 地区节点分组必须是 url-test 类型"""
@@ -303,13 +305,13 @@ class TestProxyGroups(unittest.TestCase):
         self.assertIn('日本', filter_pattern, "filter 应该排除日本")
 
     def test_108_select_groups_have_proxies(self):
-        """测试: select 类型的组必须有 proxies 列表"""
+        """测试: select 类型的组必须有 proxies 列表，或 include-all-proxies + filter"""
         for group in self.yaml_data.get('proxy-groups', []):
             if group['type'] == 'select':
-                self.assertIn('proxies', group,
-                            f"{group['name']} 是 select 类型但缺少 proxies")
-                self.assertGreater(len(group['proxies']), 0,
-                                 f"{group['name']} 的 proxies 不能为空")
+                has_proxies = 'proxies' in group and len(group.get('proxies', [])) > 0
+                has_filter_pool = group.get('include-all-proxies') and 'filter' in group
+                self.assertTrue(has_proxies or has_filter_pool,
+                            f"{group['name']} 是 select 类型但缺少 proxies 或 filter 节点池")
 
     def test_109_manual_switch_first_options(self):
         """测试: 底座 · 🎚️ 手动切换 的选项顺序检查"""
@@ -384,11 +386,12 @@ class TestProxyGroups(unittest.TestCase):
                            '地区 · 🇺🇸 美国节点']
         for opt in required_options:
             self.assertIn(opt, proxies, f"系统 · 🐟 漏网之鱼 缺少选项: {opt}")
-        if len(proxies) >= 3:
+        if len(proxies) >= 4:
             self.assertEqual(proxies[0], '底座 · ♻️ 自动最优')
-            self.assertEqual(proxies[1], '底座 · 🔌 国内直连')
-            self.assertEqual(proxies[2], '底座 · 🎚️ 手动切换',
-                           '系统 · 🐟 漏网之鱼 前三项应为 自动最优、国内直连、手动切换')
+            self.assertEqual(proxies[1], '底座 · 🏠 原生 ISP')
+            self.assertEqual(proxies[2], '底座 · 🔌 国内直连')
+            self.assertEqual(proxies[3], '底座 · 🎚️ 手动切换',
+                           '系统 · 🐟 漏网之鱼 前四项应为 自动最优、原生 ISP、国内直连、手动切换')
 
     def test_116_paypal_groups_order(self):
         """测试: PayPal 分组默认选项检查"""
@@ -416,6 +419,18 @@ class TestProxyGroups(unittest.TestCase):
             exclude = group.get('exclude-filter', '')
             self.assertIn('海外用户专用', exclude,
                         f"{group['name']} 的 exclude-filter 应该排除 '海外用户专用'")
+
+    def test_118_groups_with_cn_direct_also_have_native_isp(self):
+        """测试: 含国内直连选项的业务组也应含原生 ISP（自动最优除外）"""
+        skip = {'底座 · ♻️ 自动最优', '底座 · 🏠 原生 ISP'}
+        for group in self.yaml_data.get('proxy-groups', []):
+            name = group['name']
+            if name in skip or group['type'] != 'select':
+                continue
+            proxies = group.get('proxies', [])
+            if '底座 · 🔌 国内直连' in proxies:
+                self.assertIn('底座 · 🏠 原生 ISP', proxies,
+                              f"{name} 含国内直连选项时应同时含原生 ISP")
 
 
 class TestRules(unittest.TestCase):
