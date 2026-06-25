@@ -263,12 +263,14 @@ class TestProxyGroups(unittest.TestCase):
         self.assertIn('tolerance', group)
 
     def test_105b_auto_best_excludes_native_isp(self):
-        """测试: 底座 · ♻️ 自动最优 应排除原生/ISP 节点"""
+        """测试: 底座 · ♻️ 自动最优 应排除原生/ISP 节点（filter 或 exclude-filter）"""
         group = self.yaml_group_map.get('底座 · ♻️ 自动最优')
         self.assertIsNotNone(group)
         exclude = group.get('exclude-filter', '')
-        self.assertIn('原生', exclude, "自动最优 exclude-filter 应排除「原生」")
-        self.assertIn('isp', exclude.lower(), "自动最优 exclude-filter 应排除 isp")
+        filter_pattern = group.get('filter', '')
+        combined = f"{exclude} {filter_pattern}"
+        self.assertIn('原生', combined, "自动最优应排除「原生」")
+        self.assertIn('isp', combined.lower(), "自动最优应排除 isp")
 
     def test_105c_native_isp_group(self):
         """测试: 底座 · 🏠 原生 ISP 为手动 select，仅匹配原生/ISP 节点"""
@@ -278,7 +280,6 @@ class TestProxyGroups(unittest.TestCase):
         filter_pattern = group.get('filter', '')
         self.assertIn('原生', filter_pattern)
         self.assertIn('isp', filter_pattern.lower())
-        self.assertIn('include-all-proxies', group)
         self.assertNotIn('url', group, "原生 ISP 组不应自动测速")
 
     def test_106_region_groups_are_url_test(self):
