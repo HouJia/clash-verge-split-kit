@@ -666,18 +666,6 @@ class TestConsistency(unittest.TestCase):
         self.assertEqual(ini_time_match.group(1), yaml_time_match.group(1),
                         "INI 和 YAML 的生成时间应该一致")
 
-    def test_304_vps_ip_format(self):
-        """测试: VPS IP 格式检查"""
-        ip_pattern = r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}'
-
-        ini_ip_match = re.search(rf'VPS IP：({ip_pattern})', self.ini_content)
-        yaml_ip_match = re.search(rf'VPS IP：({ip_pattern})', self.yaml_content)
-
-        self.assertIsNotNone(ini_ip_match, "INI 应该有正确的 VPS IP 格式")
-        self.assertIsNotNone(yaml_ip_match, "YAML 应该有正确的 VPS IP 格式")
-        self.assertEqual(ini_ip_match.group(1), yaml_ip_match.group(1),
-                        "INI 和 YAML 的 VPS IP 应该一致")
-
 
 class TestOrderAndCompleteness(unittest.TestCase):
     """测试顺序和完整性"""

@@ -7,26 +7,21 @@
 ; 本文件采用 INI 格式，专为本地规则覆写设计：
 ; - 使用 [section] 定义节，每节包含特定用途的配置
 ; - 注释以 ; 开头
-; - [vps] 节：填写本机公网 IPv4（用于替换模板中的占位符）
 ; - [rules] 节：INI 格式的规则列表（ruleset=GROUP,[]TYPE,CONTENT,no-resolve）
 ;
 ; 【使用说明】
-; 1. 复制本文件为 override.ini
-; 2. 编辑 override.ini，在 [vps] 段填写你的公网 IP，在 [rules] 段添加私有规则
+; 1. 复制本文件为 override.local.ini
+; 2. 编辑 override.local.ini，在 [rules] 段添加私有规则
 ; 3. 重新生成配置：bash verge/derive/scripts/render-local.sh
 ; 4. 生成的配置位于 verge/generated/config.local.yaml
 ; 5. 如需修改规则，重复步骤 2-4
 ;
 ; 【注意事项】
-; - override.ini 文件（非本示例）被 .gitignore 排除，不会提交到仓库，适合存放敏感信息
+; - override.local.ini 被 .gitignore 排除，不会提交到仓库，适合存放敏感信息
 ; - 非私有规则（通用规则）请修改 verge/derive/parts/rulesets/*.ini
 ; - 此处的规则用于纠正系统性配置错误，最高优先级在标准规则之前命中
 ;
 ; =============================================================================
-
-[vps]
-; 填写你的公网 IPv4（用于替换模板中的 192.0.2.1 占位符）
-; 例如：203.0.113.10
 
 [rules]
 ; ============================================

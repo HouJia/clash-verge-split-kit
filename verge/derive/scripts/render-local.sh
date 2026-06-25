@@ -8,8 +8,7 @@
 #   - 保留原始片段中的子分组注释
 #
 # 用法:
-#   bash render-local.sh [你的公网IPv4]
-#   或配置 override.local 的 [vps] 节，然后直接运行
+#   bash verge/derive/scripts/render-local.sh
 # =============================================================================
 set -euo pipefail
 
@@ -21,30 +20,6 @@ LOCAL_DIR="${DST_DIR}/local"
 OVERRIDE_FILE="${LOCAL_DIR}/override.local.ini"
 DST_INI="${DST_DIR}/config.local.ini"
 DST_YAML="${DST_DIR}/config.local.yaml"
-
-# 自 override.local 的 [vps] 段读取第一个非注释非空行作为 IPv4
-read_ip_from_override() {
-  local f="$1"
-  [[ -f "$f" ]] || return 1
-  local line ip in_vps=0
-  while IFS= read -r line || [[ -n "${line}" ]]; do
-    if [[ "${line}" =~ ^[[:space:]]*\[vps\][[:space:]]*$ ]]; then
-      in_vps=1
-      continue
-    fi
-    if [[ "${line}" =~ ^[[:space:]]*\[[^]]+\][[:space:]]*$ ]]; then
-      in_vps=0
-      continue
-    fi
-    if [[ "${in_vps}" -eq 1 ]]; then
-      [[ "${line}" =~ ^[[:space:]]*# ]] && continue
-      [[ "${line}" =~ ^[[:space:]]*\; ]] && continue
-      ip="$(echo "${line}" | tr -d '[:space:]')"
-      [[ -n "${ip}" ]] && echo "${ip}" && return 0
-    fi
-  done <"${f}"
-  return 1
-}
 
 # 将 [rules] 段内容写入临时文件
 extract_rules_to_file() {
@@ -73,29 +48,16 @@ has_content() {
   local line
   while IFS= read -r line || [[ -n "${line}" ]]; do
     [[ "${line}" =~ ^[[:space:]]*# ]] && continue
+    [[ "${line}" =~ ^[[:space:]]*\; ]] && continue
     [[ -z "${line// }" ]] && continue
     return 0
   done <"${f}"
   return 1
 }
 
-# 获取 IP（优先级：命令行参数 > override.local）
-ip="${1:-}"
-ip="$(echo "${ip}" | tr -d '[:space:]')"
-if [[ -z "${ip}" ]] && [[ -f "${OVERRIDE_FILE}" ]]; then
-  ip="$(read_ip_from_override "${OVERRIDE_FILE}" 2>/dev/null || true)"
-  ip="$(echo "${ip}" | tr -d '[:space:]')"
-fi
-
-if [[ -z "${ip}" ]]; then
-  echo "用法（任选其一）：" >&2
-  echo "  bash verge/derive/scripts/render-local.sh 你的公网IPv4" >&2
-  echo "  或在 ${OVERRIDE_FILE} 的 [vps] 节写入 IPv4 后直接运行" >&2
-  exit 2
-fi
-
 if [[ ! -f "${TEMPLATE}" ]]; then
   echo "error: 缺少模板 ${TEMPLATE}" >&2
+  echo "请先运行: bash verge/derive/scripts/compose-ini.sh -o verge/template/config-template.ini" >&2
   exit 2
 fi
 
@@ -103,11 +65,9 @@ mkdir -p "${DST_DIR}" "${LOCAL_DIR}"
 
 # 准备临时文件
 RULES_TMP="$(mktemp)"
-tmp_ip="$(mktemp)"
 tmp_ini="$(mktemp)"
 cleanup() {
   [[ -n "${RULES_TMP}" && -f "${RULES_TMP}" ]] && rm -f "${RULES_TMP}"
-  [[ -n "${tmp_ip}" && -f "${tmp_ip}" ]] && rm -f "${tmp_ip}"
   [[ -n "${tmp_ini}" && -f "${tmp_ini}" ]] && rm -f "${tmp_ini}"
 }
 trap cleanup EXIT
@@ -117,17 +77,14 @@ if [[ -f "${OVERRIDE_FILE}" ]]; then
   extract_rules_to_file "${OVERRIDE_FILE}" "${RULES_TMP}"
 fi
 
-# 第一步：替换 IP 占位符
-sed -e "s|YOUR_VPS_IP|${ip}|g" -e "s|192\.0\.2\.1|${ip}|g" "${TEMPLATE}" >"${tmp_ip}"
-
-# 第二步：注入本地私有规则（在规则注入锚点处）
+# 注入本地私有规则（在规则注入锚点处）
 injected=0
 while IFS= read -r line || [[ -n "${line}" ]]; do
   if [[ "${line}" == "; >>> RULESET_INJECTION_START" ]]; then
     echo "${line}"
     echo "; === 规则片段注入（由 compose-ini.sh 自动组装）==="
     echo "; 片段源：derive/parts/rulesets/*.ini"
-    
+
     if has_content "${RULES_TMP}"; then
       echo ""
       echo "; ============================================================================="
@@ -139,13 +96,9 @@ while IFS= read -r line || [[ -n "${line}" ]]; do
         [[ -z "${rule_line// }" ]] && continue
         [[ "${rule_line}" =~ ^[[:space:]]*# ]] && continue
         [[ "${rule_line}" =~ ^[[:space:]]*\; ]] && continue
-        # 替换 IP 占位符
-        rule_line="${rule_line//YOUR_VPS_IP/${ip}}"
-        rule_line="${rule_line//192.0.2.1/${ip}}"
         # 解析 YAML 格式: "- TYPE,CONTENT,GROUP,no-resolve"
         if [[ "${rule_line}" =~ ^[[:space:]]*-[[:space:]]+(.+)$ ]]; then
           rule_content="${BASH_REMATCH[1]}"
-          # 解析规则: TYPE,CONTENT,GROUP,no-resolve
           IFS=',' read -ra parts <<< "${rule_content}"
           if [[ ${#parts[@]} -ge 3 ]]; then
             rule_type="${parts[0]}"
@@ -157,14 +110,13 @@ while IFS= read -r line || [[ -n "${line}" ]]; do
             fi
             echo "ruleset=${group_name},[]${rule_type},${rule_value}${no_resolve}"
           fi
-        # 解析 INI 格式: "ruleset=GROUP,[]TYPE,CONTENT,no-resolve"
         elif [[ "${rule_line}" =~ ^ruleset=(.+)$ ]]; then
           echo "${rule_line}"
         fi
       done <"${RULES_TMP}"
       echo ""
     fi
-    
+
     injected=1
     continue
   fi
@@ -180,28 +132,26 @@ while IFS= read -r line || [[ -n "${line}" ]]; do
   fi
 
   printf '%s\n' "${line}"
-done <"${tmp_ip}" >"${tmp_ini}"
+done <"${TEMPLATE}" >"${tmp_ini}"
 
-# 第三步：生成 INI 文件
+# 生成 INI 文件
 {
   printf '; --- 本机生成元信息（由 render-local.sh 自动生成） ---\n'
   printf '; 生成时间：%s\n' "$(date '+%Y-%m-%d %H:%M:%S %z')"
-  printf '; VPS IP：%s\n' "${ip}"
   printf '; 源模板：verge/template/config-template.ini\n'
   printf '; 本机产物：verge/generated/config.local.ini\n'
-  printf '; 注意：修改请编辑 derive/parts/rulesets/*.ini 和 generated/local/override.local.ini\n'
+  printf '; 注意：通用规则改 derive/parts/rulesets/*.ini；私有规则改 generated/local/override.local.ini 的 [rules]\n'
   printf '; ---\n\n'
   cat "${tmp_ini}"
 } >"${DST_INI}"
 
-# 第四步：生成 YAML 文件（保留格式规范）
+# 生成 YAML 文件（保留格式规范）
 {
   printf '# --- 本机生成元信息（由 render-local.sh 自动生成） ---\n'
   printf '# 生成时间：%s\n' "$(date '+%Y-%m-%d %H:%M:%S %z')"
-  printf '# VPS IP：%s\n' "${ip}"
   printf '# 源模板：verge/template/config-template.ini\n'
   printf '# 本机产物：verge/generated/config.local.yaml\n'
-  printf '# 注意：修改请编辑 derive/parts/rulesets/*.ini 和 generated/local/override.local.ini\n'
+  printf '# 注意：通用规则改 derive/parts/rulesets/*.ini；私有规则改 generated/local/override.local.ini 的 [rules]\n'
   printf '# ---\n\n'
 
   # 生成 proxy-groups
@@ -229,13 +179,12 @@ done <"${tmp_ip}" >"${tmp_ini}"
       for ((i=3; i<${#parts[@]}; i++)); do
         options+=("${parts[i]}")
       done
-      
+
       echo "  - name: '${name}'"
       echo "    type: ${type}"
-      
+
       case "${type}" in
       "select")
-        # 如果 filter 是 .*，表示包含所有节点
         if [[ "${filter}" == ".*" ]]; then
           echo "    include-all-proxies: true"
           echo "    exclude-filter: '(?i)海外用户专用'"
@@ -285,9 +234,9 @@ done <"${tmp_ip}" >"${tmp_ini}"
       esac
     fi
   done <"${tmp_ini}"
-  
+
   echo ""
-  
+
   # 生成 rule-providers（从模板提取）
   has_providers=0
   in_custom=0
@@ -305,10 +254,8 @@ done <"${tmp_ip}" >"${tmp_ini}"
     [[ "${line}" =~ ^[[:space:]]*\; ]] && continue
     if [[ "${line}" =~ ^ruleset=(.+)$ ]]; then
       ruleset_def="${BASH_REMATCH[1]}"
-      group_name=""
       rule_def=""
       if [[ "${ruleset_def}" =~ ^([^,]+),(.+)$ ]]; then
-        group_name="${BASH_REMATCH[1]}"
         rule_def="${BASH_REMATCH[2]}"
       else
         continue
@@ -333,10 +280,10 @@ done <"${tmp_ip}" >"${tmp_ini}"
       fi
     fi
   done <"${tmp_ini}"
-  
+
   echo ""
   echo "rules:"
-  
+
   # 注入本地私有规则（YAML 格式）
   if has_content "${RULES_TMP}"; then
     echo ""
@@ -348,14 +295,8 @@ done <"${tmp_ip}" >"${tmp_ini}"
       [[ "${line}" =~ ^[[:space:]]*# ]] && continue
       [[ "${line}" =~ ^[[:space:]]*\; ]] && continue
       [[ -z "${line// }" ]] && continue
-      # 转换 YAML 格式: "- TYPE,CONTENT,GROUP"
       if [[ "${line}" =~ ^[[:space:]]*-[[:space:]]+(.+)$ ]]; then
-        rule_line="${BASH_REMATCH[1]}"
-        # 替换 IP
-        rule_line="${rule_line//YOUR_VPS_IP/${ip}}"
-        rule_line="${rule_line//192.0.2.1/${ip}}"
-        echo "  - ${rule_line}"
-      # 与 INI 注入一致：ruleset=GROUP,[]TYPE,CONTENT,no-resolve
+        echo "  - ${BASH_REMATCH[1]}"
       elif [[ "${line}" =~ ^[[:space:]]*ruleset=(.+)$ ]]; then
         ruleset_def="${BASH_REMATCH[1]}"
         group_name=""
@@ -368,13 +309,9 @@ done <"${tmp_ip}" >"${tmp_ini}"
         fi
         if [[ "${rule_def}" =~ ^\[\](.+)$ ]]; then
           local_rule="${BASH_REMATCH[1]}"
-          local_rule="${local_rule//YOUR_VPS_IP/${ip}}"
-          local_rule="${local_rule//192.0.2.1/${ip}}"
           if [[ "${local_rule}" =~ ^([^,]+),(.+)$ ]]; then
             rule_type="${BASH_REMATCH[1]}"
             rule_content="${BASH_REMATCH[2]}"
-            rule_content="${rule_content//YOUR_VPS_IP/${ip}}"
-            rule_content="${rule_content//192.0.2.1/${ip}}"
             if [[ "${rule_content}" =~ ,no-resolve$ ]]; then
               rule_content="${rule_content%,no-resolve}"
               echo "  - ${rule_type},${rule_content},${group_name},no-resolve"
@@ -390,7 +327,7 @@ done <"${tmp_ip}" >"${tmp_ini}"
       fi
     done <"${RULES_TMP}"
   fi
-  
+
   # 从片段文件生成格式化的规则（保留注释和分隔）
   fragments=(
     "00-private.ini"
@@ -407,14 +344,13 @@ done <"${tmp_ip}" >"${tmp_ini}"
     "70-domestic.ini"
     "80-geo.ini"
   )
-  
+
   for fragment in "${fragments[@]}"; do
     file="${RULESETS_DIR}/${fragment}"
     [[ -f "${file}" ]] || continue
-    
+
     fragment_num="${fragment%%-*}"
-    
-    # 读取片段标题和说明
+
     title=""
     desc=""
     line_num=0
@@ -429,8 +365,7 @@ done <"${tmp_ip}" >"${tmp_ini}"
       fi
       ((line_num++))
     done <"${file}"
-    
-    # 输出节分隔
+
     echo ""
     if [[ -n "${title}" ]]; then
       echo "# ================== ${fragment_num}-${title} =================="
@@ -439,25 +374,18 @@ done <"${tmp_ip}" >"${tmp_ini}"
       echo "# ${desc}"
     fi
     echo ""
-    
-    # 输出片段内容（保留注释，跳过前两行标题，转换为 YAML 格式）
+
     skip=0
-    prev_was_rule=0
     while IFS= read -r line || [[ -n "${line}" ]]; do
       ((skip++))
       [[ ${skip} -le 2 ]] && continue
-      
-      # 跳过空行
       [[ -z "${line}" ]] && continue
-      
-      # 保留注释（转换 ; 为 #）
+
       if [[ "${line}" =~ ^[[:space:]]*\;(.+)$ ]]; then
         echo "#${BASH_REMATCH[1]}"
-        prev_was_rule=0
         continue
       fi
-      
-      # 转换 ruleset 为 YAML 格式
+
       if [[ "${line}" =~ ^ruleset=(.+)$ ]]; then
         ruleset_def="${BASH_REMATCH[1]}"
         group_name=""
@@ -468,15 +396,12 @@ done <"${tmp_ip}" >"${tmp_ini}"
         else
           continue
         fi
-        
+
         if [[ "${rule_def}" =~ ^\[\](.+)$ ]]; then
           local_rule="${BASH_REMATCH[1]}"
           if [[ "${local_rule}" =~ ^([^,]+),(.+)$ ]]; then
             rule_type="${BASH_REMATCH[1]}"
             rule_content="${BASH_REMATCH[2]}"
-            # 替换 IP
-            rule_content="${rule_content//YOUR_VPS_IP/${ip}}"
-            rule_content="${rule_content//192.0.2.1/${ip}}"
             if [[ "${rule_content}" =~ ,no-resolve$ ]]; then
               rule_content="${rule_content%,no-resolve}"
               echo "  - ${rule_type},${rule_content},${group_name},no-resolve"
@@ -485,22 +410,19 @@ done <"${tmp_ip}" >"${tmp_ini}"
             else
               echo "  - ${rule_type},${rule_content},${group_name}"
             fi
-            prev_was_rule=1
           elif [[ "${local_rule}" == "FINAL" ]]; then
             echo "  - MATCH,${group_name}"
-            prev_was_rule=1
           fi
         fi
       fi
     done <"${file}"
   done
-  
+
 } >"${DST_YAML}"
 
 echo "已生成："
 echo "  INI:  ${DST_INI}"
 echo "  YAML: ${DST_YAML}"
-echo "VPS IP：${ip}"
 if has_content "${RULES_TMP}"; then
   echo "已注入本地私有规则（来自 ${OVERRIDE_FILE}）"
 fi

@@ -1,5 +1,7 @@
 # Verge 配置重构完成总结
 
+> **2026-06-25 注：** 早期 `verge/rulesets/_anchors/`（YAML 片段）已删除；规则真值源现为 **`verge/derive/parts/rulesets/*.ini`**，见 [`derive/README.md`](derive/README.md) 与 [`README.md`](README.md)。
+
 ## 重构目标
 将「单文件混杂规则」改为「骨架 + 规则片段」架构，**保持「复制单个文件」的使用方式不变**。
 
