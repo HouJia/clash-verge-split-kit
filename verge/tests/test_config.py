@@ -188,6 +188,7 @@ class TestProxyGroups(unittest.TestCase):
         """测试: 底座策略组必须存在"""
         base_groups = [
             '底座 · ♻️ 自动最优',
+            '底座 · 🏠 原生 ISP',
             '底座 · 🔌 国内直连',
             '底座 · 🎚️ 手动切换',
         ]
@@ -260,6 +261,23 @@ class TestProxyGroups(unittest.TestCase):
         self.assertIn('url', group)
         self.assertIn('interval', group)
         self.assertIn('tolerance', group)
+
+    def test_105b_auto_best_excludes_native_isp(self):
+        """测试: 底座 · ♻️ 自动最优 应排除原生/ISP 节点"""
+        group = self.yaml_group_map.get('底座 · ♻️ 自动最优')
+        self.assertIsNotNone(group)
+        exclude = group.get('exclude-filter', '')
+        self.assertIn('原生', exclude, "自动最优 exclude-filter 应排除「原生」")
+        self.assertIn('isp', exclude.lower(), "自动最优 exclude-filter 应排除 isp")
+
+    def test_105c_native_isp_group(self):
+        """测试: 底座 · 🏠 原生 ISP 仅匹配原生/ISP 节点"""
+        group = self.yaml_group_map.get('底座 · 🏠 原生 ISP')
+        self.assertIsNotNone(group, "缺少底座 · 🏠 原生 ISP 组")
+        self.assertEqual(group['type'], 'url-test')
+        filter_pattern = group.get('filter', '')
+        self.assertIn('原生', filter_pattern)
+        self.assertIn('isp', filter_pattern.lower())
 
     def test_106_region_groups_are_url_test(self):
         """测试: 地区节点分组必须是 url-test 类型"""
@@ -685,14 +703,30 @@ class TestOrderAndCompleteness(unittest.TestCase):
         cls.group_order = [g['name'] for g in cls.proxy_groups]
 
     def test_400_base_groups_first(self):
-        """测试: 底座组应该排在前面"""
-        base_groups = ['底座 · ♻️ 自动最优', '底座 · 🔌 国内直连', '底座 · 🎚️ 手动切换']
+        """测试: 底座组应该排在前面且顺序正确"""
+        base_groups = [
+            '底座 · ♻️ 自动最优',
+            '底座 · 🏠 原生 ISP',
+            '底座 · 🔌 国内直连',
+            '底座 · 🎚️ 手动切换',
+        ]
         base_indices = [self.group_order.index(g) for g in base_groups if g in self.group_order]
 
         if len(base_indices) >= 2:
-            # 底座组应该在最前面（前5个之内）
-            self.assertLess(max(base_indices), 5,
-                          "底座组应该排在前面（前5个之内）")
+            # 底座组应该在最前面（前6个之内，含系统 · 🐟 漏网之鱼）
+            self.assertLess(max(base_indices), 6,
+                          "底座组应该排在前面（前6个之内）")
+            # 自动最优 → 原生 ISP → 国内直连
+            self.assertLess(
+                self.group_order.index('底座 · ♻️ 自动最优'),
+                self.group_order.index('底座 · 🏠 原生 ISP'),
+                "原生 ISP 组应在自动最优之后",
+            )
+            self.assertLess(
+                self.group_order.index('底座 · 🏠 原生 ISP'),
+                self.group_order.index('底座 · 🔌 国内直连'),
+                "原生 ISP 组应在国内直连之前",
+            )
 
     def test_401_region_groups_last(self):
         """测试: 地区节点分组应该排在后面"""

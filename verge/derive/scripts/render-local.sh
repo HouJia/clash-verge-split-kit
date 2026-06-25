@@ -154,6 +154,19 @@ done <"${TEMPLATE}" >"${tmp_ini}"
   printf '# 注意：通用规则改 derive/parts/rulesets/*.ini；私有规则改 generated/local/override.local.ini 的 [rules]\n'
   printf '# ---\n\n'
 
+  # 按组名输出 Mihomo exclude-filter（与 derive/parts/20-routing.ini 策略组定义配合）
+  proxy_group_exclude_filter() {
+    local group_name="$1"
+    case "${group_name}" in
+    "底座 · ♻️ 自动最优")
+      echo "(?i)(海外用户专用|原生|isp)"
+      ;;
+    *)
+      echo "(?i)海外用户专用"
+      ;;
+    esac
+  }
+
   # 生成 proxy-groups
   echo "proxy-groups:"
   in_custom=0
@@ -187,7 +200,7 @@ done <"${TEMPLATE}" >"${tmp_ini}"
       "select")
         if [[ "${filter}" == ".*" ]]; then
           echo "    include-all-proxies: true"
-          echo "    exclude-filter: '(?i)海外用户专用'"
+          echo "    exclude-filter: '$(proxy_group_exclude_filter "${name}")'"
         fi
         if [[ ${#options[@]} -gt 0 ]]; then
           echo "    proxies:"
@@ -203,11 +216,11 @@ done <"${TEMPLATE}" >"${tmp_ini}"
       "url-test")
         if [[ -n "${filter}" && "${filter}" != ".*" ]]; then
           echo "    include-all-proxies: true"
-          echo "    exclude-filter: '(?i)海外用户专用'"
+          echo "    exclude-filter: '$(proxy_group_exclude_filter "${name}")'"
           echo "    filter: '${filter}'"
         else
           echo "    include-all-proxies: true"
-          echo "    exclude-filter: '(?i)海外用户专用'"
+          echo "    exclude-filter: '$(proxy_group_exclude_filter "${name}")'"
         fi
         url="http://www.gstatic.com/generate_204"
         interval=300

@@ -45,6 +45,18 @@ done
 [[ -f "${RUNTIME_FILE}" ]] || { echo "error: 找不到运行时配置文件 ${RUNTIME_FILE}" >&2; exit 2; }
 
 # 解析 INI 的 custom_proxy_group 行，输出 YAML 格式
+proxy_group_exclude_filter() {
+  local group_name="$1"
+  case "${group_name}" in
+  "底座 · ♻️ 自动最优")
+    echo "(?i)(海外用户专用|原生|isp)"
+    ;;
+  *)
+    echo "(?i)海外用户专用"
+    ;;
+  esac
+}
+
 parse_proxy_groups() {
   local ini_file="$1"
   local in_custom_section=0
@@ -115,11 +127,11 @@ parse_proxy_groups() {
         # url-test 类型输出 filter 和其他参数
         if [[ -n "${filter}" && "${filter}" != ".*" ]]; then
           echo "    include-all-proxies: true"
-          echo "    exclude-filter: '(?i)海外用户专用'"
+          echo "    exclude-filter: '$(proxy_group_exclude_filter "${name}")'"
           echo "    filter: '${filter}'"
         else
           echo "    include-all-proxies: true"
-          echo "    exclude-filter: '(?i)海外用户专用'"
+          echo "    exclude-filter: '$(proxy_group_exclude_filter "${name}")'"
         fi
         # 输出测速参数
         local url="http://www.gstatic.com/generate_204"
