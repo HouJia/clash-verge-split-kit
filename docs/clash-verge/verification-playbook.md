@@ -2,7 +2,7 @@
 
 ## 前言
 
-本文是 **[自用分流说明（Verge 扩展）](local-split-vps.md)** 的配套：**改规则或切换出站之后**，按固定顺序在 Clash Verge 内核对「流量实际走了哪条路径」，并用 **`hjs-egress-ip` CLI** 与可选的 **`hjs-egress-ip serve` 审计 UI** 做出口侧对照。  
+本文是 **[自用分流说明（Verge 扩展）](local-split-vps.md)** 的配套：**改规则或切换出站之后**，按固定顺序在 Clash Verge 内核对「流量实际走了哪条路径」，并用 **`outbound-ip` CLI** 与可选的 **`outbound-ip serve` 审计 UI** 做出口侧对照。  
 主叙事（Extend、`*-rule-split-extend.yaml`、成对的 `*-rule-split.local.yaml`、免责声明）仍以 `local-split-vps.md` 为准；此处只收敛**验证动作**。
 
 **验证目的：** 在保存/重载配置后，确认目标站点或进程命中 **DIRECT** 或你期望的**代理组**（组名须与合并后的运行时配置一致）。
@@ -52,25 +52,25 @@
 
 ---
 
-## 何时运行 `hjs-egress-ip`（VER-02）
+## 何时运行 `outbound-ip`（VER-02）
 
 在 **Verge 重载、切换节点或修改规则** 之后，当你需要把「Verge 内看到的路径」与「对外出口 IP」做对照时运行 CLI：
 
-- **无参摘要：** 终端执行 `hjs-egress-ip`，查看分组的一键出口摘要（与 `hjs-egress-ip-cli/README.md` 一致）。
-- **机器可读表头：** `hjs-egress-ip --simple-tsv | head -5`，首行表头须含字面串 **`scenario`**（与 README 一致）。
+- **无参摘要：** 终端执行 `outbound-ip`，查看分组的一键出口摘要（与 `outbound-ip-cli/README.md` 一致）。
+- **机器可读表头：** `outbound-ip --simple-tsv | head -5`，首行表头须含字面串 **`scenario`**（与 README 一致）。
 - **如何与预期对照：** 将输出中的运营商/大致地域与「我此时期望走代理机房 / 本地直连」的心理模型对照；**不**承诺具体公网 IP 长期不变。
 
 ---
 
-## 审计 UI：`hjs-egress-ip serve`
+## 审计 UI：`outbound-ip serve`
 
-与 CLI 同属一条工具链，提供浏览器入口（详见 `hjs-egress-ip-cli/README.md`）：
+与 CLI 同属一条工具链，提供浏览器入口（详见 `outbound-ip-cli/README.md`）：
 
-1. 在终端执行 **`hjs-egress-ip serve`**，按提示在浏览器打开给出的 URL。
+1. 在终端执行 **`outbound-ip serve`**，按提示在浏览器打开给出的 URL。
 2. 页面上使用 **「一键检测」** 触发与 CLI 摘要互补的交互结果。
 3. 健康检查：在另一终端执行  
    `curl -s http://127.0.0.1:18765/health`  
-   期望输出为 **`ok`**（与 `hjs-egress-ip-cli/README.md` 第 31 行一致）。
+   期望输出为 **`ok`**（与 `outbound-ip-cli/README.md` 第 31 行一致）。
 
 **与 CLI 的关系：** 同一套探测逻辑，**CLI** 适合脚本与流水线；**审计 UI** 适合本机快速点点对照；二者都与上文「改规则/切节点后复查」衔接。
 
@@ -83,10 +83,10 @@
 | 步骤 | Verge 核对 | CLI / 审计 UI | 通过判据 |
 |------|------------|----------------|----------|
 | 1. 保存并重载 | 确认已重载或节点切换完成 | （本步可不跑 CLI） | 无报错；配置已应用 |
-| 2. 运行时配置 | **Rule 模式**；相关 `rules` 片段可见且符合预期 | （可选）改后再跑 `hjs-egress-ip` 对照出口 | `mode` 为规则模式；规则叙事与场景一致 |
-| 3. Connections | 目标连接策略链为 DIRECT 或 **主代理组** | `hjs-egress-ip` 无参摘要与「直连/代理」预期大致一致 | 策略链与出口叙事不矛盾 |
-| 4. 机器可读抽查 | （与 3 同步理解） | `hjs-egress-ip --simple-tsv \| head -5` 表头含 **`scenario`** | 表头含 `scenario` 字面值 |
-| 5. 审计 UI（可选） | 浏览器与 Verge 同机操作即可 | 启动 `hjs-egress-ip serve`；浏览器 **一键检测**；`curl -s http://127.0.0.1:18765/health` | 健康接口返回 **`ok`** |
+| 2. 运行时配置 | **Rule 模式**；相关 `rules` 片段可见且符合预期 | （可选）改后再跑 `outbound-ip` 对照出口 | `mode` 为规则模式；规则叙事与场景一致 |
+| 3. Connections | 目标连接策略链为 DIRECT 或 **主代理组** | `outbound-ip` 无参摘要与「直连/代理」预期大致一致 | 策略链与出口叙事不矛盾 |
+| 4. 机器可读抽查 | （与 3 同步理解） | `outbound-ip --simple-tsv \| head -5` 表头含 **`scenario`** | 表头含 `scenario` 字面值 |
+| 5. 审计 UI（可选） | 浏览器与 Verge 同机操作即可 | 启动 `outbound-ip serve`；浏览器 **一键检测**；`curl -s http://127.0.0.1:18765/health` | 健康接口返回 **`ok`** |
 
 ---
 

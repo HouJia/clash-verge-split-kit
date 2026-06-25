@@ -168,13 +168,13 @@
 <body>
   <header>
     <h1>出口 IP 一键检测</h1>
-    <p class="sub">本页纯静态：<code>audit-core.js</code> 与 CLI 共用同一探测表数据源（见包内同步流程）。浏览器内对工作流允许的站点使用 <code>fetch</code>。<strong>与 ipip 出口不一致的 IP，仅在同源 <code>hjs-egress-ip serve</code> + <code>/__geo</code> 时用中文行政区划补全归属；<code>file://</code> 不提供英文数据源、也不代为补全地名。</strong><strong>cip.cc、Cloudflare trace（<code>1.1.1.1/cdn-cgi/trace</code>）在「仅 file://」时脚本往往读不到正文；需 <code>serve</code> 同源 <code>/__probe</code> 代取或在标签栏单独打开探测 URL。</strong>仍可能受浏览器/系统代理与跨域响应头限制，结果与 CLI 中 <code>curl</code> 不必完全一致。</p>
+    <p class="sub">本页纯静态：<code>audit-core.js</code> 与 CLI 共用同一探测表数据源（见包内同步流程）。浏览器内对工作流允许的站点使用 <code>fetch</code>。<strong>与 ipip 出口不一致的 IP，仅在同源 <code>outbound-ip serve</code> + <code>/__geo</code> 时用中文行政区划补全归属；<code>file://</code> 不提供英文数据源、也不代为补全地名。</strong><strong>cip.cc、Cloudflare trace（<code>1.1.1.1/cdn-cgi/trace</code>）在「仅 file://」时脚本往往读不到正文；需 <code>serve</code> 同源 <code>/__probe</code> 代取或在标签栏单独打开探测 URL。</strong>仍可能受浏览器/系统代理与跨域响应头限制，结果与 CLI 中 <code>curl</code> 不必完全一致。</p>
   </header>
   <main>
     <div id="file-protocol-warning" style="display:none; margin-bottom:1rem; padding:0.75rem 1rem; border:1px dashed var(--warn); border-radius:10px; background:#2d2a1e; color:#f0c14b; font-size:0.9rem;">
       <strong>⚠️ 当前以 file:// 协议打开</strong><br>
       部分探测站点（如 cip.cc）会因跨域限制无法读取。建议启动本地服务获得完整功能：<br>
-      <code style="background:#1a2332; padding:0.2rem 0.4rem; border-radius:4px; color:#93c5fd;">hjs-egress-ip serve</code>
+      <code style="background:#1a2332; padding:0.2rem 0.4rem; border-radius:4px; color:#93c5fd;">outbound-ip serve</code>
       <button onclick="copyServeCommand()" style="margin-left:0.5rem; padding:0.2rem 0.5rem; font-size:0.8rem; background:#334155; color:#fff; border:none; border-radius:4px; cursor:pointer;">复制命令</button>
       <button onclick="tryRedirectToServer()" style="margin-left:0.5rem; padding:0.2rem 0.5rem; font-size:0.8rem; background:var(--accent); color:#fff; border:none; border-radius:4px; cursor:pointer;">尝试跳转</button>
     </div>
@@ -203,7 +203,7 @@
 
     <div class="cli-hint">
       需要 <strong>S0 代理环境 / S1 noproxy / IPv4·IPv6 / 指定网卡</strong> 等完整技术矩阵时，请在终端运行：
-      <code>hjs-egress-ip --full --ipv6-skip</code>（依赖本机安装的 <code>egress-ip-audit.sh</code>）。
+      <code>outbound-ip --full --ipv6-skip</code>（依赖本机安装的 <code>egress-ip-audit.sh</code>）。
     </div>
 
     <details class="tech">
@@ -213,7 +213,7 @@
           本页不向远端 POST；脚本直链 <code>audit-core.js</code>，与下方 TSV 同源。
           地址栏<strong>顶层打开</strong>探测站点（整页跳转）不适用跨域脚本限制；本页用 <code>fetch</code> 读正文时，若站点<strong>未返回</strong>允许跨源的响应头（示例：<strong>cip.cc</strong>），状态码常为 <code>000</code>，摘要中会显示类似「请求失败（网络异常、跨域限制或浏览器拦截）」，
           <strong>与你在地址栏单独打开是否正常无关</strong>。
-          通过 <code>hjs-egress-ip serve</code> 同源打开时，可对<strong>仅限内置探测 URL</strong>调用 <code>/__probe</code>，由本机代取正文，以便读出无跨域响应头的站点；
+          通过 <code>outbound-ip serve</code> 同源打开时，可对<strong>仅限内置探测 URL</strong>调用 <code>/__probe</code>，由本机代取正文，以便读出无跨域响应头的站点；
           <code>file://</code> 打开的页面不能使用该代取。各探测单次约有 <strong>20s</strong> 前端超时，避免站点挂起导致按钮长期停在「检测中」。
         </p>
         <p>终端一键路径对每次 curl 使用 <code>--noproxy '*'</code>，与浏览器的代理策略不同，属预期差异。</p>

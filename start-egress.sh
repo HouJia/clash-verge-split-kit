@@ -1,3 +1,3 @@
 #!/bin/bash
-# 快捷启动出口 IP 检测服务（包装脚本）
-exec "$(dirname "$0")/hjs-egress-ip-cli/start.sh" "$@"
+# 已更名：请使用 start-outbound-ip.sh（本文件保留为兼容入口）
+exec "$(dirname "$0")/start-outbound-ip.sh" "$@"

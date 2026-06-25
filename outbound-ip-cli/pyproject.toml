@@ -3,9 +3,9 @@ requires = ["setuptools>=61", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "hjs-egress-ip"
-version = "0.1.0"
-description = "Egress IP audit CLI aligned with hjs-egress-ip-audit skill."
+name = "outbound-ip"
+version = "0.2.0"
+description = "Outbound IP probe CLI (出站 IP 探测)，与代理分流验证配套使用。"
 readme = "README.md"
 license = { text = "MIT" }
 requires-python = ">=3.9"
@@ -18,14 +18,14 @@ dev = [
 ]
 
 [project.scripts]
-hjs-egress-ip = "hjs_egress_ip.cli:main"
+outbound-ip = "outbound_ip.cli:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
 
 [tool.setuptools.package-data]
-"hjs_egress_ip.data" = ["*.json"]
-"hjs_egress_ip.web" = ["static/*"]
+"outbound_ip.data" = ["*.json"]
+"outbound_ip.web" = ["static/*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

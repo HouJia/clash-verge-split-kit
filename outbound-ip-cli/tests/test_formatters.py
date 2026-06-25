@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from hjs_egress_ip.formatters import (
+from outbound_ip.formatters import (
     build_groups,
     extract_cip_cc_ip,
     extract_httpbin_origin,

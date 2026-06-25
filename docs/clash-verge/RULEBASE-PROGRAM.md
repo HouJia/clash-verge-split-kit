@@ -72,7 +72,7 @@
 | 第 3 阶段（OpenWrt 侧） | **OpenClash、Passwall、Passwall2、luci-app-xray** 等：规则或订阅转换模板注入，与 base 对齐。 |
 | 其它 | **Sing-box** 等按需接入同一 base，不阻塞前两阶段。 |
 
-**一致性的含义：** 同一业务标签（如 TT、Google、境外 AI）在各端**策略意图一致**；**出口 IP 是否完全一致**还受各端落地实现、节点健康度、DNS 与 sniffer 差异影响，需在验证 playbook 中抽样对齐（可与 `hjs-egress-ip` 等探测联动）。
+**一致性的含义：** 同一业务标签（如 TT、Google、境外 AI）在各端**策略意图一致**；**出口 IP 是否完全一致**还受各端落地实现、节点健康度、DNS 与 sniffer 差异影响，需在验证 playbook 中抽样对齐（可与 `outbound-ip` 等探测联动）。
 
 ## 9. 与本仓库其它目录的关系
 

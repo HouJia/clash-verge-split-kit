@@ -6,7 +6,7 @@
 
 **主路径：** [Clash Verge — Extend](https://www.clashverge.dev/guide/extend.html)：`airport` **主线**的真值源为 **`verge/derive/parts/`**，经 **`verge/derive/compose.sh`** 得到 [`verge/extend/airport-rule-split-extend.yaml`](../../verge/extend/airport-rule-split-extend.yaml)，再 **`bash verge/scripts/render-local.sh`**（或 `VERGE_EXTEND_FILE=…` 选用个人稿）得到 **`verge/generated/*-rule-split.local.yaml`**，粘贴进 **全局扩展配置**。详见 [`verge/derive/README.md`](../../verge/derive/README.md) 与 [`verge/README.md`](../../verge/README.md)。
 
-**换机：** 克隆仓库 → 复制 `verge/generated/local/override.local.ini.example` 为 **`override.local.ini`** 并填写 **`[vps]`**（及可选 **`[rules]`**）→ 在 Verge 里重新接入节点 → 按所用模板生成或刷新成对的 `config.local.yaml` 再贴扩展。
+**换机：** 克隆仓库 → 复制 `verge/generated/local/override.local.ini.example` 为 **`override.local.ini`** 并填写 **`[rules]`**（VPS `IP-CIDR`、面板域名等）→ 运行 `bash verge/derive/scripts/render-local.sh` 得到 `config.local.yaml`。
 
 ---
 
@@ -44,10 +44,10 @@
 
 ---
 
-## 5. 分流（Clash）和 `hjs-egress-ip` 有啥关系？
+## 5. 分流（Clash）和 `outbound-ip` 有啥关系？
 
 - **Clash / Verge：** 决定流量走哪条代理或直连。
-- **`hjs-egress-ip`：** 核对「访问某站点时对方看到的出口 IP」。
+- **`outbound-ip`：** 核对「访问某站点时对方看到的出口 IP」。
 
 具体复查步骤见 **[verification-playbook.md](verification-playbook.md)**。
 

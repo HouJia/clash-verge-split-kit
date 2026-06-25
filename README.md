@@ -21,13 +21,13 @@
 | [`docs/clash-verge/README.md`](docs/clash-verge/README.md) | 分流说明目录入口 |
 | [`docs/clash-verge/local-split-vps.md`](docs/clash-verge/local-split-vps.md) | 自用分流与工具链说明 |
 | [`docs/clash-verge/verification-playbook.md`](docs/clash-verge/verification-playbook.md) | 可重复验证与审计联动 |
-| [`hjs-egress-ip-cli/README.md`](hjs-egress-ip-cli/README.md) | CLI 与审计 UI；**pipx** 与可复制的安装命令**仅在此文** |
-| [`verge/README.md`](verge/README.md) | 扩展分流：`template/*-rule-split-extend.yaml` ⇄ `generated/*-rule-split.local.yaml`、`render-local.sh`、Hooks |
+| [`outbound-ip-cli/README.md`](outbound-ip-cli/README.md) | 出站 IP 探测 CLI 与审计 UI；**pipx** 与可复制的安装命令**仅在此文** |
+| [`verge/README.md`](verge/README.md) | INI 分流：`derive/parts/` → `render-local.sh`、`override.local.ini`、Hooks |
 | [`docs/clash-verge/RULEBASE-PROGRAM.md`](docs/clash-verge/RULEBASE-PROGRAM.md) | 自用规则库：背景、阶段顺序（Verge → 其它端）、`verge/template/` 与配置分层、脱敏红线、模块化切块口径 |
 
 ### 安装与使用路径
 
-本仓库推荐通过 **`pipx`** 安装 **`hjs-egress-ip`**；**具体 `pip install` / `pipx install` 等命令行请只阅读** [`hjs-egress-ip-cli/README.md`](hjs-egress-ip-cli/README.md)，**根 README 不抄写**。**仅克隆**本仓库**并不意味着已安装**可执行工具；若要用 CLI，请按该子目录说明完成安装。**分流 YAML** 维护见 [`verge/README.md`](verge/README.md)。
+本仓库推荐通过 **`pipx`** 安装 **`outbound-ip`**（出站 IP 探测）；**具体 `pip install` / `pipx install` 等命令行请只阅读** [`outbound-ip-cli/README.md`](outbound-ip-cli/README.md)，**根 README 不抄写**。**仅克隆**本仓库**并不意味着已安装**可执行工具；若要用 CLI，请按该子目录说明完成安装。**分流 INI** 维护见 [`verge/README.md`](verge/README.md)。
 
 ### 分流与验证主路径（与 Verge 内置能力一致）
 

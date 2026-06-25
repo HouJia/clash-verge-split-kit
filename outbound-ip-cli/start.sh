@@ -1,13 +1,11 @@
 #!/bin/bash
-# 启动出口 IP 检测服务
-
-cd "$(dirname "$0")" || exit 1
-
-if [ ! -f ".venv/bin/hjs-egress-ip" ]; then
-    echo "错误：未找到虚拟环境，请先安装项目"
-    echo "运行：pip install -e ."
-    exit 1
+# 快捷启动出站 IP 审计页（outbound-ip serve）
+set -euo pipefail
+ROOT="$(cd "$(dirname "$0")" && pwd)"
+cd "${ROOT}"
+if [ ! -f ".venv/bin/outbound-ip" ]; then
+  echo "正在创建虚拟环境并安装 outbound-ip …" >&2
+  python3 -m venv .venv
+  .venv/bin/pip install -q -e .
 fi
-
-echo "🚀 启动出口 IP 检测服务..."
-./.venv/bin/hjs-egress-ip serve "$@"
+exec ./.venv/bin/outbound-ip serve "$@"

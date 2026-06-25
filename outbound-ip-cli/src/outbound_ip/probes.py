@@ -9,7 +9,7 @@ from typing import Any
 
 
 def load_default() -> list[dict[str, Any]]:
-    ref = resources.files("hjs_egress_ip.data") / "probes.packaged.json"
+    ref = resources.files("outbound_ip.data") / "probes.packaged.json"
     if not ref.is_file():
         print(
             "错误: 未找到内置 probes.packaged.json。若在开发环境，请在包根目录执行 node scripts/sync-probes.mjs。",

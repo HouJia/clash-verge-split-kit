@@ -146,7 +146,7 @@
   }
 
   /**
-   * 同源宿主（hjs-egress-ip serve）上的代取入口，跳过目标站缺失的 Access-Control-Allow-Origin。
+   * 同源宿主（outbound-ip serve）上的代取入口，跳过目标站缺失的 Access-Control-Allow-Origin。
    * @param {string} base location.origin，须为 http(s)
    */
   function fetchViaRelay(base, probe, scenario) {
@@ -179,7 +179,7 @@
           probe,
           scenario,
           "000",
-          "file 打开无法脚本读取；请 hjs-egress-ip serve 后打开本页，或地址栏直接访问本条 URL"
+          "file 打开无法脚本读取；请 outbound-ip serve 后打开本页，或地址栏直接访问本条 URL"
         )
       );
     }
@@ -331,7 +331,7 @@
   }
 
   /**
-   * 补全「来自于：…」。仅在有同源宿主（hjs-egress-ip serve）时调用 /__geo（中文行政区划，无英文数据源）。
+   * 补全「来自于：…」。仅在有同源宿主（outbound-ip serve）时调用 /__geo（中文行政区划，无英文数据源）。
    * file:// 等场景不发起任何归属查询，避免出现英文地名。
    */
   function fetchGeoTail(ip) {

@@ -1,63 +1,188 @@
-# hjs-egress-ip
+# outbound-ip — 出站 IP 探测工具
 
-本目录为 **独立可安装的出口 IP 探测 CLI**（Python 包名 `hjs-egress-ip`），与 Cursor 全局技能 `~/.cursor/skills/hjs-egress-ip-audit/` 解耦：默认行为与技能内 `egress-ip-audit.sh` 对齐，便于用 `pipx` 或虚拟环境分发。
+| 项目 | 内容 |
+|---|---|
+| **创建时间** | 2026-06-25 |
+| **最后更新** | 2026-06-25 |
 
-## 与全局技能的关系
+## 更新记录
 
-- **技能**：在 IDE 内提供说明、快捷入口与（可选）脚本路径。
-- **本 CLI**：安装后可在任意终端执行 `hjs-egress-ip`，不依赖 Cursor。首版通过子进程调用技能目录下的 `egress-ip-audit.sh`（可用环境变量 `HJS_EGRESS_AUDIT_SCRIPT` 覆盖脚本路径）。
+| 日期 | 更新内容 |
+|---|----|
+| 2026-06-25 | 重写：补充项目背景、前因后果与使用场景 |
+| 2026-06-25 | 自 `hjs-egress-ip` 更名为 `outbound-ip`（与 3x-ui「出站」同义，更直观） |
 
-## 探测表单一数据源
+## 目录
 
-- **语义与解析逻辑（唯一维护处）**：`src/hjs_egress_ip/web/static/audit-core.js` 内的 `PROBES` 与 `snippetFromBody`。
-- **静态 HTML**：`static/index.html` 以普通 `<script src>` 引入 `audit-core.js`（挂载在 `globalThis.HjsEgressAuditCore`），浏览器内对工作流允许 `fetch` 的探测 URL **直连**。**无 CORS 的站点（如 `https://cip.cc`）在纯 `fetch` 下会表现为失败**——与地址栏能否打开无关；若以 `hjs-egress-ip serve` 同源打开，可走内置 **`GET /__probe?url=`**（仅允许 `probes.packaged.json` 中的 URL），由本机服务端代读正文后与页面解析逻辑一致。
-- **Python 校验数据**：在包根目录执行 `node scripts/sync-probes.mjs`，将 `PROBES` 导出为 `src/hjs_egress_ip/data/probes.packaged.json`；CLI 在调用 bash 前仍会 `load_default()` 校验该 JSON 存在且结构合法。
-- **与终端 curl 对齐**：实际多场景矩阵仍由全局技能内 `egress-ip-audit.sh` 执行。**若增删改探测点**，请同时修改 `audit-core.js`、重新运行 `sync-probes.mjs`，并在技能脚本中同步更新 bash 数组 `PROBES`，避免两处漂移。
+- [更新记录](#更新记录)
+- [一句话](#一句话)
+- [背景：为什么要做这个工具](#背景为什么要做这个工具)
+- [它解决什么问题](#它解决什么问题)
+- [和 Clash 分流是什么关系](#和-clash-分流是什么关系)
+- [什么时候该用它](#什么时候该用它)
+- [它不是什么](#它不是什么)
+- [输出长什么样](#输出长什么样)
+- [安装与日常用法](#安装与日常用法)
+- [与 Cursor 技能的关系](#与-cursor-技能的关系)
+- [维护者与探测点变更](#维护者与探测点变更)
+- [相关文档](#相关文档)
 
-## 安装（开发）
+## 一句话
 
-```bash
-cd hjs-egress-ip-cli
-pip install -e ".[dev]"
+**在你这台机器上，从多个「查 IP」网站同时看出去，对方眼里你的公网出口是哪里——用来验证代理/分流有没有按预期工作。**
+
+---
+
+## 背景：为什么要做这个工具
+
+本仓库（`airport`）的主线是 **Clash Verge 分流**：用规则决定「哪些流量直连、哪些走机场节点」。  
+分流改完后，你真正关心的是：
+
+- 访问 Google / TikTok / 国内站时，**对方服务器看到的 IP** 是家宽、VPS，还是某个机场机房？
+- 刚在 Verge 里 **换了节点、改了规则、重载配置**，效果对不对？
+- 终端里 `curl` 看到的 IP，和浏览器里打开 `whatismyip` 是否一致？（系统代理、TUN、规则漏网会导致不一致）
+
+最早这些检查写在 Cursor 全局技能 **`hjs-egress-ip-audit`** 里的 bash 脚本（`egress-ip-audit.sh`）：在终端里对一批探测 URL 做 `curl`，按「国内站 / 国际站 / CDN 观测 / JSON 接口」分组汇总。
+
+**`outbound-ip-cli`** 是把同一套能力 **打包成可独立安装的 CLI**（`pipx install` 后终端随处可用），并附带可选的 **浏览器审计页**（`outbound-ip serve`），不再绑在 Cursor IDE 里。
+
+---
+
+## 它解决什么问题
+
+| 困惑 | 本工具能帮你 |
+|------|-------------|
+| 「我明明选了美国节点，网站还是把我当地域限制？」 | 看多个探测点回显的 IP / 地域是否真是美国机房 |
+| 「这条域名应该直连，怎么还是慢？」 | 对照出口是否仍是代理 IP，而不是家宽 |
+| 「改完 `verge/` 规则并 reload 了，生效了吗？」 | 改规则前后各跑一次，对比摘要是否变化 |
+| 「只有浏览器能上网，终端 curl 不对」 | CLI 走 shell 网络栈；审计页走浏览器栈，可发现 **分流不同步** |
+
+**Clash 告诉你「规则命中哪一组」；本工具告诉你「数据包出去时长什么样」。** 两者互补，不能互相替代。
+
+---
+
+## 和 Clash 分流是什么关系
+
+```text
+verge/ 规则（谁该直连 / 谁该走代理）
+        ↓ 你在 Verge 里保存、重载
+Clash 按 rules 转发流量
+        ↓ 你想确认「对外 IP 对不对」
+outbound-ip（多站点探测出口）
 ```
 
-（开发机需安装 Node，仅用于运行 `scripts/sync-probes.mjs`。最终用户使用 wheel **不依赖** Node。）
+配套验证流程见仓库 [`docs/clash-verge/verification-playbook.md`](../docs/clash-verge/verification-playbook.md)：先在 Verge **Connections** 里看策略链，再用本工具做出口侧抽查。
 
-## 推荐最终用户安装（pipx）
+---
+
+## 什么时候该用它
+
+**适合跑一遍：**
+
+- 新装/换机场、切换 **策略组默认节点** 之后
+- 修改 `verge/derive/parts/` 或 `override.local.ini` 并 **重载 Clash** 之后
+- 怀疑某站「该走代理却直连」或反过来
+- 配置 **亮数据 ISP、VPS 直连** 等新规则后，确认相关流量没绕回隧道
+
+**不必天天跑：** 节点和规则稳定、出口无异常时，不必例行探测。
+
+---
+
+## 它不是什么
+
+- **不是** 测速、延迟、丢包工具（不替代 `url-test` 测速）
+- **不是** 规则编辑器，不会改 Clash 配置
+- **不能保证** 某个具体网站（如 Netflix）的 IP——它用的是一批 **通用「我是谁」探测站**，与目标站 CDN 可能不同
+- **不能** 代替 Verge 里看 `rules` 命中与 Connections 策略链（见 playbook）
+
+---
+
+## 输出长什么样
+
+**默认（无参数）：** 按场景分组的一段 **人类可读摘要**，例如国内站、国际回显、Cloudflare trace、JSON 接口等各自显示的 IP / 地域片段。
+
+**`--simple-tsv`：** 带 `scenario` 表头的表格行，便于脚本对比或存档。
+
+**`--full`：** 完整技术矩阵（多网卡/IPv6 等场景，底层仍由 `egress-ip-audit.sh` 执行）。
+
+**`outbound-ip serve`：** 在本机 `127.0.0.1` 打开静态审计页，点「一键检测」在浏览器里看同样分组的结果（部分站点需经本地 `GET /__probe` 代读，绕过浏览器 CORS 限制）。
+
+---
+
+## 安装与日常用法
+
+### 安装（推荐 pipx）
 
 ```bash
-pipx install /path/to/hjs-egress-ip-cli   # 发布后可用 PyPI 包名
-# 或
-pipx run hjs-egress-ip -- --help
+cd outbound-ip-cli
+pipx install .
+# 或开发模式：pip install -e ".[dev]"
 ```
 
-## 端到端手动检测（一轮）
+依赖：本机有 **`curl`**；CLI 默认调用 `~/.cursor/skills/hjs-egress-ip-audit/scripts/egress-ip-audit.sh`（可用 `OUTBOUND_IP_AUDIT_SCRIPT` 覆盖；兼容旧变量 `HJS_EGRESS_AUDIT_SCRIPT`）。
 
-1. 确认本机已安装 `curl`，且能访问外网。
-2. `pip install -e .` 或 `pipx install ...` 后执行：`hjs-egress-ip`（无参）应输出「一键出口摘要」分组文本。
-3. 机器可读：`hjs-egress-ip --simple-tsv | head -5`，首行表头应含 `scenario`。
-4. 完整矩阵：`hjs-egress-ip --full --ipv6-skip | head -20`。
-5. 静态审计页：**直接双击或打开** `src/hjs_egress_ip/web/static/index.html`（与 `audit-core.js` 同目录，勿单独移动导致相对路径断裂）；也可执行 `hjs-egress-ip serve` 做本地静态托管（页面仍不向本服务 POST）。健康检查：`curl -s http://127.0.0.1:18765/health` 期望 `ok`。
+### 三条最常用命令
 
-## 环境变量
+```bash
+# 1. 改完分流/换节点后：一眼看分组摘要
+outbound-ip
+
+# 2. 要给脚本或笔记留底
+outbound-ip --simple-tsv | head -10
+
+# 3. 浏览器里点着看（可选）
+outbound-ip serve
+# 另开终端：curl -s http://127.0.0.1:18765/health  → 应返回 ok
+```
+
+仓库根目录另有快捷脚本 [`start-outbound-ip.sh`](../start-outbound-ip.sh)，等价于启动 `serve`。
+
+### 环境变量
 
 | 变量 | 说明 |
 |------|------|
-| `HJS_EGRESS_AUDIT_SCRIPT` | 覆盖默认的 `egress-ip-audit.sh` 绝对路径 |
-| `CURL_TIMEOUT` | 透传给底层脚本（秒，默认 8） |
+| `OUTBOUND_IP_AUDIT_SCRIPT` | 覆盖 `egress-ip-audit.sh` 的绝对路径（兼容 `HJS_EGRESS_AUDIT_SCRIPT`） |
+| `CURL_TIMEOUT` | 透传底层脚本超时（秒，默认 8） |
 
-## 构建 wheel
-
-```bash
-pip install build
-python -m build
-```
-
-产物在 `dist/`。若需发布到 PyPI / Homebrew，请在本仓库外配置 CI 与签名流程（此处仅占位说明）。
-
-## 测试
+### 测试与打包
 
 ```bash
-cd hjs-egress-ip-cli
+cd outbound-ip-cli
 pytest -q
+python -m build   # 需 pip install build；产物在 dist/
 ```
+
+---
+
+## 与 Cursor 技能的关系
+
+| | Cursor 技能 `hjs-egress-ip-audit` | 本 CLI `outbound-ip` |
+|---|-----------------------------------|-------------------------|
+| 运行环境 | IDE 内说明 + 脚本路径 | 任意终端，`pipx` 安装 |
+| 探测逻辑 | `egress-ip-audit.sh` | **默认仍调用同一脚本** |
+| 审计页 | 技能内文档指向静态页 | 随包分发，`serve` 子命令 |
+
+没有装 Cursor 也可以装 CLI；但 **首版仍依赖技能目录下的 bash 脚本**（或你通过环境变量指定的副本）。
+
+---
+
+## 维护者与探测点变更
+
+探测 URL 与解析逻辑的 **语义真值** 在：
+
+`src/outbound_ip/web/static/audit-core.js` 内的 `PROBES` 与 `snippetFromBody`。
+
+变更后请：
+
+1. 在包根目录执行 `node scripts/sync-probes.mjs` → 更新 `src/outbound_ip/data/probes.packaged.json`
+2. 同步修改技能内 `egress-ip-audit.sh` 的 `PROBES` 数组，避免 CLI 与终端脚本漂移
+
+---
+
+## 相关文档
+
+| 文档 | 内容 |
+|------|------|
+| [`docs/clash-verge/verification-playbook.md`](../docs/clash-verge/verification-playbook.md) | 改规则后：Verge 内检查 + 何时跑本 CLI |
+| [`docs/clash-verge/local-split-vps.md`](../docs/clash-verge/local-split-vps.md) | 分流概念；第 5 节简述与出站探测工具关系 |
+| [`verge/README.md`](../verge/README.md) | 分流规则维护（`derive/parts/`、`override.local.ini`） |

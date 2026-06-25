@@ -18,7 +18,7 @@ from importlib import resources
 
 @cache
 def _allowed_probe_urls() -> frozenset[str]:
-    ref = resources.files("hjs_egress_ip.data") / "probes.packaged.json"
+    ref = resources.files("outbound_ip.data") / "probes.packaged.json"
     data = json.loads(ref.read_text(encoding="utf-8"))
     out = {str(p["url"]) for p in data["probes"] if isinstance(p, dict) and "url" in p}
     return frozenset(out)
@@ -31,7 +31,7 @@ def _geo_tail_for_ip(ip: str) -> str:
         ipaddress.ip_address(ip)
     except ValueError:
         return ""
-    ua = "hjs-egress-ip-audit-ui/0.1 (+https://pypi.org/project/hjs-egress-ip/)"
+    ua = "outbound-ip-audit-ui/0.2 (+https://github.com/HouJia/clash-verge-split-kit)"
 
     def _join_zh(parts: list[str]) -> str:
         parts = [p.strip() for p in parts if p and str(p).strip()]
@@ -63,7 +63,7 @@ def _geo_tail_for_ip(ip: str) -> str:
 
 
 class Handler(BaseHTTPRequestHandler):
-    server_version = "hjs-egress-ip/0.1"
+    server_version = "outbound-ip/0.2"
 
     def log_message(self, fmt: str, *args: object) -> None:
         sys.stderr.write("%s - - [%s] %s\n" % (self.address_string(), self.log_date_time_string(), fmt % args))
@@ -84,7 +84,7 @@ class Handler(BaseHTTPRequestHandler):
             self._send(200, b"ok", "text/plain; charset=utf-8")
             return
 
-        static = resources.files("hjs_egress_ip.web") / "static"
+        static = resources.files("outbound_ip.web") / "static"
         if path in ("/", "/index.html"):
             ref = static / "index.html"
             if not ref.is_file():
@@ -123,7 +123,7 @@ class Handler(BaseHTTPRequestHandler):
                 raw,
                 method="GET",
                 headers={
-                    "User-Agent": "hjs-egress-ip-audit-ui/0.1 (+https://pypi.org/project/hjs-egress-ip/)",
+                    "User-Agent": "outbound-ip-audit-ui/0.2 (+https://github.com/HouJia/clash-verge-split-kit)",
                     "Accept": "text/plain,text/html,application/json;q=0.9,*/*;q=0.1",
                     # 与浏览器默认语言对齐，避免 cip.cc 等对脚本/代取返回英文简版而地址栏为中文。
                     "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.7",
@@ -192,7 +192,7 @@ class Handler(BaseHTTPRequestHandler):
 
 
 def serve_main(argv: list[str]) -> int:
-    parser = argparse.ArgumentParser(prog="hjs-egress-ip serve")
+    parser = argparse.ArgumentParser(prog="outbound-ip serve")
     parser.add_argument("--host", default="127.0.0.1")
     parser.add_argument("--port", type=int, default=18765)
     parser.add_argument("--no-open", action="store_true")

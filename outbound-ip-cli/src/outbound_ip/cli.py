@@ -1,4 +1,4 @@
-"""CLI entry: delegate to egress-ip-audit.sh；可选本地仅静态页的轻量 HTTP 入口。"""
+"""CLI：出站 IP 探测；可选本地静态审计页。"""
 
 from __future__ import annotations
 
@@ -8,30 +8,32 @@ import subprocess
 import sys
 from pathlib import Path
 
-from hjs_egress_ip.probes import load_default
+from outbound_ip.probes import load_default
 
 
 def resolve_audit_script() -> str:
-    env = os.environ.get("HJS_EGRESS_AUDIT_SCRIPT", "").strip()
-    if env:
+    for key in ("OUTBOUND_IP_AUDIT_SCRIPT", "HJS_EGRESS_AUDIT_SCRIPT"):
+        env = os.environ.get(key, "").strip()
+        if not env:
+            continue
         p = Path(env).expanduser()
         if p.is_file():
             return str(p.resolve())
-        print(f"错误: HJS_EGRESS_AUDIT_SCRIPT 指向的文件不存在: {p}", file=sys.stderr)
+        print(f"错误: {key} 指向的文件不存在: {p}", file=sys.stderr)
         sys.exit(2)
     default = Path.home() / ".cursor/skills/hjs-egress-ip-audit/scripts/egress-ip-audit.sh"
     if default.is_file():
         return str(default.resolve())
     print(
-        "错误: 未找到 egress-ip-audit.sh。请安装技能 hjs-egress-ip-audit "
-        "或通过 HJS_EGRESS_AUDIT_SCRIPT 指定脚本路径。",
+        "错误: 未找到 egress-ip-audit.sh。请安装 Cursor 技能 hjs-egress-ip-audit，"
+        "或通过 OUTBOUND_IP_AUDIT_SCRIPT 指定脚本路径。",
         file=sys.stderr,
     )
     sys.exit(2)
 
 
 def run_serve(argv: list[str]) -> int:
-    from hjs_egress_ip.web.server import serve_main
+    from outbound_ip.web.server import serve_main
 
     return serve_main(argv)
 
@@ -42,9 +44,9 @@ def run_audit(argv: list[str] | None = None) -> int:
         return run_serve(base[1:])
 
     parser = argparse.ArgumentParser(
-        prog="hjs-egress-ip",
-        description="出口 IP 探测：默认一键摘要；可选 TSV 与完整矩阵。底层调用 egress-ip-audit.sh。",
-        epilog="可选静态预览：hjs-egress-ip serve [--port 18765]（无探测 API；页面亦可直接打开静态文件）",
+        prog="outbound-ip",
+        description="出站 IP 探测：默认一键摘要；可选 TSV 与完整矩阵。底层调用 egress-ip-audit.sh。",
+        epilog="可选静态预览：outbound-ip serve [--port 18765]（页面亦可直接打开静态文件）",
     )
     parser.add_argument("--full", action="store_true", help="完整技术矩阵")
     parser.add_argument("--simple-tsv", action="store_true", help="仅输出 TSV（含表头）")
