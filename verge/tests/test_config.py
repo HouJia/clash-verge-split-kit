@@ -820,12 +820,13 @@ class TestOrderAndCompleteness(unittest.TestCase):
         self.assertEqual(duplicates, {}, f"发现重复的组名: {duplicates}")
 
     def test_406_domain_rules_have_suffix_or_keyword(self):
-        """测试: DOMAIN 规则应该使用 -SUFFIX 或明确类型"""
+        """测试: DOMAIN 规则应使用 DOMAIN / DOMAIN-SUFFIX / DOMAIN-KEYWORD"""
         for rule in self.yaml_rules:
             if isinstance(rule, str) and rule.startswith('DOMAIN'):
-                # DOMAIN 或 DOMAIN-SUFFIX 都是合法的
                 self.assertTrue(
-                    rule.startswith('DOMAIN-SUFFIX,') or rule.startswith('DOMAIN,'),
+                    rule.startswith('DOMAIN-SUFFIX,')
+                    or rule.startswith('DOMAIN,')
+                    or rule.startswith('DOMAIN-KEYWORD,'),
                     f"DOMAIN 规则格式不正确: {rule}"
                 )
 
