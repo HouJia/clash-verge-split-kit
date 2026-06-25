@@ -203,7 +203,7 @@
 
     <div class="cli-hint">
       需要 <strong>S0 代理环境 / S1 noproxy / IPv4·IPv6 / 指定网卡</strong> 等完整技术矩阵时，请在终端运行：
-      <code>outbound-ip --full --ipv6-skip</code>（依赖本机安装的 <code>egress-ip-audit.sh</code>）。
+      <code>outbound-ip --full --ipv6-skip</code>（依赖本机安装的 <code>outbound-ip-audit.sh</code>）。
     </div>
 
     <details class="tech">
@@ -224,14 +224,14 @@
   <script src="./audit-core.js"></script>
   <script>
     const {
-      buildEgressLegendLines,
+      buildOutboundLegendLines,
       buildIpChipClassMap,
       buildGroups,
       escapeHtmlForSnippet,
       formatSnippetHtmlWithIpChips,
       formatUiCategory,
       runBrowserProbes,
-    } = globalThis.HjsEgressAuditCore;
+    } = globalThis.OutboundIpAuditCore;
 
     const $ = (id) => document.getElementById(id);
 
@@ -282,7 +282,7 @@
         return;
       }
       wrap.classList.add("show");
-      const lines = buildEgressLegendLines(rows, chipMap);
+      const lines = buildOutboundLegendLines(rows, chipMap);
       host.innerHTML = lines
         .map(function (L) {
           const ipInner = escapeHtmlForSnippet(L.displayIp);
@@ -421,10 +421,10 @@
 
     // 复制启动命令到剪贴板
     function copyServeCommand() {
-      navigator.clipboard.writeText('./start-egress.sh --no-open').then(() => {
+      navigator.clipboard.writeText('./start-outbound-ip.sh --no-open').then(() => {
         showToast('命令已复制到剪贴板', 'success');
       }).catch(() => {
-        prompt('请手动复制:', './start-egress.sh --no-open');
+        prompt('请手动复制:', './start-outbound-ip.sh --no-open');
       });
     }
 
@@ -465,7 +465,7 @@
       // 服务未启动，显示提示
       btn.disabled = false;
       setPill("需手动启动", "err");
-      $("status-msg").innerHTML = '本地服务未运行。<span style="color:var(--muted);">请先在终端执行 <code style="background:#1a2332;padding:0.15rem 0.35rem;border-radius:4px;color:#93c5fd;">./start-egress.sh --no-open</code> 启动服务</span> <button onclick="tryRedirectToServer()" style="margin-left:0.5rem;padding:0.2rem 0.6rem;font-size:0.85rem;background:var(--accent);color:#fff;border:none;border-radius:6px;cursor:pointer;">尝试跳转</button> <button onclick="copyServeCommand()" style="margin-left:0.3rem;padding:0.2rem 0.6rem;font-size:0.85rem;background:#334155;color:var(--text);border:none;border-radius:6px;cursor:pointer;">复制命令</button>';
+      $("status-msg").innerHTML = '本地服务未运行。<span style="color:var(--muted);">请先在终端执行 <code style="background:#1a2332;padding:0.15rem 0.35rem;border-radius:4px;color:#93c5fd;">./start-outbound-ip.sh --no-open</code> 启动服务</span> <button onclick="tryRedirectToServer()" style="margin-left:0.5rem;padding:0.2rem 0.6rem;font-size:0.85rem;background:var(--accent);color:#fff;border:none;border-radius:6px;cursor:pointer;">尝试跳转</button> <button onclick="copyServeCommand()" style="margin-left:0.3rem;padding:0.2rem 0.6rem;font-size:0.85rem;background:#334155;color:var(--text);border:none;border-radius:6px;cursor:pointer;">复制命令</button>';
       return false;
     }
 

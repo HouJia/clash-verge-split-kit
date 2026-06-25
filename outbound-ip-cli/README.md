@@ -9,13 +9,14 @@
 
 | 日期 | 更新内容 |
 |---|----|
-| 2026-06-25 | 重写：补充项目背景、前因后果与使用场景 |
-| 2026-06-25 | 自 `hjs-egress-ip` 更名为 `outbound-ip`（与 3x-ui「出站」同义，更直观） |
+| 2026-06-25 | 自 `hjs-egress-ip` 更名为 `outbound-ip`（与 3x-ui「出站」同义） |
+| 2026-06-25 | 技能与脚本统一 outbound 命名；澄清 CLI 与网页两种形态 |
 
 ## 目录
 
 - [更新记录](#更新记录)
 - [一句话](#一句话)
+- [这是什么？终端 + 网页，不是「只有一个网页」](#这是什么终端--网页不是只有一个网页)
 - [背景：为什么要做这个工具](#背景为什么要做这个工具)
 - [它解决什么问题](#它解决什么问题)
 - [和 Clash 分流是什么关系](#和-clash-分流是什么关系)
@@ -31,6 +32,16 @@
 
 **在你这台机器上，从多个「查 IP」网站同时看出去，对方眼里你的公网出口是哪里——用来验证代理/分流有没有按预期工作。**
 
+## 这是什么？终端 + 网页，不是「只有一个网页」
+
+| 形态 | 怎么用 | 适合 |
+|------|--------|------|
+| **终端 CLI** | 安装后执行 `outbound-ip`（见下文 `pipx` / `pip install -e`） | 改完分流规则后快速看摘要、脚本留档 |
+| **浏览器页** | `outbound-ip serve` 或仓库根 `./start-outbound-ip.sh` | 点按钮看图、给不熟悉终端时用 |
+| **纯静态 HTML** | 直接打开包内 `web/static/index.html` | 无需安装，但部分站点受 CORS 限制 |
+
+**只有网页、不装 CLI 也可以点「一键检测」**（浏览器 `fetch`）；但 **`--full` 矩阵、与 curl 完全一致的摘要** 仍依赖 **`outbound-ip-audit.sh`**，由 CLI 在终端调用。克隆仓库 ≠ 已安装命令，需要时才 `pipx install` 或用仓库里的 `start-outbound-ip.sh` 起本地服务。
+
 ---
 
 ## 背景：为什么要做这个工具
@@ -42,7 +53,7 @@
 - 刚在 Verge 里 **换了节点、改了规则、重载配置**，效果对不对？
 - 终端里 `curl` 看到的 IP，和浏览器里打开 `whatismyip` 是否一致？（系统代理、TUN、规则漏网会导致不一致）
 
-最早这些检查写在 Cursor 全局技能 **`hjs-egress-ip-audit`** 里的 bash 脚本（`egress-ip-audit.sh`）：在终端里对一批探测 URL 做 `curl`，按「国内站 / 国际站 / CDN 观测 / JSON 接口」分组汇总。
+最早这些检查写在 Cursor 全局技能 **`hjs-outbound-ip-audit`** 里的 bash 脚本（`outbound-ip-audit.sh`）：在终端里对一批探测 URL 做 `curl`，按「国内站 / 国际站 / CDN 观测 / JSON 接口」分组汇总。
 
 **`outbound-ip-cli`** 是把同一套能力 **打包成可独立安装的 CLI**（`pipx install` 后终端随处可用），并附带可选的 **浏览器审计页**（`outbound-ip serve`），不再绑在 Cursor IDE 里。
 
@@ -103,7 +114,7 @@ outbound-ip（多站点探测出口）
 
 **`--simple-tsv`：** 带 `scenario` 表头的表格行，便于脚本对比或存档。
 
-**`--full`：** 完整技术矩阵（多网卡/IPv6 等场景，底层仍由 `egress-ip-audit.sh` 执行）。
+**`--full`：** 完整技术矩阵（多网卡/IPv6 等场景，底层仍由 `outbound-ip-audit.sh` 执行）。
 
 **`outbound-ip serve`：** 在本机 `127.0.0.1` 打开静态审计页，点「一键检测」在浏览器里看同样分组的结果（部分站点需经本地 `GET /__probe` 代读，绕过浏览器 CORS 限制）。
 
@@ -119,7 +130,7 @@ pipx install .
 # 或开发模式：pip install -e ".[dev]"
 ```
 
-依赖：本机有 **`curl`**；CLI 默认调用 `~/.cursor/skills/hjs-egress-ip-audit/scripts/egress-ip-audit.sh`（可用 `OUTBOUND_IP_AUDIT_SCRIPT` 覆盖；兼容旧变量 `HJS_EGRESS_AUDIT_SCRIPT`）。
+依赖：本机有 **`curl`**。探测脚本查找顺序：`OUTBOUND_IP_AUDIT_SCRIPT` → 包内 `outbound-ip-cli/scripts/outbound-ip-audit.sh` → `~/.cursor/skills/hjs-outbound-ip-audit/scripts/outbound-ip-audit.sh`。
 
 ### 三条最常用命令
 
@@ -141,7 +152,7 @@ outbound-ip serve
 
 | 变量 | 说明 |
 |------|------|
-| `OUTBOUND_IP_AUDIT_SCRIPT` | 覆盖 `egress-ip-audit.sh` 的绝对路径（兼容 `HJS_EGRESS_AUDIT_SCRIPT`） |
+| `OUTBOUND_IP_AUDIT_SCRIPT` | 覆盖 `outbound-ip-audit.sh` 的绝对路径 |
 | `CURL_TIMEOUT` | 透传底层脚本超时（秒，默认 8） |
 
 ### 测试与打包
@@ -156,10 +167,10 @@ python -m build   # 需 pip install build；产物在 dist/
 
 ## 与 Cursor 技能的关系
 
-| | Cursor 技能 `hjs-egress-ip-audit` | 本 CLI `outbound-ip` |
+| | Cursor 技能 `hjs-outbound-ip-audit` | 本 CLI `outbound-ip` |
 |---|-----------------------------------|-------------------------|
 | 运行环境 | IDE 内说明 + 脚本路径 | 任意终端，`pipx` 安装 |
-| 探测逻辑 | `egress-ip-audit.sh` | **默认仍调用同一脚本** |
+| 探测逻辑 | `outbound-ip-audit.sh` | **默认仍调用同一脚本** |
 | 审计页 | 技能内文档指向静态页 | 随包分发，`serve` 子命令 |
 
 没有装 Cursor 也可以装 CLI；但 **首版仍依赖技能目录下的 bash 脚本**（或你通过环境变量指定的副本）。
@@ -175,7 +186,7 @@ python -m build   # 需 pip install build；产物在 dist/
 变更后请：
 
 1. 在包根目录执行 `node scripts/sync-probes.mjs` → 更新 `src/outbound_ip/data/probes.packaged.json`
-2. 同步修改技能内 `egress-ip-audit.sh` 的 `PROBES` 数组，避免 CLI 与终端脚本漂移
+2. 同步修改技能内 `outbound-ip-audit.sh` 的 `PROBES` 数组，避免 CLI 与终端脚本漂移
 
 ---
 
@@ -183,6 +194,7 @@ python -m build   # 需 pip install build；产物在 dist/
 
 | 文档 | 内容 |
 |------|------|
+| [`.cursor/skills/hjs-outbound-ip-audit/SKILL.md`](../.cursor/skills/hjs-outbound-ip-audit/SKILL.md) | 配套 Cursor 技能与脚本说明 |
 | [`docs/clash-verge/verification-playbook.md`](../docs/clash-verge/verification-playbook.md) | 改规则后：Verge 内检查 + 何时跑本 CLI |
 | [`docs/clash-verge/local-split-vps.md`](../docs/clash-verge/local-split-vps.md) | 分流概念；第 5 节简述与出站探测工具关系 |
 | [`verge/README.md`](../verge/README.md) | 分流规则维护（`derive/parts/`、`override.local.ini`） |

@@ -45,7 +45,7 @@
   ];
 
   /**
-   * 与 egress-ip-audit.sh 中各 parser 分支对齐的摘要提取。
+   * 与 outbound-ip-audit.sh 中各 parser 分支对齐的摘要提取。
    * @param {string} parser
    * @param {string} text
    */
@@ -273,7 +273,7 @@
    * @param {Map<string,string>} chipMap key 与 buildIpChipClassMap 一致
    * @returns {{ displayIp: string, paletteKey: string, chipClass: string, tailZh: string }[]}
    */
-  function buildEgressLegendLines(rows, chipMap) {
+  function buildOutboundLegendLines(rows, chipMap) {
     if (!rows || !rows.length || !chipMap.size) return [];
     var parts = [...chipMap.entries()].sort(function (a, b) {
       return String(a[0]).localeCompare(String(b[0]), undefined, { numeric: true });
@@ -565,7 +565,7 @@
     return result;
   }
 
-  g.HjsEgressAuditCore = {
+  g.OutboundIpAuditCore = {
     GROUP_ORDER: GROUP_ORDER,
     GROUP_LABELS: GROUP_LABELS,
     CATEGORY_UI_LABEL: CATEGORY_UI_LABEL,
@@ -580,7 +580,7 @@
     normalizeIpPaletteKey: normalizeIpPaletteKey,
     findIpSpansInText: findIpSpansInText,
     buildIpChipClassMap: buildIpChipClassMap,
-    buildEgressLegendLines: buildEgressLegendLines,
+    buildOutboundLegendLines: buildOutboundLegendLines,
     escapeHtmlForSnippet: escapeHtmlForSnippet,
     formatSnippetHtmlWithIpChips: formatSnippetHtmlWithIpChips,
   };

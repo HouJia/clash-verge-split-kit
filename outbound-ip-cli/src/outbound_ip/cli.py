@@ -12,21 +12,25 @@ from outbound_ip.probes import load_default
 
 
 def resolve_audit_script() -> str:
-    for key in ("OUTBOUND_IP_AUDIT_SCRIPT", "HJS_EGRESS_AUDIT_SCRIPT"):
-        env = os.environ.get(key, "").strip()
-        if not env:
-            continue
+    env = os.environ.get("OUTBOUND_IP_AUDIT_SCRIPT", "").strip()
+    if env:
         p = Path(env).expanduser()
         if p.is_file():
             return str(p.resolve())
-        print(f"错误: {key} 指向的文件不存在: {p}", file=sys.stderr)
+        print(f"错误: OUTBOUND_IP_AUDIT_SCRIPT 指向的文件不存在: {p}", file=sys.stderr)
         sys.exit(2)
-    default = Path.home() / ".cursor/skills/hjs-egress-ip-audit/scripts/egress-ip-audit.sh"
-    if default.is_file():
-        return str(default.resolve())
+
+    candidates = [
+        Path(__file__).resolve().parents[2] / "scripts" / "outbound-ip-audit.sh",
+        Path.home() / ".cursor/skills/hjs-outbound-ip-audit/scripts/outbound-ip-audit.sh",
+    ]
+    for p in candidates:
+        if p.is_file():
+            return str(p.resolve())
+
     print(
-        "错误: 未找到 egress-ip-audit.sh。请安装 Cursor 技能 hjs-egress-ip-audit，"
-        "或通过 OUTBOUND_IP_AUDIT_SCRIPT 指定脚本路径。",
+        "错误: 未找到 outbound-ip-audit.sh。请设置 OUTBOUND_IP_AUDIT_SCRIPT，"
+        "或安装技能 hjs-outbound-ip-audit（~/.cursor/skills/）。",
         file=sys.stderr,
     )
     sys.exit(2)
@@ -45,7 +49,7 @@ def run_audit(argv: list[str] | None = None) -> int:
 
     parser = argparse.ArgumentParser(
         prog="outbound-ip",
-        description="出站 IP 探测：默认一键摘要；可选 TSV 与完整矩阵。底层调用 egress-ip-audit.sh。",
+        description="出站 IP 探测：默认一键摘要；可选 TSV 与完整矩阵。底层调用 outbound-ip-audit.sh。",
         epilog="可选静态预览：outbound-ip serve [--port 18765]（页面亦可直接打开静态文件）",
     )
     parser.add_argument("--full", action="store_true", help="完整技术矩阵")
