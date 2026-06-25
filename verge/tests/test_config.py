@@ -304,6 +304,18 @@ class TestProxyGroups(unittest.TestCase):
         self.assertIn('美国', filter_pattern, "filter 应该排除美国")
         self.assertIn('香港', filter_pattern, "filter 应该排除香港")
         self.assertIn('日本', filter_pattern, "filter 应该排除日本")
+        self.assertIn('原生', filter_pattern, "filter 应该排除原生")
+
+    def test_119_all_url_test_groups_exclude_native_isp(self):
+        """测试: 所有 url-test 组均应在 filter 或 exclude-filter 中排除原生/ISP"""
+        for group in self.yaml_data.get('proxy-groups', []):
+            if group['type'] != 'url-test':
+                continue
+            combined = f"{group.get('exclude-filter', '')} {group.get('filter', '')}"
+            self.assertIn('原生', combined,
+                          f"{group['name']} 的 url-test 应排除「原生」")
+            self.assertIn('isp', combined.lower(),
+                          f"{group['name']} 的 url-test 应排除 isp")
 
     def test_108_select_groups_have_proxies(self):
         """测试: select 类型的组必须有 proxies 列表，或 include-all-proxies + filter"""
@@ -413,13 +425,19 @@ class TestProxyGroups(unittest.TestCase):
                            "PayPal 国际线路默认应该是自动最优")
 
     def test_117_all_groups_exclude_filter(self):
-        """测试: 所有代理组都有 exclude-filter 排除海外用户专用节点"""
+        """测试: 所有代理组都有 exclude-filter；原生 ISP 组不排除原生关键字"""
         for group in self.yaml_data.get('proxy-groups', []):
             self.assertIn('exclude-filter', group,
                         f"{group['name']} 缺少 exclude-filter")
             exclude = group.get('exclude-filter', '')
             self.assertIn('海外用户专用', exclude,
                         f"{group['name']} 的 exclude-filter 应该排除 '海外用户专用'")
+            if group['name'] == '底座 · 🏠 原生 ISP':
+                self.assertNotIn('原生', exclude,
+                               '原生 ISP 组的 exclude-filter 不应排除「原生」')
+            elif group['type'] == 'url-test':
+                self.assertIn('原生', exclude,
+                            f"{group['name']} url-test 的 exclude-filter 应排除「原生」")
 
     def test_118_groups_with_cn_direct_also_have_native_isp(self):
         """测试: 含国内直连选项的业务组也应含原生 ISP（自动最优除外）"""

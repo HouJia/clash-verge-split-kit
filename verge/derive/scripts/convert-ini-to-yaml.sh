@@ -48,11 +48,11 @@ done
 proxy_group_exclude_filter() {
   local group_name="$1"
   case "${group_name}" in
-  "底座 · ♻️ 自动最优")
-    echo "(?i)(海外用户专用|原生|isp)"
+  "底座 · 🏠 原生 ISP")
+    echo "(?i)海外用户专用"
     ;;
   *)
-    echo "(?i)海外用户专用"
+    echo "(?i)(海外用户专用|原生|isp)"
     ;;
   esac
 }
