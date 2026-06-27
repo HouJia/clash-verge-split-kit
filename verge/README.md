@@ -3,18 +3,21 @@
 | 项目 | 内容 |
 |---|---|
 | **创建时间** | 2026-03-01 |
-| **最后更新** | 2026-06-25 |
+| **最后更新** | 2026-06-27 |
 
 ## 更新记录
 
 | 日期 | 更新内容 |
 |---|----|
+| 2026-06-27 | WebRTC 封闭 INI 方案文档、05-webrtc.ini 草稿、旁路由规则源说明 |
 | 2026-06-25 | 补充 SubConverter 排障文档链接、交叉验收脚本说明 |
 | 2026-03-01 | 初稿：INI 模板与本机稿数据流 |
 
 长期目标与脱敏红线见 **[`docs/clash-verge/RULEBASE-PROGRAM.md`](../docs/clash-verge/RULEBASE-PROGRAM.md)**。
 
 **SubConverter / 原生 ISP 踩坑：** 见 **[`derive/TROUBLESHOOTING-subconverter-ini.md`](derive/TROUBLESHOOTING-subconverter-ini.md)**（订阅走 gist INI 时必读）。
+
+**WebRTC 封闭（旁路由 + Verge 共用 sub）：** 见 **[`docs/clash-verge/webrtc-lockdown-ini-plan.md`](../docs/clash-verge/webrtc-lockdown-ini-plan.md)**。旁路由 OpenClash 的分流规则 **以本仓库 INI → gist → SubConverter 为准**（非 `side-router-lab` custom 规则）。
 
 ## 数据流（当前主线）
 
