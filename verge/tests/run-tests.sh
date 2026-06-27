@@ -36,8 +36,8 @@ if ! python3 -c "import yaml" 2>/dev/null; then
 fi
 
 # 检查配置文件是否存在
-INI_FILE="$VERGE_DIR/generated/config.local.ini"
-YAML_FILE="$VERGE_DIR/generated/config.local.yaml"
+INI_FILE="$VERGE_DIR/generated/houjia.local-template.ini"
+YAML_FILE="$VERGE_DIR/generated/houjia.local-template.yaml"
 
 if [ ! -f "$INI_FILE" ]; then
     echo -e "${RED}错误: INI 配置文件不存在: $INI_FILE${NC}"

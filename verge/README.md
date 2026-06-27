@@ -29,7 +29,8 @@ verge/derive/parts/20-routing.ini
 verge/template/config-template.ini          ← 合并模板（可提交）
         │  render-local.sh + override.local.ini [rules]
         ▼
-verge/generated/config.local.ini / .yaml    ← 本机产物（勿提交）
+verge/generated/houjia.local-template.ini / .yaml   ← **当前维护** 的本机产物（勿提交）
+verge/generated/config.local.ini / .yaml            ← **历史文件名**，gist/旧订阅仍可用，render 不再更新
 ```
 
 **真值源：** [`derive/parts/`](derive/parts/)（通用规则与策略组）。  
@@ -43,9 +44,9 @@ verge/generated/config.local.ini / .yaml    ← 本机产物（勿提交）
 | [`derive/parts/rulesets/*.ini`](derive/parts/rulesets/) | 按场景拆分的通用 `ruleset=` 片段 |
 | [`derive/scripts/compose-ini.sh`](derive/scripts/compose-ini.sh) | 合并 parts → `template/config-template.ini` |
 | [`template/config-template.ini`](template/config-template.ini) | **合并后的 subconverter INI 模板**（由 compose 生成，日常改 parts 后需重跑 compose） |
-| [`derive/scripts/render-local.sh`](derive/scripts/render-local.sh) | 读模板 + 注入 `override.local.ini` 的 `[rules]` → 写出 `generated/config.local.*` |
+| [`derive/scripts/render-local.sh`](derive/scripts/render-local.sh) | 读模板 + 注入 `override.local.ini` 的 `[rules]` → 写出 `generated/houjia.local-template.*` |
 | [`generated/local/override.local.ini.example`](generated/local/override.local.ini.example) | 复制为 `override.local.ini`（勿提交） |
-| [`derive/scripts/sync-generated-gists.sh`](derive/scripts/sync-generated-gists.sh) | 将本机产物推到 secret gist（需 `gist-sync.local.env`）；末尾自动跑交叉验收 |
+| [`derive/scripts/sync-generated-gists.sh`](derive/scripts/sync-generated-gists.sh) | 推送 **houjia.local-template.*** 到 gist（不覆盖历史 `config.local.*`） |
 | [`derive/scripts/verify-native-split.sh`](derive/scripts/verify-native-split.sh) | INI + gist + SubConverter 原生/ISP 分流交叉验收 |
 | [`derive/TROUBLESHOOTING-subconverter-ini.md`](derive/TROUBLESHOOTING-subconverter-ini.md) | SubConverter INI 排障与原生 ISP 经验沉淀 |
 
@@ -63,7 +64,7 @@ cp verge/generated/local/override.local.ini.example verge/generated/local/overri
 3. **生成本机稿：** `bash verge/derive/scripts/render-local.sh`  
 4. **（可选）同步 gist：** `bash verge/derive/scripts/sync-generated-gists.sh`（内含 verify）  
 5. **改策略组 filter 后建议交叉验收：** `bash verge/derive/scripts/verify-native-split.sh`  
-6. 将 `verge/generated/config.local.yaml` 用于 Sub-Store / subconverter，或按你的 Verge 接入方式粘贴规则段
+6. 新订阅 `config=` 用 gist 上 **`houjia.local-template.ini`**；旧链仍可用 **`config.local.ini`**
 
 若 Verge 订阅 URL 的 `config=` 指向 gist INI，**以 INI 的 `custom_proxy_group` 为准**；仅改 YAML `exclude-filter` 不会生效（详见排障文档）。
 

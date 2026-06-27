@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Clash Verge Split Kit - 配置回归测试脚本
-验证生成的 config.local.ini 和 config.local.yaml 配置正确性
+验证生成的 houjia.local-template.ini 和 houjia.local-template.yaml 配置正确性
 
 使用方式:
     cd clash-verge-split-kit/verge
@@ -30,8 +30,8 @@ except ImportError:
 class ConfigPaths:
     """配置路径管理"""
     BASE_DIR = Path(__file__).parent.parent
-    INI_PATH = BASE_DIR / "generated" / "config.local.ini"
-    YAML_PATH = BASE_DIR / "generated" / "config.local.yaml"
+    INI_PATH = BASE_DIR / "generated" / "houjia.local-template.ini"
+    YAML_PATH = BASE_DIR / "generated" / "houjia.local-template.yaml"
 
 
 class INIParser:

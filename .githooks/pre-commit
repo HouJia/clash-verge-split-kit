@@ -10,7 +10,7 @@ if git diff --cached --name-only | grep -qE '^verge/derive/parts/.*\.ini$'; then
 
   if [ -f "${ROOT}/verge/derive/scripts/render-local.sh" ]; then
     if bash "${ROOT}/verge/derive/scripts/render-local.sh" >/dev/null 2>&1; then
-      echo "  ✓ 已自动更新 verge/generated/config.local.ini" >&2
+      echo "  ✓ 已自动更新 verge/generated/houjia.local-template.ini" >&2
     else
       echo "  ⚠ 自动生成失败，请手动运行：" >&2
       echo "    bash verge/derive/scripts/render-local.sh" >&2

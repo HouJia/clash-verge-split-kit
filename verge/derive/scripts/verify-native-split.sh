@@ -12,10 +12,10 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
-INI="${ROOT}/verge/generated/config.local.ini"
+INI="${ROOT}/verge/generated/houjia.local-template.ini"
 
-SUBCONVERTER_VERIFY_URL="${SUBCONVERTER_VERIFY_URL:-http://192.168.0.6:25500/sub?target=clash&url=https%3A%2F%2Fcc.hjshome.cc%2Fclash%2F2nyd0fv1fx7bihor&insert=false&config=https%3A%2F%2Fgist.githubusercontent.com%2FHouJia%2F54a5b224ac542a03beebf6701053269f%2Fraw%2Fconfig.local.ini&emoji=true&list=true&tfo=false&scv=true&fdn=false&expand=true&sort=false&new_name=true}"
-GIST_RAW_INI_URL="${GIST_RAW_INI_URL:-https://gist.githubusercontent.com/HouJia/54a5b224ac542a03beebf6701053269f/raw/config.local.ini}"
+SUBCONVERTER_VERIFY_URL="${SUBCONVERTER_VERIFY_URL:-http://192.168.0.6:25500/sub?target=clash&url=https%3A%2F%2Fcc.hjshome.cc%2Fclash%2F2nyd0fv1fx7bihor&insert=false&config=https%3A%2F%2Fgist.githubusercontent.com%2FHouJia%2F54a5b224ac542a03beebf6701053269f%2Fraw%2Fhoujia.local-template.ini&emoji=true&list=true&tfo=false&scv=true&fdn=false&expand=true&sort=false&new_name=true}"
+GIST_RAW_INI_URL="${GIST_RAW_INI_URL:-https://gist.githubusercontent.com/HouJia/54a5b224ac542a03beebf6701053269f/raw/houjia.local-template.ini}"
 
 [[ -f "${INI}" ]] || {
   echo "error: 缺少 ${INI}，请先 bash verge/derive/scripts/render-local.sh" >&2

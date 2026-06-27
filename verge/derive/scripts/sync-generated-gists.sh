@@ -1,19 +1,13 @@
 #!/usr/bin/env bash
 # =============================================================================
-# 将本机生成物推送到已存在的 GitHub Gist（secret gist，由 gh 默认）
-# =============================================================================
-# 不在仓库中存放 Gist ID：读 verge/generated/local/gist-sync.local.env（gitignore）
-# 映射说明：同目录 GIST-SYNC.local.md（gitignore）
-#
-# 用法（仓库根）:
-#   bash verge/derive/scripts/sync-generated-gists.sh
+# 将 houjia.local-template.* 推送到 CONFIG_PAIR_GIST（新增文件名，不覆盖历史 config.local.*）
 # =============================================================================
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
 ENV="${ROOT}/verge/generated/local/gist-sync.local.env"
-INI="${ROOT}/verge/generated/config.local.ini"
-YAML="${ROOT}/verge/generated/config.local.yaml"
+INI="${ROOT}/verge/generated/houjia.local-template.ini"
+YAML="${ROOT}/verge/generated/houjia.local-template.yaml"
 OVERRIDE="${ROOT}/verge/generated/local/override.local.ini"
 EXAMPLE="${ROOT}/verge/generated/local/gist-sync.local.env.example"
 
@@ -42,17 +36,18 @@ set +a
 
 command -v gh >/dev/null 2>&1 || { echo "error: 需要 gh（GitHub CLI）" >&2; exit 2; }
 
-gh gist edit "${CONFIG_PAIR_GIST_ID}" --filename config.local.ini "${INI}"
-gh gist edit "${CONFIG_PAIR_GIST_ID}" --filename config.local.yaml "${YAML}"
+gh gist edit "${CONFIG_PAIR_GIST_ID}" --filename houjia.local-template.ini "${INI}" 2>/dev/null \
+  || gh gist edit "${CONFIG_PAIR_GIST_ID}" --add houjia.local-template.ini "${INI}"
+gh gist edit "${CONFIG_PAIR_GIST_ID}" --filename houjia.local-template.yaml "${YAML}" 2>/dev/null \
+  || gh gist edit "${CONFIG_PAIR_GIST_ID}" --add houjia.local-template.yaml "${YAML}"
 gh gist edit "${OVERRIDE_GIST_ID}" --filename override.local.ini "${OVERRIDE}"
 
-echo "ok: 已用本地文件更新两份 secret gist（对照仅写在 GIST-SYNC.local.md）"
+echo "ok: 已更新 gist 中的 houjia.local-template.*（未改动历史 config.local.*）"
 
-# gist raw CDN 有延迟；交叉验收 INI 关键行 + SubConverter 运行时
 sleep 3
 VERIFY="${ROOT}/verge/derive/scripts/verify-native-split.sh"
 if [[ -x "${VERIFY}" ]]; then
   bash "${VERIFY}"
 else
-  bash "${VERIFY}" # 首次无 +x 时仍执行
+  bash "${VERIFY}"
 fi

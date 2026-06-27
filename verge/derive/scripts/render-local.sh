@@ -18,8 +18,8 @@ RULESETS_DIR="${ROOT}/verge/derive/parts/rulesets"
 DST_DIR="${ROOT}/verge/generated"
 LOCAL_DIR="${DST_DIR}/local"
 OVERRIDE_FILE="${LOCAL_DIR}/override.local.ini"
-DST_INI="${DST_DIR}/config.local.ini"
-DST_YAML="${DST_DIR}/config.local.yaml"
+DST_INI="${DST_DIR}/houjia.local-template.ini"
+DST_YAML="${DST_DIR}/houjia.local-template.yaml"
 
 # 将 [rules] 段内容写入临时文件
 extract_rules_to_file() {
@@ -139,7 +139,8 @@ done <"${TEMPLATE}" >"${tmp_ini}"
   printf '; --- 本机生成元信息（由 render-local.sh 自动生成） ---\n'
   printf '; 生成时间：%s\n' "$(date '+%Y-%m-%d %H:%M:%S %z')"
   printf '; 源模板：verge/template/config-template.ini\n'
-  printf '; 本机产物：verge/generated/config.local.ini\n'
+  printf '; 本机产物：verge/generated/houjia.local-template.ini\n'
+  printf '; 历史 config.local.ini 仍保留在仓库/gist 供旧订阅使用，本脚本不再更新该文件名\n'
   printf '; 注意：通用规则改 derive/parts/rulesets/*.ini；私有规则改 generated/local/override.local.ini 的 [rules]\n'
   printf '; ---\n\n'
   cat "${tmp_ini}"
@@ -150,7 +151,8 @@ done <"${TEMPLATE}" >"${tmp_ini}"
   printf '# --- 本机生成元信息（由 render-local.sh 自动生成） ---\n'
   printf '# 生成时间：%s\n' "$(date '+%Y-%m-%d %H:%M:%S %z')"
   printf '# 源模板：verge/template/config-template.ini\n'
-  printf '# 本机产物：verge/generated/config.local.yaml\n'
+  printf '# 本机产物：verge/generated/houjia.local-template.yaml\n'
+  printf '# 历史 config.local.yaml 仍保留在仓库/gist 供旧订阅使用，本脚本不再更新该文件名\n'
   printf '# 注意：通用规则改 derive/parts/rulesets/*.ini；私有规则改 generated/local/override.local.ini 的 [rules]\n'
   printf '# ---\n\n'
 
