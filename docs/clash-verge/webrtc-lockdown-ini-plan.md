@@ -9,7 +9,7 @@
 
 | 日期 | 更新内容 |
 |---|----|
-| 2026-06-27 | 初稿：对齐旁路由/Verge 共用 sub、WebRTC 策略组 + 端口规则、与 side-router-lab 分工 |
+| 2026-06-27 | 接入 compose：`20-routing.ini` WebRTC 组、`compose-ini.sh` 含 `05-webrtc.ini`；已推 gist + GitHub `a621cfa`；旁路由更新订阅并清 custom |
 
 ## 目录
 
@@ -52,9 +52,9 @@ gist raw config.local.ini                    ← SubConverter config=
 
 **旁路由 OpenClash 的分流规则以本仓库生成并经 SubConverter 转换后的 YAML 为准**；详见 [`side-router-lab` 交叉引用](#相关仓库)。
 
-## INI 改动清单（待你迭代）
+## INI 改动清单（已接入）
 
-### 1. `verge/derive/parts/20-routing.ini` — 新增策略组
+### 1. `verge/derive/parts/20-routing.ini` — 新增策略组 ✅
 
 放在 **系统组**（广告拦截附近），**`[]REJECT` 放第一位** 作默认：
 
@@ -76,9 +76,9 @@ ruleset=系统 · 📡 WebRTC,[]AND,((NETWORK,udp),(DST-PORT,19302))
 
 > **SubConverter 语法待本机验证：** 合并后跑 `convert-ini-to-yaml.sh` / `verify-native-split.sh`，确认 YAML 中出现三条 `AND,...WebRTC` 或等价 REJECT。
 
-### 3. `verge/derive/scripts/compose-ini.sh`
+### 3. `verge/derive/scripts/compose-ini.sh` ✅
 
-在 `fragments` 数组 **`00-private.ini` 之后** 加入 `"05-webrtc.ini"`（草稿已写好，**尚未接入 compose**，下一会话你改）。
+在 `fragments` 数组 **`00-private.ini` 之后** 已加入 `"05-webrtc.ini"`。
 
 ### 4. 日常发布
 
@@ -121,7 +121,7 @@ bash verge/derive/scripts/sync-generated-gists.sh
 **旁路由（更新订阅后）：**
 
 ```bash
-ssh side-router 'grep -E "3478|5349|19302|WebRTC" /etc/openclash/忍者云+cc.yaml | head -6'
+ssh side-router 'grep -E "3478|5349|19302|WebRTC" /etc/openclash/config/忍者云+cc.yaml | head -6'
 bash skills/hjs-side-router-setup/scripts/verify-webrtc-gate.sh
 ```
 
