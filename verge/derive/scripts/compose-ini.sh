@@ -44,6 +44,7 @@ emit_ruleset_fragments() {
   # 片段文件列表（按优先级顺序）
   local fragments=(
     "00-private.ini"
+    "05-webrtc.ini"
     "10-ads.ini"
     "20-cursor.ini"
     "30-ai.ini"
